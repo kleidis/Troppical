@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://github.com/kleidis/installer-python/blob/47fbe8f4416424a93555b3c5276cc8e979c658e0/icons/logos/installer_logo.svg" alt="Placeholder" width="188"/>
+  <img src="https://github.com/kleidis/Troppical/blob/9683c790f5f0ad58e5cd7854f2474369061e4f0d/icons/logos/installer_logo.svg" alt="Placeholder" width="188"/>
 </p>
 <p align="center" style="font-size:144px;">
   <strong>Troppical</strong>

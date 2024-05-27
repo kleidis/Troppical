@@ -15,7 +15,7 @@
 
 # What is this?
 
-Troppical is a simple app written in Python that lets you manage your emulators with an easy installation and updating process
+Troppical is a simple app written in Python that lets you manage your emulators with an easy installation and updating process. **FOR NOW IN BETA**
 
 **For now, we have 4 emulators (We're focusing on these for now)**
 
@@ -50,6 +50,10 @@ If you want an emulator to be added, feel free to open a feature request issue. 
 - Although Troppical is portable that doesn't mean the emulators are. For now, there is no way to move an emulator directory once it is installed. If you do so, Troppical will just install updates on the directory that you initially chose to install the respective emulator on. The Uninstall button will error out and prompt you to reinstall as well
 
 - Troppical is in the beta stages of development. Things may break so please report any bugs you encounter and I;ll try my best to fix them. Note that this is my first project and I'm a beginner so please be patient
+
+# Screenshot
+<img src="https://github.com/kleidis/Troppical/assets/167202775/4fefa8c3-a70d-4c91-9c7c-a8d59faf5753" width="500">
+
 
 # Building
 

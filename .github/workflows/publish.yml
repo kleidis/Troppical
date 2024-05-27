@@ -1,0 +1,36 @@
+name: citra-enhanced-release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    steps:
+      - name: Download/Unzip Android APK Artifact
+        run: |
+          curl -L -o troppical-nightly.zip https://nightly.link/kleidis/Troppical/workflows/build/master/troppical-nightly.zip
+          unzip troppical-nightly.zip -d ./troppical-nightly
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            tag_name: ${{ github.ref_name }}
+            release_name: ${{ github.ref_name }}
+            draft: true
+            prerelease: false
+      - name: upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./troppical-nightly/troppical.exe
+          asset_name: troppical.exe
+          asset_content_type: application/octet-stream

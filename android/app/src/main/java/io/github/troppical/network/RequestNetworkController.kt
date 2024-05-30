@@ -1,4 +1,4 @@
-package io.github.troppical
+package io.github.troppical.network
 
 import com.google.gson.Gson
 import okhttp3.*

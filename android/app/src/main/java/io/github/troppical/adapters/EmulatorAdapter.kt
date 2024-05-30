@@ -1,4 +1,4 @@
-package io.guthub.troppical
+package io.guthub.troppical.adapters
 
 import android.content.Context
 import android.view.LayoutInflater

@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.troppical.ui.theme.TroppicalTheme
 import io.github.troppical.network.RequestNetwork
 import io.github.troppical.network.RequestNetworkController
+import io.guthub.troppical.adapters.EmulatorAdapter
 
 class MainActivity : AppCompatActivity {
 

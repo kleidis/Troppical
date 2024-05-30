@@ -60,7 +60,7 @@
                 android:singleLine="true"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:ellipsize="none"
-                android:requiresFadingEdege="horizontal"
+                android:requiresFadingEdge="horizontal"
                 tools:text="Description" />
 
         </LinearLayout>

@@ -43,7 +43,7 @@ class EmulatorAdapter(private val context: Context, private val data: ArrayList<
         Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulator_logo)
 
         card_emulator.setOnClickListener {
-           val dialog = EmulatorAboutDialog(this)
+           val dialog = EmulatorAboutDialog(this, item)
            dialog.show()
         }
 

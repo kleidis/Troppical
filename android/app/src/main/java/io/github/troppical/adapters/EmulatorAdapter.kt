@@ -1,4 +1,4 @@
-package io.guthub.troppical.adapters
+package io.github.troppical.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
+import io.github.troppical.R
 
 class EmulatorAdapter(private val context: Context, private val data: ArrayList<HashMap<String, Any>>) : BaseAdapter() {
 

@@ -14,9 +14,9 @@
         <item name="colorOnTertiary">@color/onTertiary</item>
         <item name="colorTertiaryContainer">@color/tertiaryContainer</item>
         <item name="colorOnTertiaryContainer">@color/onTertiaryContainer</item>
-        <item name="colorError">@color/citra_error</item>
+        <item name="colorError">@color/error</item>
         <item name="colorErrorContainer">@color/errorContainer</item>
-        <item name="colorOnError">@color/citra_onError</item>
+        <item name="colorOnError">@color/onError</item>
         <item name="colorOnErrorContainer">@color/onErrorContainer</item>
         <item name="android:colorBackground">@color/background</item>
         <item name="colorOnBackground">@color/onBackground</item>

@@ -129,7 +129,10 @@ class RequestNetworkController private constructor() {
                 override fun onResponse(call: Call, response: Response) {
                     val responseBody = response.body()?.string()?.trim() ?: ""
                     requestNetwork.getActivity().runOnUiThread {
-                        val responseHeaders = response.headers().toMap()
+                        val responseHeaders = mutableMapOf<String, Any>()
+                        response.headers().names().forEach { name ->
+                            responseHeaders[name] = response.header(name) ?: "null"
+                        }
                         requestListener.onResponse(tag, responseBody, responseHeaders)
                     }
                 }

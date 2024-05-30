@@ -12,6 +12,7 @@ import android.net.Uri
 import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
 import io.github.troppical.R
+import io.github.troppical.dialogs.EmulatorAboutDialog
 
 class EmulatorAdapter(private val context: Context, private val data: ArrayList<HashMap<String, Any>>) : BaseAdapter() {
 
@@ -40,6 +41,11 @@ class EmulatorAdapter(private val context: Context, private val data: ArrayList<
         emulator_name.text = item["emulator_name"].toString()
         emulator_desc.text = item["emulator_desc"].toString()
         Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulator_logo)
+
+        card_emulator.setOnClickListener {
+           val dialog = EmulatorAboutDialog(this)
+           dialog.show()
+        }
 
         return view
     }

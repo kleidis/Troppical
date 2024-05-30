@@ -2,4 +2,5 @@
     <string name="app_name">Troppical</string>
     <string name="about">ABOUT</string>
     <string name="latest_version">LATEST VERSION</string>
+    <string name="install">Install</string>
 </resources>

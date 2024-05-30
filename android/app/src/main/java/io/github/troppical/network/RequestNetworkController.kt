@@ -8,6 +8,7 @@ import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.*
+import io.github.troppical.network.RequestNetwork
 
 class RequestNetworkController private constructor() {
     companion object {
@@ -74,7 +75,7 @@ class RequestNetworkController private constructor() {
         val headerBuilder = Headers.Builder()
 
         if (requestNetwork.getHeaders().isNotEmpty()) {
-            requestNetwork.getHeaders.forEach { (key, value) ->
+            requestNetwork.getHeaders().forEach { (key, value) ->
                 headerBuilder.add(key, value.toString())
             }
         }
@@ -106,7 +107,7 @@ class RequestNetworkController private constructor() {
             } else {
                 val reqBody = RequestBody.create(
                     MediaType.parse("application/json"),
-                    Gson().toJson(requestNetwork.params)
+                    Gson().toJson(requestNetwork.getParams())
                 )
 
                 if (method == GET) {

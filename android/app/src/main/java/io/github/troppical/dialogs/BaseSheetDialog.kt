@@ -20,7 +20,7 @@ open class BaseSheetDialog(context: Context) : BottomSheetDialog(CompatUtils.fin
         behavior.maxHeight = (height * heightScale).toInt()
         behavior.maxWidth = width
 
-        super.setContentView(R.layout.dialog_bottom_sheet)
+        super.setContentView(R.layout.base_sheet_dialog)
         contentView = super.findViewById(R.id.content)!!
     }
 

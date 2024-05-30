@@ -73,20 +73,20 @@ class RequestNetworkController private constructor() {
         val reqBuilder = Request.Builder()
         val headerBuilder = Headers.Builder()
 
-        if (requestNetwork.headers.isNotEmpty()) {
-            requestNetwork.headers.forEach { (key, value) ->
+        if (requestNetwork.getHeaders().isNotEmpty()) {
+            requestNetwork.getHeaders.forEach { (key, value) ->
                 headerBuilder.add(key, value.toString())
             }
         }
 
         try {
-            if (requestNetwork.requestType == REQUEST_PARAM) {
+            if (requestNetwork.getRequestType() == REQUEST_PARAM) {
                 if (method == GET) {
                     val httpBuilder = HttpUrl.parse(url)?.newBuilder()
                         ?: throw NullPointerException("unexpected url: $url")
 
-                    if (requestNetwork.params.isNotEmpty()) {
-                        requestNetwork.params.forEach { (key, value) ->
+                    if (requestNetwork.getParams().isNotEmpty()) {
+                        requestNetwork.getParams().forEach { (key, value) ->
                             httpBuilder.addQueryParameter(key, value.toString())
                         }
                     }
@@ -94,8 +94,8 @@ class RequestNetworkController private constructor() {
                     reqBuilder.url(httpBuilder.build()).headers(headerBuilder.build()).get()
                 } else {
                     val formBuilder = FormBody.Builder()
-                    if (requestNetwork.params.isNotEmpty()) {
-                        requestNetwork.params.forEach { (key, value) ->
+                    if (requestNetwork.getParams().isNotEmpty()) {
+                        requestNetwork.getParams().forEach { (key, value) ->
                             formBuilder.add(key, value.toString())
                         }
                     }
@@ -120,14 +120,14 @@ class RequestNetworkController private constructor() {
 
             getClient().newCall(req).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    requestNetwork.activity.runOnUiThread {
+                    requestNetwork.getActivity().runOnUiThread {
                         requestListener.onErrorResponse(tag, e.message ?: "Unknown error")
                     }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     val responseBody = response.body()?.string()?.trim() ?: ""
-                    requestNetwork.activity.runOnUiThread {
+                    requestNetwork.getActivity().runOnUiThread {
                         val responseHeaders = response.headers().toMap()
                         requestListener.onResponse(tag, responseBody, responseHeaders)
                     }

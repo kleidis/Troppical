@@ -8,6 +8,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.net.Uri
 import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
 import io.github.troppical.R

@@ -22,7 +22,7 @@ import java.io.File
 class EmulatorAboutDialog(context: Context, private val item: HashMap<String, Any>) : BaseSheetDialog(context) {
 
     private val fetcherScope = CoroutineScope(Dispatchers.Main + Job())
-    private var downloadUrl: String
+    private lateinit var downloadUrl: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

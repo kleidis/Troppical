@@ -11,6 +11,7 @@ import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.*
 import io.github.troppical.R
 import io.github.troppical.network.GitHubReleaseFetcher
@@ -21,7 +22,7 @@ import java.io.File
 class EmulatorAboutDialog(context: Context, private val item: HashMap<String, Any>) : BaseSheetDialog(context) {
 
     private val fetcherScope = CoroutineScope(Dispatchers.Main + Job())
-    private val downloadUrl: String
+    private var downloadUrl: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

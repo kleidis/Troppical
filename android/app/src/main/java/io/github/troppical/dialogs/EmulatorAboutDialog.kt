@@ -10,8 +10,9 @@ import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import io.github.troppical.R
+import io.github.troppical.network.GitHubReleaseFetcher
 
 class EmulatorAboutDialog(context: Context, private val item: HashMap<String, Any>) : BaseSheetDialog(context) {
 
@@ -24,16 +25,25 @@ class EmulatorAboutDialog(context: Context, private val item: HashMap<String, An
         val emulatorLogo = findViewById<ImageView>(R.id.emulator_logo)
         val emulatorLatestVersion = findViewById<TextView>(R.id.emulator_latest_version)
 
-        runBlocking {
-           val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())
-           val artifactName = item["emulator_artifact_name"].toString()
-           val (directLink, tagName) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
-        }
-
         emulatorLatestVersion.text = tagName
         emulatorName.text = item["emulator_name"].toString()
         emulatorDesc.text = item["emulator_desc"].toString()
         Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulatorLogo)
-        
+
+        // Fetch the latest version information asynchronously
+        GlobalScope.launch(Dispatchers.Main) {
+            val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())
+            try {
+                val artifactName = item["emulator_artifact_name"].toString()
+                val (directLink, tagName) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
+                // Update the UI with the fetched tag name
+                emulatorLatestVersion.text = tagName
+            } catch (e: Exception) {
+                // Handle any errors here
+                emulatorLatestVersion.text = "Error fetching version"
+            } finally {
+                fetcher.close()
+            }
+        }  
     }
 }

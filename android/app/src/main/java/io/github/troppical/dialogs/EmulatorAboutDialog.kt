@@ -65,43 +65,51 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         }
         
         installButton.setOnClickListener {
-          val outputFile = File(context.filesDir, item["emulator_artifact_name"].toString())
-          val downloader = APKDownloader(downloadUrl, outputFile)
-
-          val progressDialog = MaterialAlertDialogBuilder(context)
-              .setTitle("Downloading")
-              .setView(R.layout.progress_dialog)
-              .setCancelable(false)
-              .create()
-
-          val progressIndicator: LinearProgressIndicator
-
-          progressDialog.show()
-          progressIndicator = progressDialog.findViewById(R.id.progress_indicator)!!
-
-          downloader.download(
-              onProgress = { progress ->
-                  activity.runOnUiThread {
-                      progressIndicator.progress = progress
-                  }
-              },
-              onComplete = { success ->
-                  activity.runOnUiThread {
-                      progressDialog.dismiss()
-                      if (success) {
-                          val installer = APKInstaller(context)
-                          installer.install(outputFile)
-                      } else {
-                          // TODO: Handle download failure
-                      }
-                  }
-              }
-           ) 
+           install()
         }                 
+    }
+
+    private fun install() {
+        val outputFile = File(context.filesDir, item["emulator_artifact_name"].toString())
+        val downloader = APKDownloader(downloadUrl, outputFile)
+
+        val progressDialog = MaterialAlertDialogBuilder(context)
+            .setTitle("Downloading")
+            .setView(R.layout.progress_dialog)
+            .setCancelable(false)
+            .create()
+
+        val progressIndicator: LinearProgressIndicator
+
+        progressDialog.show()
+        progressIndicator = progressDialog.findViewById(R.id.progress_indicator)!!
+
+        downloader.download(
+            onProgress = { progress ->
+                activity.runOnUiThread {
+                    progressIndicator.progress = progress
+                }
+            },
+            onComplete = { success ->
+                activity.runOnUiThread {
+                    progressDialog.dismiss()
+                    if (success) {
+                        val installer = APKInstaller(context)
+                        installer.install(outputFile)
+                    } else {
+                        // TODO: Handle download failure
+                    }
+                }
+            }
+        )
     }
 
     override fun onStop() {
         super.onStop()
+        val apkFile = File(context.filesDir, item["emulator_artifact_name"].toString())
+        if (apkFile.exists()) {
+            apkFile.delete() // Ensure that the apk is deleted when no more needed 
+        }
         fetcherScope.cancel() // Cancel any ongoing coroutines when the dialog is destroyed
     }
 }

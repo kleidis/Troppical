@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
                 val _response = _param2
                 listmap = Gson().fromJson(_response, object : TypeToken<ArrayList<HashMap<String, Any>>>() {}.type)
                 val gridEmulators: GridView = findViewById(R.id.grid_emulators)
-                gridEmulators.adapter = EmulatorAdapter(this@MainActivity, this, listmap)
+                gridEmulators.adapter = EmulatorAdapter(this@MainActivity, this@MainActivity, listmap)
             }
 
             override fun onErrorResponse(_param1: String, _param2: String) {

@@ -42,7 +42,7 @@ class APKDownloader(private val url: String, private val outputFile: File) {
                         onComplete(false)
                     }
                 } else {
-                    onComplete(false, null)
+                    onComplete(false)
                 }
             }
         })

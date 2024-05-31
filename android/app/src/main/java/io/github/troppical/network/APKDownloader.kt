@@ -21,8 +21,7 @@ class APKDownloader(private val url: String, private val outputFile: File) {
 
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 if (response.isSuccessful) {
-                    val body: ResponseBody? = response.body
-                    if (body != null) {
+                    response.body?.let { body ->
                         try {
                             val inputStream = body.byteStream()
                             val outputStream = FileOutputStream(outputFile)
@@ -39,11 +38,11 @@ class APKDownloader(private val url: String, private val outputFile: File) {
                             e.printStackTrace()
                             onComplete(false)
                         }
-                    } else {
+                    } ?: run {
                         onComplete(false)
                     }
                 } else {
-                    onComplete(false)
+                    onComplete(false, null)
                 }
             }
         })

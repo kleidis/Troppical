@@ -56,8 +56,8 @@ class EmulatorAboutDialog(context: Context, private val item: HashMap<String, An
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onStop() {
+        super.onStop()
         fetcherScope.cancel() // Cancel any ongoing coroutines when the dialog is destroyed
     }
 }

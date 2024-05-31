@@ -42,13 +42,9 @@ class EmulatorAboutDialog(context: Context, private val item: HashMap<String, An
 
                 // Set the download link if the artifact is found
                 if (directLink != null) {
-                    emulatorDownloadLink.text = "Download APK"
-                    emulatorDownloadLink.setOnClickListener {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(directLink))
-                        context.startActivity(intent)
-                    }
+                    Log.w("EmulatorAboutDialog", "Direct download link is $directLink")
                 } else {
-                    Log.e("Artifact not found"
+                    Log.e("EmulatorAboutDialog", "Artifact not found")
                 }
             } catch (e: Exception) {
                 // Log the error to understand what went wrong

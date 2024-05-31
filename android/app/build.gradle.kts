@@ -47,7 +47,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -60,12 +59,12 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:3.9.1")
     implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.google.android.material:material:1.8.0")
-    implementation("io.ktor:ktor-client-core:2.0.3")
-    implementation("io.ktor:ktor-client-cio:2.0.3")
-    implementation("io.ktor:ktor-client-content-negotiation:2.0.3")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.0.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation("io.ktor:ktor-client-core:2.3.0")
+    implementation("io.ktor:ktor-client-cio:2.3.0")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.0")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

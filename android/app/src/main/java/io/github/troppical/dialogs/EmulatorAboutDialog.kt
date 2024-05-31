@@ -2,6 +2,7 @@ package io.github.troppical.dialogs
 
 import android.content.Context
 import android.os.Bundle
+import android.app.Activity
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,7 +22,7 @@ import io.github.troppical.network.APKDownloader
 import io.github.troppical.network.APKInstaller
 import java.io.File
 
-class EmulatorAboutDialog(context: Context, private val item: HashMap<String, Any>) : BaseSheetDialog(context) {
+class EmulatorAboutDialog(context: Context, private val activity: Activity, private val item: HashMap<String, Any>) : BaseSheetDialog(context) {
 
     private val fetcherScope = CoroutineScope(Dispatchers.Main + Job())
     private lateinit var downloadUrl: String
@@ -80,12 +81,12 @@ class EmulatorAboutDialog(context: Context, private val item: HashMap<String, An
 
           downloader.download(
               onProgress = { progress ->
-                  context.runOnUiThread {
+                  activity.runOnUiThread {
                       progressIndicator.progress = progress
                   }
               },
               onComplete = { success ->
-                  context.runOnUiThread {
+                  activity.runOnUiThread {
                       progressDialog.dismiss()
                       if (success) {
                           val installer = APKInstaller(context)

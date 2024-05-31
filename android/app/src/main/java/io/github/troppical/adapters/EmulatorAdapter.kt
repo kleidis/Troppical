@@ -3,6 +3,7 @@ package io.github.troppical.adapters
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
+import android.app.Activity
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
@@ -14,7 +15,7 @@ import com.google.android.material.card.MaterialCardView
 import io.github.troppical.R
 import io.github.troppical.dialogs.EmulatorAboutDialog
 
-class EmulatorAdapter(private val context: Context, private val data: ArrayList<HashMap<String, Any>>) : BaseAdapter() {
+class EmulatorAdapter(private val context: Context, private val activity: Activity, private val data: ArrayList<HashMap<String, Any>>) : BaseAdapter() {
 
     override fun getCount(): Int {
         return data.size
@@ -43,7 +44,7 @@ class EmulatorAdapter(private val context: Context, private val data: ArrayList<
         Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulator_logo)
 
         card_emulator.setOnClickListener {
-           val dialog = EmulatorAboutDialog(context, item)
+           val dialog = EmulatorAboutDialog(context, activity, item)
            dialog.show()
         }
 

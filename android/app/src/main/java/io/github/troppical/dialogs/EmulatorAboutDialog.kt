@@ -12,6 +12,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.*
 import io.github.troppical.R
 import io.github.troppical.network.GitHubReleaseFetcher
@@ -78,12 +80,12 @@ class EmulatorAboutDialog(context: Context, private val item: HashMap<String, An
 
           downloader.download(
               onProgress = { progress ->
-                  runOnUiThread {
+                  context.runOnUiThread {
                       progressIndicator.progress = progress
                   }
               },
               onComplete = { success ->
-                  runOnUiThread {
+                  context.runOnUiThread {
                       progressDialog.dismiss()
                       if (success) {
                           val installer = APKInstaller(context)

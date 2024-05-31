@@ -25,7 +25,6 @@ class EmulatorAboutDialog(context: Context, private val item: HashMap<String, An
         val emulatorLogo = findViewById<ImageView>(R.id.emulator_logo)
         val emulatorLatestVersion = findViewById<TextView>(R.id.emulator_latest_version)
 
-        emulatorLatestVersion.text = tagName
         emulatorName.text = item["emulator_name"].toString()
         emulatorDesc.text = item["emulator_desc"].toString()
         Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulatorLogo)

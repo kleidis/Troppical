@@ -33,16 +33,12 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String) 
     }
 
     suspend fun fetchArtifactDirectLinkAndTag(artifactName: String): Pair<String?, String?> {
-        val url = "https://api.github.com/repos/$owner/$repo/releases"
+        val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
         val response: HttpResponse = client.get(url)
-        val releases: List<GitHubRelease> = response.body()
+        val release: GitHubRelease = response.body()
 
-        val latestReleaseOrPreRelease = releases
-            .sortedWith(compareByDescending<GitHubRelease> { it.prerelease }.thenByDescending { it.tagName })
-            .firstOrNull()
-
-        val directLink = latestReleaseOrPreRelease?.assets?.firstOrNull { it.name.contains(artifactName) }?.browserDownloadUrl
-        val tagName = latestReleaseOrPreRelease?.tagName
+        val directLink = release.assets.firstOrNull { it.name.contains(artifactName) }?.browserDownloadUrl
+        val tagName = release.tagName
 
         return Pair(directLink, tagName)
     }

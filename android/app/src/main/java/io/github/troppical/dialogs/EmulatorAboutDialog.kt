@@ -3,6 +3,7 @@ package io.github.troppical.dialogs
 import android.content.Context
 import android.os.Bundle
 import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,8 @@ import io.github.troppical.R
 import io.github.troppical.network.GitHubReleaseFetcher
 
 class EmulatorAboutDialog(context: Context, private val item: HashMap<String, Any>) : BaseSheetDialog(context) {
+
+    private val fetcherScope = CoroutineScope(Dispatchers.Main + Job())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,20 +32,36 @@ class EmulatorAboutDialog(context: Context, private val item: HashMap<String, An
         emulatorDesc.text = item["emulator_desc"].toString()
         Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulatorLogo)
 
-        // Fetch the latest version information asynchronously
-        GlobalScope.launch(Dispatchers.Main) {
+        fetcherScope.launch {
             val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())
             try {
                 val artifactName = item["emulator_artifact_name"].toString()
                 val (directLink, tagName) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
                 // Update the UI with the fetched tag name
                 emulatorLatestVersion.text = tagName
+
+                // Set the download link if the artifact is found
+                if (directLink != null) {
+                    emulatorDownloadLink.text = "Download APK"
+                    emulatorDownloadLink.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(directLink))
+                        context.startActivity(intent)
+                    }
+                } else {
+                    Log.e("Artifact not found"
+                }
             } catch (e: Exception) {
-                // Handle any errors here
+                // Log the error to understand what went wrong
+                Log.e("EmulatorAboutDialog", "Error fetching version", e)
                 emulatorLatestVersion.text = "Error fetching version"
             } finally {
                 fetcher.close()
             }
-        }  
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fetcherScope.cancel() // Cancel any ongoing coroutines when the dialog is destroyed
     }
 }

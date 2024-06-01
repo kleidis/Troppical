@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
             netRequestListener
         )
 
-        clearApkFiles(File(filesDir))
+        clearApkFiles(filesDir)
     }
 
     private fun clearApkFiles(dir: File) {

@@ -43,6 +43,11 @@ class MainActivity : AppCompatActivity() {
         clearApkFiles(filesDir)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        clearApkFiles(filesDir)
+    }
+
     private fun clearApkFiles(dir: File) {
         if (dir.isDirectory) {
             val children = dir.listFiles()

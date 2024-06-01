@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation("com.google.code.gson:gson:2.8.7")
     implementation("com.squareup.okhttp3:okhttp:3.9.1")
+    implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.google.android.material:material:1.8.0")
     implementation("io.ktor:ktor-client-core:2.3.0")
     implementation("io.ktor:ktor-client-cio:2.3.0")

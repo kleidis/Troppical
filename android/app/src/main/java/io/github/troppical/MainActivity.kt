@@ -60,13 +60,13 @@ class MainActivity : AppCompatActivity() {
             // Set theme color to the refresh animation's background
             setProgressBackgroundColorSchemeColor(
                 MaterialColors.getColor(
-                    binding.swipeRefresh,
+                    swipeRefresh,
                     com.google.android.material.R.attr.colorPrimary
                 )
             )
             setColorSchemeColors(
                 MaterialColors.getColor(
-                    binding.swipeRefresh,
+                    swipeRefresh,
                     com.google.android.material.R.attr.colorOnPrimary
                 )
             )

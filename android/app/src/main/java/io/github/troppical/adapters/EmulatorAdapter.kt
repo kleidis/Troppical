@@ -10,7 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.net.Uri
-import com.bumptech.glide.Glide
+import coil.load
 import com.google.android.material.card.MaterialCardView
 import io.github.troppical.R
 import io.github.troppical.dialogs.EmulatorAboutDialog
@@ -41,7 +41,7 @@ class EmulatorAdapter(private val context: Context, private val activity: Activi
         val item = getItem(position)
         emulator_name.text = item["emulator_name"].toString()
         emulator_desc.text = item["emulator_desc"].toString()
-        Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulator_logo)
+        emulator_logo.load(Uri.parse(item["emulator_logo"].toString()))
 
         card_emulator.setOnClickListener {
            val dialog = EmulatorAboutDialog(context, activity, item)

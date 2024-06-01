@@ -5,22 +5,20 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class ZipExtractor(
-    private val zipFilePath: String, 
-    private val destDirectory: String, 
+    private val zipFilePath: File, 
+    private val destDirectory: File, 
     private val progressCallback: (Int) -> Unit,
     private val onComplete: (Boolean, String?) -> Unit
 ) {
 
-    private val extractedFiles = mutableListOf<String>()
     var apkFilePath: String? = null
         private set
     var isExtractionDone: Boolean = false
         private set
 
     fun extract() {
-        val destDir = File(destDirectory)
-        if (!destDir.exists()) {
-            destDir.mkdirs()
+        if (!destDirectory.exists()) {
+            destDirectory.mkdirs()
         }
 
         try {
@@ -31,11 +29,10 @@ class ZipExtractor(
                 ZipInputStream(fis).use { zipIn ->
                     var entry: ZipEntry? = zipIn.nextEntry
                     while (entry != null) {
-                        val filePath = destDirectory + File.separator + entry.name
+                        val filePath = destDirectory.absolutePath + File.separator + entry.name
                         if (!entry.isDirectory) {
                             // Extract the file
                             val fileSize = extractFile(zipIn, filePath)
-                            extractedFiles.add(filePath)
                             // Check if it's an APK file
                             if (filePath.endsWith(".apk", ignoreCase = true)) {
                                 apkFilePath = filePath
@@ -47,7 +44,6 @@ class ZipExtractor(
                             // Create the directory
                             val dir = File(filePath)
                             dir.mkdirs()
-                            extractedFiles.add(filePath + File.separator)
                         }
                         zipIn.closeEntry()
                         entry = zipIn.nextEntry
@@ -75,10 +71,6 @@ class ZipExtractor(
             }
         }
         return fileSize
-    }
-
-    fun getExtractedFiles(): List<String> {
-        return extractedFiles
     }
 
     companion object {

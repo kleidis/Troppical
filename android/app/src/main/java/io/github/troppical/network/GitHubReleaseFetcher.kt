@@ -37,7 +37,7 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String) 
         val response: HttpResponse = client.get(url)
         val release: GitHubRelease = response.body()
 
-        val directLink = if (artifactName != null) { release.assets.firstOrNull { it.name.contains(artifactName) }?.browserDownloadUrl } else { release.assets.firstOrNull { it.name.endsWith(".apk", ignoreCase = true) }?.browserDownloadUrl }
+        val directLink = if (artifactName != "null") { release.assets.firstOrNull { it.name.contains(artifactName) }?.browserDownloadUrl } else { release.assets.firstOrNull { it.name.endsWith(".apk", ignoreCase = true) }?.browserDownloadUrl }
         val tagName = release.tagName
 
         return Pair(directLink, tagName)

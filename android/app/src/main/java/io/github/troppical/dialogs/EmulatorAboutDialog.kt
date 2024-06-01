@@ -94,8 +94,19 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 activity.runOnUiThread {
                     progressDialog.dismiss()
                     if (success) {
-                        val installer = APKInstaller(context)
-                        installer.install(outputFile)
+                        if (outputFile.endsWith(".apk", ignoreCase = true)) {
+                            val installer = APKInstaller(context)
+                            installer.install(outputFile)
+                        } else {
+                            val zipExtractor = ZipExtractor(outputFile, File(context.filesDir))
+                            zipExtractor.extract()
+
+                            val apkFile = zipExtractor.apkFilePath
+                            if (apkFile != null) {
+                                val installer = APKInstaller(context)
+                                installer.install(apkFile)
+                            } 
+                        }      
                     } else {
                         // TODO: Handle download failure
                     }

@@ -17,5 +17,5 @@
 	android:verticalSpacing="10dp"
 	android:stretchMode="columnWidth" />
 
-</androidx.swiperefreshlayout.widget.swiperefreshlayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
                         

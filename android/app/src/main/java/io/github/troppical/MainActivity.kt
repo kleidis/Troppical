@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.widget.GridView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.color.MaterialColors
 import io.github.troppical.network.RequestNetwork
 import io.github.troppical.network.RequestNetworkController
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             netRequestListener
         )
 
-        swipeRefresh = findViewById(R.id.swipe_refresh)
+        swipeRefresh = findViewById<SwipeRefreshLayout>(R.id.swipe_refresh)
 
         swipeRefresh.apply {
             // Add swipe down to refresh gesture

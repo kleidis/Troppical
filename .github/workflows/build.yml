@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/bin
           python image-base64data-generator.py
-          pyinstaller --clean --onefile --icon=icon.ico --windowed troppical.py
+          pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed troppical.py
       - name: Upload troppical
         uses: actions/upload-artifact@v4
         with:

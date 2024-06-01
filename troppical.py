@@ -46,7 +46,7 @@ class QtUi(QMainWindow, Style):
     # Widgets
     def ui(self):
         # Init Window
-        self.setWindowTitle('Troppical') # Window name
+        self.setWindowTitle(f'Troppical - {version}')  # Window name with version        
         self.setCentralWidget(QWidget(self))  # Set a central widget
         self.layout = QStackedLayout(self.centralWidget())  # Set the layout on the central widget
         # Set the window icon
@@ -231,8 +231,7 @@ class Logic:
         if reg_result is None:
             current_version = "Not Installed"
         else:
-            _, current_version = reg_result
-
+            current_version = reg_result[1]
         for selected_emulator in self.troppical_api:
             if selected_emulator['emulator_name'] == self.emulator:
                 self.releases_url = f"https://api.github.com/repos/{selected_emulator['emulator_owner']}/{selected_emulator['emulator_repo']}/releases"
@@ -327,7 +326,7 @@ class Logic:
     def Prepare_Download(self):
         reg_key = self.checkreg()
         if reg_key is not None:
-            _, UpdateChannelValue = reg_key
+            UpdateChannelValue = reg_key[1]
         else:
             UpdateChannelValue = None  
 
@@ -343,8 +342,10 @@ class Logic:
                         options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
                         choice, ok = QInputDialog.getItem(qtui, "Select Version", "Multiple Windows versions found. Please select one:\n" + options, [asset['name'] for asset in windows_assets], 0, False)
                         if ok:
-                            selected_asset = next(asset for asset in windows_assets if asset['name'] == choice)
-                            self.target_download = selected_asset['browser_download_url']
+                            self.selected_asset = next(asset for asset in windows_assets if asset['name'] == choice)
+                            self.selected_asset_name = self.selected_asset['name']
+                            print (self.selected_asset_name)
+                            self.target_download = self.selected_asset['browser_download_url']
                             self.url = self.target_download  # url for the download thread
                             self.Download_Emulator()
                             self.createreg()
@@ -361,13 +362,17 @@ class Logic:
             response = requests.get(self.releases_url + "/latest")
             latest_release = response.json()
             for asset in latest_release['assets']:
-                if 'windows-msvc' in asset['name'] or f"{self.selection}-windows.zip" in asset['name']:
+                self_asset_version = self.checkreg()[2]
+                if self_asset_version and (self_asset_version in asset['name']):
                     if asset['name'].endswith('.zip'):
                         self.target_download = asset['browser_download_url']
-                        self.url = self.target_download # url for the downlaod thread
+                        self.url = self.target_download  # url for the download thread
+                        print (self.url)
                         self.Download_Emulator()
-                        self.selection = latest_release['tag_name'] # The mathod of updating the reg value is bound to chnage on the update method
+                        self.selection = latest_release['tag_name']
                         self.createreg()
+                elif self_asset_version and (self_asset_version not in asset['name']):
+                    QMessageBox.critical(qtui, "Error", f"No suitable Windows download found for {self.emulator} in the latest release. The Owner might have chnaged the asset naming in their release. Please oepn a bug report on Troppical's Github page")
 
     # Download function    
     def Download_Emulator(self):
@@ -385,7 +390,6 @@ class Logic:
 
     # Extract and install function 
     def extract_and_install(self, temp_file, extract_to):
-       
         # Clear the target directory before extracting new files
         if os.path.exists(extract_to):
             shutil.rmtree(extract_to)
@@ -449,8 +453,9 @@ class Logic:
             self.registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}", 0, winreg.KEY_READ)
             self.regvalue, regtype = winreg.QueryValueEx(self.registry_key, 'Install_Dir')
             self.updatevalue, regtype = winreg.QueryValueEx(self.registry_key, 'Version')
+            self.asset_version, regtype = winreg.QueryValueEx(self.registry_key, 'Asset_version')
             winreg.CloseKey(self.registry_key)
-            return self.regvalue, self.updatevalue  
+            return self.regvalue, self.updatevalue, self.asset_version
         except FileNotFoundError:         
             pass
     # Function to create the reg values            
@@ -460,6 +465,7 @@ class Logic:
                                         winreg.KEY_WRITE)
         if self.install_mode == "Install":
             winreg.SetValueEx(self.registry_key, 'Install_Dir', 0, winreg.REG_SZ, qtui.installationPathLineEdit.text())
+            winreg.SetValueEx(self.registry_key, 'Asset_version', 0, winreg.REG_SZ, self.selected_asset_name)
         winreg.SetValueEx(self.registry_key, 'Version', 0, winreg.REG_SZ, self.selection)
         winreg.CloseKey(self.registry_key)
 
@@ -556,6 +562,7 @@ class DownloadWorker(QThread):
             self.finished.emit()
 
 if __name__ == "__main__":
+    version = "v1.1"
     app = QApplication(sys.argv)
     qtui = QtUi()
     qtui.show()

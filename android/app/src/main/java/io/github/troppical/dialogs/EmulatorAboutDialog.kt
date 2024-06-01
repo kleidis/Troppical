@@ -117,7 +117,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                                     }
                                 },
                                 onComplete = { success, apkFilePath ->
-                                    zipFilePath.delete()
+                                    outputFile.delete()
                                     apkPath = apkFilePath
                                     activity.runOnUiThread {
                                         progressDialogExtract.dismiss()

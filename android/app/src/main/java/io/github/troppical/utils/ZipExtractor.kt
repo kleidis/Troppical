@@ -5,13 +5,13 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class ZipExtractor(
-    private val zipFilePath: File, 
-    private val destDirectory: File, 
+    private val zipFilePath: File,
+    private val destDirectory: File,
     private val progressCallback: (Int) -> Unit,
-    private val onComplete: (Boolean, String?) -> Unit
+    private val onComplete: (Boolean, File?) -> Unit
 ) {
 
-    var apkFilePath: String? = null
+    var apkFilePath: File? = null
         private set
     var isExtractionDone: Boolean = false
         private set
@@ -29,12 +29,12 @@ class ZipExtractor(
                 ZipInputStream(fis).use { zipIn ->
                     var entry: ZipEntry? = zipIn.nextEntry
                     while (entry != null) {
-                        val filePath = destDirectory.absolutePath + File.separator + entry.name
+                        val filePath = File(destDirectory, entry.name)
                         if (!entry.isDirectory) {
                             // Extract the file
                             val fileSize = extractFile(zipIn, filePath)
                             // Check if it's an APK file
-                            if (filePath.endsWith(".apk", ignoreCase = true)) {
+                            if (filePath.extension.equals("apk", ignoreCase = true)) {
                                 apkFilePath = filePath
                             }
                             extractedSize += fileSize
@@ -42,8 +42,7 @@ class ZipExtractor(
                             progressCallback(progress)
                         } else {
                             // Create the directory
-                            val dir = File(filePath)
-                            dir.mkdirs()
+                            filePath.mkdirs()
                         }
                         zipIn.closeEntry()
                         entry = zipIn.nextEntry
@@ -60,7 +59,7 @@ class ZipExtractor(
     }
 
     @Throws(IOException::class)
-    private fun extractFile(zipIn: ZipInputStream, filePath: String): Int {
+    private fun extractFile(zipIn: ZipInputStream, filePath: File): Int {
         var fileSize = 0
         BufferedOutputStream(FileOutputStream(filePath)).use { bos ->
             val bytesIn = ByteArray(BUFFER_SIZE)

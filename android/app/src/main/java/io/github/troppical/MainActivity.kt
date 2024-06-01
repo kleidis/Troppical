@@ -43,7 +43,9 @@ class MainActivity : AppCompatActivity() {
             netRequestListener
         )
 
-        binding.swipeRefresh.apply {
+        swipeRefresh = findViewById(R.id.swipe_refresh)
+
+        swipeRefresh.apply {
             // Add swipe down to refresh gesture
             setOnRefreshListener {
                 isRefreshing = true
@@ -68,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                     com.google.android.material.R.attr.colorOnPrimary
                 )
             )
-            binding.swipeRefresh.isRefreshing = isRefreshing
+            swipeRefresh.isRefreshing = isRefreshing
         }
 
         clearApkFiles(filesDir)

@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             netRequestListener
         )
 
-        swipeRefresh = findViewById<SwipeRefreshLayout>(R.id.swipe_refresh)
+        val swipeRefresh = findViewById<SwipeRefreshLayout>(R.id.swipe_refresh)
 
         swipeRefresh.apply {
             // Add swipe down to refresh gesture

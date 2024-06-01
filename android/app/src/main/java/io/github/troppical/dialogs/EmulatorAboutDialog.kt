@@ -26,6 +26,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
 
     private val fetcherScope = CoroutineScope(Dispatchers.Main + Job())
     private lateinit var downloadUrl: String
+    private lateinit var apkPath: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +47,6 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
             try {
                 val artifactName = item["emulator_artifact_name"].toString()
                 val (directLink, tagName) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
-                // Update the UI with the fetched tag name
                 emulatorLatestVersion.text = tagName
 
                 if (directLink != null) {
@@ -56,7 +56,6 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                     Log.e("EmulatorAboutDialog", "Artifact not found")
                 }
             } catch (e: Exception) {
-                // Log the error to understand what went wrong
                 Log.e("EmulatorAboutDialog", "Error fetching version", e)
                 emulatorLatestVersion.text = "Error fetching version"
             } finally {
@@ -94,21 +93,51 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 activity.runOnUiThread {
                     progressDialog.dismiss()
                     if (success) {
-                        if (outputFile.endsWith(".apk", ignoreCase = true)) {
+                        if (outputFile.extension.equals("apk", ignoreCase = true)) {
                             val installer = APKInstaller(context)
                             installer.install(outputFile)
+                            apkPath = outputFile
                         } else {
-                            val zipExtractor = ZipExtractor(outputFile, File(context.filesDir))
-                            zipExtractor.extract()
+                            val progressDialogExtract = MaterialAlertDialogBuilder(context)
+                                .setTitle("Extracting")
+                                .setView(R.layout.progress_dialog)
+                                .setCancelable(false)
+                                .create()
 
-                            val apkFile = zipExtractor.apkFilePath
-                            if (apkFile != null) {
-                                val installer = APKInstaller(context)
-                                installer.install(apkFile)
-                            } 
+                            progressDialogExtract.show()
+                            val progressIndicatorExtract = progressDialogExtract.findViewById<LinearProgressIndicator>(R.id.progress_indicator)!!
+
+                            val zipExtractor = ZipExtractor(
+                                zipFilePath = outputFile, 
+                                destDirectory = context.filesDir,
+                                progressCallback = { progress ->
+                                    activity.runOnUiThread {
+                                        progressIndicatorExtract.progress = progress
+                                    }
+                                },
+                                onComplete = { success, apkFilePath ->
+                                    zipFilePath.delete()
+                                    apkPath = apkFilePath
+                                    activity.runOnUiThread {
+                                        progressDialogExtract.dismiss()
+                                        if (success && apkFilePath != null) {
+                                            val installer = APKInstaller(context)
+                                            installer.install(File(apkFilePath))
+                                        } else {
+                                            // TODO: Handle extraction failure
+                                            Log.e("EmulatorAboutDialog", "Extraction failed or no APK file found.")
+                                        }
+                                    }
+                                }
+                            )
+
+                            CoroutineScope(Dispatchers.IO).launch {
+                                zipExtractor.extract()
+                            }
                         }      
                     } else {
                         // TODO: Handle download failure
+                        Log.e("EmulatorAboutDialog", "Download failed.")
                     }
                 }
             }

@@ -11,7 +11,7 @@ class ZipExtractor(
     private val onComplete: (Boolean, File?) -> Unit
 ) {
 
-    var apkFilePath: File? = null
+    var apkFilePath: File = null
         private set
     var isExtractionDone: Boolean = false
         private set

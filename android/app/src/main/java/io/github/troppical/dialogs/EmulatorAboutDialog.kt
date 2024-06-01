@@ -147,8 +147,10 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
 
     override fun onStop() {
         super.onStop()
-        if (apkPath.exists()) {
-            apkPath.delete() // Ensure that the apk is deleted when no more needed 
+        apkPath?.let {
+            if (it.exists()) {
+                it.delete() // Ensure that the apk is deleted when no longer needed
+            }
         }
         fetcherScope.cancel() // Cancel any ongoing coroutines when the dialog is destroyed
     }

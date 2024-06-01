@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken
 import io.github.troppical.network.RequestNetwork
 import io.github.troppical.network.RequestNetworkController
 import io.github.troppical.adapters.EmulatorAdapter
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,5 +39,22 @@ class MainActivity : AppCompatActivity() {
             "",
             netRequestListener
         )
+
+        clearApkFiles(File(filesDir))
+    }
+
+    private fun clearApkFiles(dir: File) {
+        if (dir.isDirectory) {
+            val children = dir.listFiles()
+            if (children != null) {
+                for (child in children) {
+                    if (child.isDirectory) {
+                        clearApkFiles(child) // Recursively check directories
+                    } else if (child.extension.equals("apk", ignoreCase = true)) {
+                        child.delete() // Delete the APK file
+                    }
+                }
+            }
+        }
     }
 }

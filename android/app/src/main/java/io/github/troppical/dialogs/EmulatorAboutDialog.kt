@@ -20,6 +20,7 @@ import io.github.troppical.R
 import io.github.troppical.network.GitHubReleaseFetcher
 import io.github.troppical.network.APKDownloader
 import io.github.troppical.network.APKInstaller
+import io.github.troppical.utils.zipExtractor
 import java.io.File
 
 class EmulatorAboutDialog(context: Context, private val activity: Activity, private val item: HashMap<String, Any>) : BaseSheetDialog(context) {
@@ -146,9 +147,8 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
 
     override fun onStop() {
         super.onStop()
-        val apkFile = File(context.filesDir, item["emulator_artifact_name"].toString())
-        if (apkFile.exists()) {
-            apkFile.delete() // Ensure that the apk is deleted when no more needed 
+        if (apkPath.exists()) {
+            apkPath.delete() // Ensure that the apk is deleted when no more needed 
         }
         fetcherScope.cancel() // Cancel any ongoing coroutines when the dialog is destroyed
     }

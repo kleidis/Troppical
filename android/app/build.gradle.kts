@@ -66,9 +66,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-    implementation("io.coil-kt:coil:2.1.0") {
-    exclude(group = "com.squareup.okhttp3", module = "okhttp")
-    }
+    implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

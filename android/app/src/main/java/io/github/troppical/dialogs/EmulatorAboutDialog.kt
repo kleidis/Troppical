@@ -15,7 +15,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.*
-import coil.load
+import com.bumptech.glide.Glide
 import io.github.troppical.R
 import io.github.troppical.network.GitHubReleaseFetcher
 import io.github.troppical.network.APKDownloader
@@ -41,7 +41,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
 
         emulatorName.text = item["emulator_name"].toString()
         emulatorDesc.text = item["emulator_desc"].toString()
-        emulatorLogo.load(Uri.parse(item["emulator_logo"].toString()))
+        Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulatorLogo)
 
         fetcherScope.launch {
             val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())

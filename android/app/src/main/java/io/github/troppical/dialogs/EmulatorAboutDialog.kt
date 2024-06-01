@@ -27,7 +27,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
 
     private val fetcherScope = CoroutineScope(Dispatchers.Main + Job())
     private lateinit var downloadUrl: String
-    private lateinit var apkPath: File
+    private var apkPath: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

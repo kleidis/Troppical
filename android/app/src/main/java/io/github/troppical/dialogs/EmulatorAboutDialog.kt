@@ -123,7 +123,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                                         progressDialogExtract.dismiss()
                                         if (success && apkFilePath != null) {
                                             val installer = APKInstaller(context)
-                                            installer.install(File(apkFilePath))
+                                            apkFilePath?.let { installer.install(it) }
                                         } else {
                                             // TODO: Handle extraction failure
                                             Log.e("EmulatorAboutDialog", "Extraction failed or no APK file found.")

@@ -232,7 +232,7 @@ class Logic:
         self.emulator = emulator
         reg_result = self.checkreg()
         if reg_result is None:
-            current_version = "Not Installed"
+            current_version = "v1.1"
         else:
             current_version = reg_result[1]
         for selected_emulator in self.troppical_api:
@@ -572,7 +572,7 @@ class DownloadWorker(QThread):
             self.finished.emit()
 
 if __name__ == "__main__":
-    version = "v1.0"
+    version = "v1.1"
     app = QApplication(sys.argv)
     qtui = QtUi()
     qtui.show()

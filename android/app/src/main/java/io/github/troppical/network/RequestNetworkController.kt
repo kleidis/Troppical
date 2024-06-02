@@ -108,10 +108,8 @@ class RequestNetworkController private constructor() {
                     reqBuilder.url(url).headers(headerBuilder.build()).method(method, reqBody)
                 }
             } else {
-                val reqBody = RequestBody.create(
-                    ("application/json").toMediaTypeOrNull(),
-                    Gson().toJson(requestNetwork.getParams())
-                )
+                val reqBody = Gson().toJson(requestNetwork.getParams())
+                    .toRequestBody(("application/json").toMediaTypeOrNull())
 
                 if (method == GET) {
                     reqBuilder.url(url).headers(headerBuilder.build()).get()

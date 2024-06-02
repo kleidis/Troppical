@@ -1,7 +1,8 @@
 import os
 import sys
 import requests
-from PyQt6.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QCheckBox, QStackedLayout, QHBoxLayout, QGroupBox, QComboBox, QProgressBar, QLineEdit, QMessageBox, QFileDialog, QVBoxLayout, QGridLayout
+import json
+from PyQt6.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QCheckBox, QStackedLayout, QHBoxLayout, QGroupBox, QComboBox, QProgressBar, QLineEdit, QMessageBox, QFileDialog, QVBoxLayout, QInputDialog
 from PyQt6.QtGui import QPixmap, QIcon, QImage
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QByteArray, QFile, pyqtSignal, pyqtSlot
 from zipfile import ZipFile 
@@ -10,13 +11,6 @@ import tempfile
 from icons import styledark_rc
 import win32com.client
 import winreg
-import base64
-from Citra_Logo_base64 import image_data as citra
-from LimeLogo_base64 import image_data as lime
-from CitraEnhanced_base64 import image_data as citra_enh
-from installer_logo_base64 import image_data as logo
-from yuzu_base64 import image_data as yuzu
-
 from stylesheet import Style
 from pathlib import Path
 
@@ -24,112 +18,90 @@ class QtUi(QMainWindow, Style):
     def __init__(self):
         super().__init__()
         self.logic = Logic()
+        self.logic.fetch_google_sheet_data()
         self.ui()  # Init UI
         self.load_stylesheet()
-        
+
     # Logo Header
     def Header(self):
         # Header Layout
         self.headerLayout = QVBoxLayout()
         self.headerLayout.setContentsMargins(0, 20, 0, 0)
         # Icon Widget
-        CEicon = QLabel()
-        image_bytes = base64.b64decode(logo)
-        image = QImage.fromData(QByteArray(image_bytes))
-        pixmap = QPixmap.fromImage(image)
-        ## Scale the pixmap
-        scaledPixmap = pixmap.scaled(180, 180,)
-        CEicon.setPixmap(scaledPixmap)
+        iconLabel = QLabel()
+#        icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
+        icon = QIcon()
+        pixmap = icon.pixmap(180, 180)  # Specify the size directly
+        iconLabel.setPixmap(pixmap)
         # Text Widget
-        CElabel = QLabel("<b><font size='10'>Troppical</font></b>")
+        label = QLabel("<b><font size='10'>Troppical</font></b>")
         # Set Widgets
-        self.headerLayout.addWidget(CEicon, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.headerLayout.addWidget(CElabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.headerLayout.addWidget(iconLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.headerLayout.addWidget(label, alignment=Qt.AlignmentFlag.AlignCenter)
         return self.headerLayout
     
     # Widgets
     def ui(self):
         # Init Window
-        self.setWindowTitle('Troppical') # Window name
+        self.setWindowTitle(f'Troppical - {version}')  # Window name with version        
         self.setCentralWidget(QWidget(self))  # Set a central widget
         self.layout = QStackedLayout(self.centralWidget())  # Set the layout on the central widget
-        image_bytes = base64.b64decode(logo)
-        # Window icon from base64 file to keep all into one executable
-        image = QImage.fromData(QByteArray(image_bytes))
-        pixmap = QPixmap.fromImage(image)
         # Set the window icon
-        self.setWindowIcon(QIcon(pixmap))
+#        icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
+#        self.setWindowIcon(QIcon(icon_path))
+        self.selection_page()
 
-        # Emulator Select Page
+    # Emulator Select Page
+    def selection_page(self):
         self.emulatorSelectPage = QWidget()
-        emulatorSelectLayout = QHBoxLayout()  # Changed to horizontal layout
+        emulatorSelectLayout = QHBoxLayout()
         emulatorSelectGroup = QGroupBox("Emulators")
-        emulatorSelectGroupLayout = QVBoxLayout()  # Changed to vertical layout for stacking icons
-        # Layouts and griups
+        emulatorSelectGroupLayout = QVBoxLayout()
         descriptionGroup = QGroupBox("Emulator Descriptions")
         descriptionGroupLayout = QVBoxLayout()
+
         self.emulatorSelectPage.setLayout(emulatorSelectLayout)
         emulatorSelectGroup.setLayout(emulatorSelectGroupLayout)
         descriptionGroup.setLayout(descriptionGroupLayout)
-        # Widgets
-        # Yuzu
-        yuzu_image_bytes = base64.b64decode(yuzu)
-        yuzu_qimage = QImage.fromData(QByteArray(yuzu_image_bytes))
-        yuzu_pixmap = QPixmap.fromImage(yuzu_qimage).scaled(112, 112, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        yuzu_label = QLabel()
-        yuzu_label.setPixmap(yuzu_pixmap)
-        yuzu_label.setStyleSheet("QLabel:hover { background-color: rgba(255, 255, 255, 50); }")
-        yuzu_label.mousePressEvent = lambda event: self.logic.set_emulator('sudachi')
-        yuzu_desc = QLabel("Sudachi is a continuation of Yuzu by a unfiliated developer \n that already has some fixes/enhancements that were not in the original.")
-        yuzu_desc.setFixedHeight(112)
-        yuzu_desc.setStyleSheet("background-color: rgba(255, 255, 255, 16); color: white; border-radius: 5px; padding: 5px;")
-        ## Citra-Enhanced Emulator
-        citra_enh_image_bytes = base64.b64decode(citra_enh)
-        citra_enh_qimage = QImage.fromData(QByteArray(citra_enh_image_bytes))
-        citra_enh_pixmap = QPixmap.fromImage(citra_enh_qimage).scaled(112, 112, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        citra_enh_label = QLabel()
-        citra_enh_label.setPixmap(citra_enh_pixmap)
-        citra_enh_label.setStyleSheet("QLabel:hover { background-color: rgba(255, 255, 255, 50); }")
-        citra_enh_label.mousePressEvent = lambda event: self.logic.set_emulator('Citra-Enhanced')
-        citra_enh_desc = QLabel("Citra-Enhanced offers improved performance for games at the cost of stability and bugs.")
-        citra_enh_desc.setFixedHeight(112)
-        citra_enh_desc.setStyleSheet("background-color: rgba(255, 255, 255, 16); color: white; border-radius: 5px; padding: 5px;")
-        # Lime3DS Emulator
-        lime_image_bytes = base64.b64decode(lime)
-        lime_qimage = QImage.fromData(QByteArray(lime_image_bytes))
-        lime_pixmap = QPixmap.fromImage(lime_qimage).scaled(112, 112, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        lime_label = QLabel()
-        lime_label.setPixmap(lime_pixmap)
-        lime_label.setStyleSheet("QLabel:hover { background-color: rgba(255, 255, 255, 50); }")
-        lime_label.mousePressEvent = lambda event: self.logic.set_emulator('Lime3DS')
-        lime_desc = QLabel("Lime3DS is an open source 3DS emulator that aims to revive and continue work on Citra.<br><b>It is generally more stable than Citra-Enhanced.</b>")
-        lime_desc.setFixedHeight(112)
-        lime_desc.setStyleSheet("background-color: rgba(255, 255, 255, 16); color: white; border-radius: 5px; padding: 5px; line-height: 1.6;")
-        # Citra PabloMK7 Emulator
-        citra_image_bytes = base64.b64decode(citra)
-        citra_qimage = QImage.fromData(QByteArray(citra_image_bytes))
-        citra_pixmap = QPixmap.fromImage(citra_qimage).scaled(112, 112, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        citra_label = QLabel()
-        citra_label.setPixmap(citra_pixmap)
-        citra_label.setStyleSheet("QLabel:hover { background-color: rgba(255, 255, 255, 50); }")
-        citra_label.mousePressEvent = lambda event: self.logic.set_emulator('Citra')
-        citra_desc = QLabel("Pablo's fork is the closets to Citra since it has former devs working on it.")
-        citra_desc.setFixedHeight(112)
-        citra_desc.setStyleSheet("background-color: rgba(255, 255, 255, 16); color: white; border-radius: 5px; padding: 5px;")
-        # Adding widgets to the layout
-        ## Images
-        emulatorSelectGroupLayout.addWidget(yuzu_label)
-        emulatorSelectGroupLayout.addWidget(lime_label)
-        emulatorSelectGroupLayout.addWidget(citra_enh_label)        
-        emulatorSelectGroupLayout.addWidget(citra_label)
-        ## Descriptions
-        descriptionGroupLayout.addWidget(yuzu_desc)
-        descriptionGroupLayout.addWidget(lime_desc)
-        descriptionGroupLayout.addWidget(citra_enh_desc)
-        descriptionGroupLayout.addWidget(citra_desc)
+
+        # Iterate over each emulator in the API data
+        for troppical_api_data in self.logic.troppical_api:
+            # Fetch and decode the logo
+            logo_url = troppical_api_data['emulator_logo']
+            print(logo_url)
+            response = requests.get(logo_url)
+            if response.status_code == 200:
+                image_bytes = response.content
+                qimage = QImage.fromData(QByteArray(image_bytes))
+                pixmap = QPixmap.fromImage(qimage).scaled(112, 112, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            else:
+                QMessageBox.critical(self, "Failed to fetch logo", f"Failed to fetch logo for {troppical_api_data['emulator_name']}. Status code: {response.status_code}")
+            
+            # Create and style QLabel for the emulator logo
+            emulator_label = QLabel()
+            emulator_label.setPixmap(pixmap)
+            emulator_label.setStyleSheet("QLabel:hover { background-color: rgba(255, 255, 255, 50); }")
+
+            # Set mouse press event to set emulator
+            emulator_label.mousePressEvent = lambda event, emulator=troppical_api_data['emulator_name']: self.logic.set_emulator(emulator)
+
+            # Create and style QLabel for the emulator name
+            emulator_name_label = QLabel(troppical_api_data['emulator_name'])
+            emulator_name_label.setStyleSheet("font-weight: bold; color: white;")
+
+            # Create and style QLabel for the emulator description
+            emulator_desc = QLabel(troppical_api_data['emulator_desc'])
+            emulator_desc.setFixedHeight(112)
+            emulator_desc.setStyleSheet("background-color: rgba(255, 255, 255, 16); color: white; border-radius: 5px; padding: 5px;")
+
+            # Add widgets to the layout
+            emulatorSelectGroupLayout.addWidget(emulator_label)
+            emulatorSelectGroupLayout.addWidget(emulator_name_label)
+            descriptionGroupLayout.addWidget(emulator_desc)
+
+        # Add groups to the layout
         emulatorSelectLayout.addWidget(emulatorSelectGroup)
         emulatorSelectLayout.addWidget(descriptionGroup)
-        # Add the page to the layout
         self.layout.addWidget(self.emulatorSelectPage)
 
         # Welcome page
@@ -243,7 +215,17 @@ class QtUi(QMainWindow, Style):
 class Logic:
     def __init__(self):
         self.regvalue = None  
-        self.install_mode = None 
+        self.install_mode = None
+   
+    def fetch_google_sheet_data(self):
+        url = "https://script.googleusercontent.com/macros/echo?user_content_key=Hw-G9S_OHELhOUAsT-oQr8ux2HPMIpva3U1w0Su7P1ZYrr1ngXyqlN6LBhfev1taFoRtJ07w_KDhWVbMaBaeJ3c86H4e0k8Xm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnL69XsVZDOhipZMwrhs3JioNozSVnp4Chm6SveAF_nlUSMgTaOh-zk0bQ5F9LtyaiRZKic-heYuYVV866SySaVfv-0TkTPKcCtz9Jw9Md8uu&lib=MmjrdpKGbUxdyxLDAqWkoFhoZjK-0W8qS"
+        response = requests.get(url)
+        if response.status_code == 200:
+            all_data = response.json()
+            self.troppical_api = [item for item in all_data if item.get('emulator_platform') != 'android']
+            return self.troppical_api
+        else:
+            print("Failed to fetch data:", response.status_code)
 
     # Set which emulator to use for the installer depeanding on the selected emulator 
     def set_emulator(self, emulator):
@@ -252,23 +234,15 @@ class Logic:
         if reg_result is None:
             current_version = "Not Installed"
         else:
-            _, current_version = reg_result
+            current_version = reg_result[1]
+        for selected_emulator in self.troppical_api:
+            if selected_emulator['emulator_name'] == self.emulator:
+                self.releases_url = f"https://api.github.com/repos/{selected_emulator['emulator_owner']}/{selected_emulator['emulator_repo']}/releases"
+                if self.emulator in ["Panda3DS"]:
+                    self.nightly_url = f"https://nightly.link/{selected_emulator['emulator_owner']}/{selected_emulator['emulator_repo']}/workflows/Qt_Build/master/Windows%20executable.zip"
+                else:
+                    self.nightly_url = f"https://nightly.link/{selected_emulator['emulator_owner']}/{selected_emulator['emulator_repo']}/workflows/build/master/windows-msvc.zip"
 
-        if self.emulator == "Citra":
-            self.releases_url = "https://api.github.com/repos/PabloMK7/citra/releases"
-            self.nightly_url = "https://nightly.link/PabloMK7/citra/workflows/build/master/windows-msvc.zip"
-        elif self.emulator == "Lime3DS":
-            self.releases_url = "https://api.github.com/repos/Lime3DS/Lime3DS/releases"
-            self.nightly_url = "https://nightly.link/Lime3DS/Lime3DS/workflows/build/master/windows-msvc.zip"
-        elif self.emulator == "Citra-Enhanced":
-            self.releases_url = "https://api.github.com/repos/CitraEnhanced/citra/releases"
-            self.nightly_url = "https://nightly.link/CitraEnhanced/citra/workflows/build/master/windows-msvc.zip"
-        elif self.emulator == "sudachi":
-            self.releases_url = "https://api.github.com/repos/sudachi-emu/sudachi/releases"
-            self.nightly_url = None
-    
-
-        # Set widgets to emulator value
         qtui.installationPathLineEdit.setText(QLineEdit(os.path.join(os.environ['LOCALAPPDATA'], self.emulator)).text()) 
         qtui.labeldown.setText(qtui.labeldown.text() + self.emulator)
         qtui.labelext.setText(qtui.labelext.text() + self.emulator)
@@ -298,7 +272,7 @@ class Logic:
             qtui.layout.setCurrentIndex(2)
             self.Add_releases_to_combobox()
         elif button is qtui.updateButton:
-            self.check_for_updates()
+            self.emulator_updates()
         elif button is qtui.uninstallButton:
             self.install_mode = "Uninstall" # Unused for now
             self.uninstall()
@@ -324,34 +298,23 @@ class Logic:
 
     # Add the various version to the selection combobox 
     def Add_releases_to_combobox(self):
+        print (self.releases_url)
         response = requests.get(self.releases_url)
-        self.releases = response.json()[:10] 
+        self.releases = response.json()[:5] 
 
-        for release in self.releases:
+        # Remove or add items based on the emulator
+        for release in self.releases: 
             qtui.installationSourceComboBox.addItem(release['tag_name'])
         
-        qtui.installationSourceComboBox.insertSeparator(len(self.releases))
-
-        if self.emulator != "sudachi":
-            # Add the latest CI action run option to the combobox
-            qtui.installationSourceComboBox.addItem("Latest Nightly")
-
-        
     # Update button function    
-    def check_for_updates(self): 
+    def emulator_updates(self): 
         self.checkreg() # Initialise the reg value function
         current_Version = self.updatevalue
         response = requests.get(self.releases_url + "/latest")
         latest_release = response.json()
         latest_version = latest_release['tag_name']
 
-        if current_Version == "Latest Nightly":
-            reply = QMessageBox.question(qtui, "Update nightly builds", f"Due to the way nightly builds work, we cannot fetch the latest version. Check our Github page to see what changed. Would you like to update {self.emulator} to the latest nightly build?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-            if reply == QMessageBox.StandardButton.Yes:
-                self.install_mode = "Update"
-                qtui.layout.setCurrentIndex(3)
-                self.Prepare_Download()
-        elif latest_version > current_Version:
+        if latest_version > current_Version:
             reply = QMessageBox.question(qtui, "Update Found", "Would you like to update " + self.emulator + " to " +  latest_version + "?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 self.install_mode = "Update"
@@ -366,54 +329,60 @@ class Logic:
     def Prepare_Download(self):
         reg_key = self.checkreg()
         if reg_key is not None:
-            _, UpdateChannelValue = reg_key
+            UpdateChannelValue = reg_key[1]
         else:
             UpdateChannelValue = None  
 
         self.selection = qtui.installationSourceComboBox.currentText()
 
         if self.install_mode == "Install":
-            if self.selection == "Latest Nightly":
-                self.target_download = self.nightly_url
-                self.url = self.target_download # url for the downlaod thread
-                self.Download_Emulator()
-                print (self.url)
-                self.createreg()
-                return              
-            else:
-                response = requests.get(self.releases_url)
-                releases = response.json()
+            response = requests.get(self.releases_url)
+            releases = response.json()
             for release in releases:
                 if release['tag_name'] == self.selection:
-                    for asset in release['assets']:
-                        if 'windows-msvc' in asset['name'] or f"{self.selection}-windows.zip" in asset['name']:
-                            if asset['name'].endswith('.zip'):
-                                self.target_download = asset['browser_download_url']
-                                print (self.target_download)
-                                self.url = self.target_download # url for the downlaod thread
-                                self.Download_Emulator()
-                                self.createreg()
-                            elif asset == None:
-                                QMessageBox.critical(qtui, "Error", f"No suitable download found for {self.emulator} {self.selection} Please try another release.")
-                                qtui.layout.setCurrentIndex(2)
-        elif self.install_mode == "Update":
-            if UpdateChannelValue == "Latest Nightly":
-                self.target_download = self.nightly_url
-                self.url = self.target_download # url for the downlaod thread
-                self.Download_Emulator()
-                print (self.url)
-                return
-            else:
-                response = requests.get(self.releases_url + "/latest")
-                latest_release = response.json()
-                for asset in latest_release['assets']:
-                    if 'windows-msvc' in asset['name'] or f"{self.selection}-windows.zip" in asset['name']:
-                        if asset['name'].endswith('.zip'):
-                            self.target_download = asset['browser_download_url']
-                            self.url = self.target_download # url for the downlaod thread
+                    windows_assets = [asset for asset in release['assets'] if 'windows' in asset['name'].lower() and asset['name'].endswith('.zip')]
+                    if len(windows_assets) > 1:
+                        options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
+                        choice, ok = QInputDialog.getItem(qtui, "Select Version", "Multiple Windows versions found. Please select one:\n" + options, [asset['name'] for asset in windows_assets], 0, False)
+                        if ok:
+                            self.selected_asset = next(asset for asset in windows_assets if asset['name'] == choice)
+                            self.selected_asset_name = self.selected_asset['name']
+                            print (self.selected_asset_name)
+                            self.target_download = self.selected_asset['browser_download_url']
+                            self.url = self.target_download  # url for the download thread
                             self.Download_Emulator()
-                            self.selection = latest_release['tag_name'] # The mathod of updating the reg value is bound to chnage on the update method
                             self.createreg()
+                    elif len(windows_assets) == 1:
+                        self.selected_asset_name = windows_assets[0]['name']
+                        self.target_download = windows_assets[0]['browser_download_url']
+                        print(self.target_download)
+                        self.url = self.target_download  # url for the download thread
+                        self.Download_Emulator()
+                        self.createreg()
+                    else:
+                        QMessageBox.critical(qtui, "Error", f"No suitable Windows download found for {self.emulator} {self.selection}. Please try another release.")
+                        qtui.layout.setCurrentIndex(2)
+        elif self.install_mode == "Update":
+            response = requests.get(self.releases_url + "/latest")
+            latest_release = response.json()
+            windows_assets = [asset for asset in latest_release['assets'] if 'windows' in asset['name'].lower() and asset['name'].endswith('.zip')]
+            if windows_assets:
+                if len(windows_assets) > 1:
+                    options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
+                    choice, ok = QInputDialog.getItem(qtui, "Select Version", "Multiple Windows versions found. Please select one:\n" + options, [asset['name'] for asset in windows_assets], 0, False)
+                    if ok:
+                        latest_asset = next(asset for asset in windows_assets if asset['name'] == choice)
+                else:
+                    latest_asset = windows_assets[0]
+
+                self.target_download = latest_asset['browser_download_url']
+                self.url = self.target_download  # url for the download thread
+                print(self.url)
+                self.Download_Emulator()
+                self.selection = latest_release['tag_name']
+                self.createreg()
+            else:
+                QMessageBox.critical(qtui, "Error", f"No suitable Windows download found for {self.emulator} in the latest release. Please try another release or check for updates.")
 
     # Download function    
     def Download_Emulator(self):
@@ -431,7 +400,6 @@ class Logic:
 
     # Extract and install function 
     def extract_and_install(self, temp_file, extract_to):
-       
         # Clear the target directory before extracting new files
         if os.path.exists(extract_to):
             shutil.rmtree(extract_to)
@@ -443,27 +411,30 @@ class Logic:
 
         with ZipFile(zip_file_path, 'r') as emu_zip:
             emu_zip.extractall(self.temp_extract_folder)
-            for file in emu_zip.namelist():
-                if file.endswith('.zip'):
-                    nested_zip_path = os.path.join(self.temp_extract_folder, file)
-                    with ZipFile(nested_zip_path, 'r') as nested_zip:
-                        nested_zip.extractall(self.temp_extract_folder)
-                    os.remove(nested_zip_path)
+            # Check for nested zip files and extract them
+            nested_zips = [f for f in emu_zip.namelist() if f.endswith('.zip')]
+            for nested_zip in nested_zips:
+                nested_zip_path = os.path.join(self.temp_extract_folder, nested_zip)
+                with ZipFile(nested_zip_path, 'r') as nested_zip_file:
+                    nested_zip_file.extractall(self.temp_extract_folder)
+                os.remove(nested_zip_path)
         os.remove(zip_file_path)
 
         self.move_files(extract_to)
 
-    # Move extartced files function (There is a bug with this if you select ci builds the etartced nested archive might also move with the files)
     def move_files(self, extract_to):
-        dir_path = os.path.join(self.temp_extract_folder)
-        src_path = os.path.join(dir_path)
-        if self.emulator == "sudachi":
-            dest_path = os.path.join(extract_to, '')
-            os.makedirs(dest_path, exist_ok=True)
+        # Find the first directory containing an executable
+        for root, dirs, files in os.walk(self.temp_extract_folder):
+            if any(file.endswith('.exe') for file in files):
+                src_path = root
+                break
         else:
-            dest_path = os.path.join(extract_to)
-        for p in os.listdir(src_path):
-            shutil.move(os.path.join(src_path, p), dest_path)
+            src_path = self.temp_extract_folder  # Fallback if no .exe is found
+
+        dest_path = extract_to
+        os.makedirs(dest_path, exist_ok=True)
+        for item in os.listdir(src_path):
+            shutil.move(os.path.join(src_path, item), dest_path)
        
         # Mark the installation as complete
         self.installation_complete()
@@ -473,10 +444,12 @@ class Logic:
         qtui.extractionProgressBar.setValue(100)
         if self.emulator == "Lime3DS":
             executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'lime3ds-gui.exe'))
-        elif self.emulator == "Citra" or self.emulator == "Citra-Enhanced":           
+        elif self.emulator == "PabloMK7's Citra" or self.emulator == "Citra Enhanced":           
             executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'citra-qt.exe')) # Declare exe path for the shortcuts
-        elif self.emulator == "sudachi":
-            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'sudachi.exe'))    
+        elif self.emulator == "Sudachi":
+            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'Sudachi.exe'))
+        elif self.emulator == "Panda3DS":
+            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'Alber.exe'))
         if qtui.desktopShortcutCheckbox.isChecked():
             self.define_shortcut(executable_path, 'desktop')
         if qtui.startMenuShortcutCheckbox.isChecked():
@@ -490,8 +463,9 @@ class Logic:
             self.registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}", 0, winreg.KEY_READ)
             self.regvalue, regtype = winreg.QueryValueEx(self.registry_key, 'Install_Dir')
             self.updatevalue, regtype = winreg.QueryValueEx(self.registry_key, 'Version')
+            self.asset_version, regtype = winreg.QueryValueEx(self.registry_key, 'Asset_version')
             winreg.CloseKey(self.registry_key)
-            return self.regvalue, self.updatevalue  
+            return self.regvalue, self.updatevalue, self.asset_version
         except FileNotFoundError:         
             pass
     # Function to create the reg values            
@@ -501,6 +475,7 @@ class Logic:
                                         winreg.KEY_WRITE)
         if self.install_mode == "Install":
             winreg.SetValueEx(self.registry_key, 'Install_Dir', 0, winreg.REG_SZ, qtui.installationPathLineEdit.text())
+            winreg.SetValueEx(self.registry_key, 'Asset_version', 0, winreg.REG_SZ, self.selected_asset_name)
         winreg.SetValueEx(self.registry_key, 'Version', 0, winreg.REG_SZ, self.selection)
         winreg.CloseKey(self.registry_key)
 
@@ -574,6 +549,7 @@ class DownloadWorker(QThread):
         self.url = url
         self.dest = dest
 
+
     @pyqtSlot()
     def do_download(self):
         try:
@@ -596,11 +572,9 @@ class DownloadWorker(QThread):
             self.finished.emit()
 
 if __name__ == "__main__":
+    version = "v1.0"
     app = QApplication(sys.argv)
     qtui = QtUi()
     qtui.show()
     self = Logic()
     sys.exit(app.exec())
-
-
-

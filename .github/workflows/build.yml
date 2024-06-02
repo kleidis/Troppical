@@ -3,15 +3,31 @@ name: troppical-build
 on:
   push:
     branches: [ "*" ]
-    tags: [ "*" ]
+    tags: [ "v*" ]
+
 jobs:
   Windows-build:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Bump version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          $NEW_VERSION="${{ github.ref_name }}"
+          (Get-Content troppical.py) -replace 'version = ".*"', "version = `"$NEW_VERSION`"" | Set-Content troppical.py
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add troppical.py
+          git commit -m "Update version to $NEW_VERSION"
+          git push origin HEAD:master --force --follow-tags --verbose
+        shell: pwsh
+
       - name: Cache pip
         uses: actions/cache@v3
         with:
@@ -21,16 +37,42 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
       - name: Install dependencies
         run: pip install pyqt6 pyinstaller pywin32 requests
+
       - name: Build
         shell: bash
         run: |
           mkdir -p ${{ github.workspace }}/bin
-          python image-base64data-generator.py
-          pyinstaller --clean --onefile --icon=icon.ico --windowed troppical.py
+          pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed troppical.py
+
       - name: Upload troppical
         uses: actions/upload-artifact@v4
         with:
           name: troppical-nightly
+          path: ${{ github.workspace }}/dist/troppical.exe
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          draft: true
+          prerelease: false
+
+      - name: Upload Release Asset
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/troppical.exe
+          asset_name: troppical.exe
+          asset_content_type: application/octet-stream
           path: ${{ github.workspace }}/dist/troppical.exe

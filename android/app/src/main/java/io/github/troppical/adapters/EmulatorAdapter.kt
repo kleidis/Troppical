@@ -53,7 +53,7 @@ class EmulatorAdapter(private val context: Context, private val activity: Activi
         cardEmulator.setOnClickListener {
            // Double-click prevention, using threshold of 1000 ms
            if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
-               return
+               return@setOnClickListener
            }
            lastClickTime = SystemClock.elapsedRealtime()
         

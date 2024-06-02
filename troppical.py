@@ -29,8 +29,8 @@ class QtUi(QMainWindow, Style):
         self.headerLayout.setContentsMargins(0, 20, 0, 0)
         # Icon Widget
         iconLabel = QLabel()
-#        icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
-        icon = QIcon()
+        icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
+        icon = QIcon(icon_path)
         pixmap = icon.pixmap(180, 180)  # Specify the size directly
         iconLabel.setPixmap(pixmap)
         # Text Widget
@@ -47,8 +47,8 @@ class QtUi(QMainWindow, Style):
         self.setCentralWidget(QWidget(self))  # Set a central widget
         self.layout = QStackedLayout(self.centralWidget())  # Set the layout on the central widget
         # Set the window icon
-#        icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
-#        self.setWindowIcon(QIcon(icon_path))
+        icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
+        self.setWindowIcon(QIcon(icon_path))
         self.selection_page()
 
     # Emulator Select Page

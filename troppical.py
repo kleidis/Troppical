@@ -11,9 +11,6 @@ import tempfile
 from icons import styledark_rc
 import win32com.client
 import winreg
-from urllib.parse import quote
-
-
 from stylesheet import Style
 from pathlib import Path
 
@@ -212,17 +209,17 @@ class QtUi(QMainWindow, Style):
 class Logic:
     def __init__(self):
         self.regvalue = None  
-        self.install_mode = None 
-    
+        self.install_mode = None
+   
     def fetch_google_sheet_data(self):
         url = "https://script.googleusercontent.com/macros/echo?user_content_key=Hw-G9S_OHELhOUAsT-oQr8ux2HPMIpva3U1w0Su7P1ZYrr1ngXyqlN6LBhfev1taFoRtJ07w_KDhWVbMaBaeJ3c86H4e0k8Xm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnL69XsVZDOhipZMwrhs3JioNozSVnp4Chm6SveAF_nlUSMgTaOh-zk0bQ5F9LtyaiRZKic-heYuYVV866SySaVfv-0TkTPKcCtz9Jw9Md8uu&lib=MmjrdpKGbUxdyxLDAqWkoFhoZjK-0W8qS"
         response = requests.get(url)
         if response.status_code == 200:
-            self.troppical_api = response.json()
+            all_data = response.json()
+            self.troppical_api = [item for item in all_data if item.get('emulator_platform') != 'android']
             return self.troppical_api
         else:
             print("Failed to fetch data:", response.status_code)
-        self.process_emulator_data()
 
     # Set which emulator to use for the installer depeanding on the selected emulator 
     def set_emulator(self, emulator):
@@ -269,7 +266,7 @@ class Logic:
             qtui.layout.setCurrentIndex(2)
             self.Add_releases_to_combobox()
         elif button is qtui.updateButton:
-            self.check_for_updates()
+            self.emulator_updates()
         elif button is qtui.uninstallButton:
             self.install_mode = "Uninstall" # Unused for now
             self.uninstall()
@@ -304,7 +301,7 @@ class Logic:
             qtui.installationSourceComboBox.addItem(release['tag_name'])
         
     # Update button function    
-    def check_for_updates(self): 
+    def emulator_updates(self): 
         self.checkreg() # Initialise the reg value function
         current_Version = self.updatevalue
         response = requests.get(self.releases_url + "/latest")
@@ -350,6 +347,7 @@ class Logic:
                             self.Download_Emulator()
                             self.createreg()
                     elif len(windows_assets) == 1:
+                        self.selected_asset_name = windows_assets[0]['name']
                         self.target_download = windows_assets[0]['browser_download_url']
                         print(self.target_download)
                         self.url = self.target_download  # url for the download thread
@@ -361,18 +359,24 @@ class Logic:
         elif self.install_mode == "Update":
             response = requests.get(self.releases_url + "/latest")
             latest_release = response.json()
-            for asset in latest_release['assets']:
-                self_asset_version = self.checkreg()[2]
-                if self_asset_version and (self_asset_version in asset['name']):
-                    if asset['name'].endswith('.zip'):
-                        self.target_download = asset['browser_download_url']
-                        self.url = self.target_download  # url for the download thread
-                        print (self.url)
-                        self.Download_Emulator()
-                        self.selection = latest_release['tag_name']
-                        self.createreg()
-                elif self_asset_version and (self_asset_version not in asset['name']):
-                    QMessageBox.critical(qtui, "Error", f"No suitable Windows download found for {self.emulator} in the latest release. The Owner might have chnaged the asset naming in their release. Please oepn a bug report on Troppical's Github page")
+            windows_assets = [asset for asset in latest_release['assets'] if 'windows' in asset['name'].lower() and asset['name'].endswith('.zip')]
+            if windows_assets:
+                if len(windows_assets) > 1:
+                    options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
+                    choice, ok = QInputDialog.getItem(qtui, "Select Version", "Multiple Windows versions found. Please select one:\n" + options, [asset['name'] for asset in windows_assets], 0, False)
+                    if ok:
+                        latest_asset = next(asset for asset in windows_assets if asset['name'] == choice)
+                else:
+                    latest_asset = windows_assets[0]
+
+                self.target_download = latest_asset['browser_download_url']
+                self.url = self.target_download  # url for the download thread
+                print(self.url)
+                self.Download_Emulator()
+                self.selection = latest_release['tag_name']
+                self.createreg()
+            else:
+                QMessageBox.critical(qtui, "Error", f"No suitable Windows download found for {self.emulator} in the latest release. Please try another release or check for updates.")
 
     # Download function    
     def Download_Emulator(self):
@@ -436,8 +440,8 @@ class Logic:
             executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'lime3ds-gui.exe'))
         elif self.emulator == "PabloMK7's Citra" or self.emulator == "Citra Enhanced":           
             executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'citra-qt.exe')) # Declare exe path for the shortcuts
-        elif self.emulator == "sudachi":
-            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'sudachi.exe'))
+        elif self.emulator == "Sudachi":
+            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'Sudachi.exe'))
         elif self.emulator == "Panda3DS":
             executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'Alber.exe'))
         if qtui.desktopShortcutCheckbox.isChecked():
@@ -562,7 +566,7 @@ class DownloadWorker(QThread):
             self.finished.emit()
 
 if __name__ == "__main__":
-    version = "v1.1"
+    version = "v1.0"
     app = QApplication(sys.argv)
     qtui = QtUi()
     qtui.show()

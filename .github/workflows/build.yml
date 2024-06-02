@@ -53,8 +53,41 @@ jobs:
           name: troppical-nightly
           path: ${{ github.workspace }}/dist/troppical.exe
 
+  android-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Build with Gradle
+        run: |
+          cd android/
+          chmod +x gradlew
+          ./gradlew assembleDebug
+          cd ../..
+
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: ./android/app/build/outputs/apk/debug/app-debug.apk
+
+  release:
+    needs: [Windows-build, android-build]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ${{ github.workspace }}/artifacts
+
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/v')
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -65,14 +98,22 @@ jobs:
           draft: true
           prerelease: false
 
-      - name: Upload Release Asset
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Upload Windows Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/troppical.exe
+          asset_path: ${{ github.workspace }}/artifacts/troppical-nightly/troppical.exe
           asset_name: troppical.exe
           asset_content_type: application/octet-stream
-          path: ${{ github.workspace }}/dist/troppical.exe
+
+      - name: Upload Android Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/artifacts/app-debug/app-debug.apk
+          asset_name: troppical.apk
+          asset_content_type: application/vnd.android.package-archive

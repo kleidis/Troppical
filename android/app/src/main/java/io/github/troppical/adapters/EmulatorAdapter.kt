@@ -1,6 +1,7 @@
 package io.github.troppical.adapters
 
 import android.content.Context
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.app.Activity
@@ -36,7 +37,7 @@ class EmulatorAdapter(private val context: Context, private val activity: Activi
         val inflater = LayoutInflater.from(context)
         val view = convertView ?: inflater.inflate(R.layout.card_emulator, parent, false)
 
-        val card_emulator = view.findViewById<MaterialCardView>(R.id.card_emulator)
+        val cardEmulator = view.findViewById<MaterialCardView>(R.id.card_emulator)
         val emulatorLogo = view.findViewById<ImageView>(R.id.emulator_logo)
         val emulatorName = view.findViewById<TextView>(R.id.emulator_name)
         val emulatorDesc = view.findViewById<TextView>(R.id.emulator_desc)
@@ -49,7 +50,7 @@ class EmulatorAdapter(private val context: Context, private val activity: Activi
         emulatorDesc.ellipsize = TextUtils.TruncateAt.MARQUEE
         emulatorDesc.isSelected = true
 
-        card_emulator.setOnClickListener {
+        cardEmulator.setOnClickListener {
            // Double-click prevention, using threshold of 1000 ms
            if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
                return

@@ -18,6 +18,8 @@ import io.github.troppical.dialogs.EmulatorAboutDialog
 
 class EmulatorAdapter(private val context: Context, private val activity: Activity, private val data: ArrayList<HashMap<String, Any>>) : BaseAdapter() {
 
+    private var lastClickTime = 0L
+    
     override fun getCount(): Int {
         return data.size
     }
@@ -48,6 +50,12 @@ class EmulatorAdapter(private val context: Context, private val activity: Activi
         emulatorDesc.isSelected = true
 
         card_emulator.setOnClickListener {
+           // Double-click prevention, using threshold of 1000 ms
+           if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
+               return
+           }
+           lastClickTime = SystemClock.elapsedRealtime()
+        
            val dialog = EmulatorAboutDialog(context, activity, item)
            dialog.show()
         }

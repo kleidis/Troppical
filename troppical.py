@@ -232,9 +232,9 @@ class Logic:
         self.emulator = emulator
         reg_result = self.checkreg()
         if reg_result is None:
-            current_version = "v1.1"
+            installed_emulator = "Not Installed"
         else:
-            current_version = reg_result[1]
+            installed_emulator = reg_result[1]
         for selected_emulator in self.troppical_api:
             if selected_emulator['emulator_name'] == self.emulator:
                 self.releases_url = f"https://api.github.com/repos/{selected_emulator['emulator_owner']}/{selected_emulator['emulator_repo']}/releases"
@@ -246,7 +246,7 @@ class Logic:
         qtui.installationPathLineEdit.setText(QLineEdit(os.path.join(os.environ['LOCALAPPDATA'], self.emulator)).text()) 
         qtui.labeldown.setText(qtui.labeldown.text() + self.emulator)
         qtui.labelext.setText(qtui.labelext.text() + self.emulator)
-        qtui.welcomerLabel.setText(f'<big>Your currently selected emulator is <b>{self.emulator}</b> and current version is <b>{current_version}</b>.</big>')
+        qtui.welcomerLabel.setText(f'<big>Your currently selected emulator is <b>{self.emulator}</b> and current version is <b>{installed_emulator}</b>.</big>')
 
         self.checkreg()
         self.disable_qt_buttons_if_installed()
@@ -309,12 +309,12 @@ class Logic:
     # Update button function    
     def emulator_updates(self): 
         self.checkreg() # Initialise the reg value function
-        current_Version = self.updatevalue
+        installed_emulator = self.updatevalue
         response = requests.get(self.releases_url + "/latest")
         latest_release = response.json()
         latest_version = latest_release['tag_name']
 
-        if latest_version > current_Version:
+        if latest_version > installed_emulator:
             reply = QMessageBox.question(qtui, "Update Found", "Would you like to update " + self.emulator + " to " +  latest_version + "?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 self.install_mode = "Update"

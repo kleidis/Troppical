@@ -9,6 +9,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.text.TextUtils
 import android.net.Uri
 import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
@@ -34,14 +35,17 @@ class EmulatorAdapter(private val context: Context, private val activity: Activi
         val view = convertView ?: inflater.inflate(R.layout.card_emulator, parent, false)
 
         val card_emulator = view.findViewById<MaterialCardView>(R.id.card_emulator)
-        val emulator_logo = view.findViewById<ImageView>(R.id.emulator_logo)
-        val emulator_name = view.findViewById<TextView>(R.id.emulator_name)
-        val emulator_desc = view.findViewById<TextView>(R.id.emulator_desc)
+        val emulatorLogo = view.findViewById<ImageView>(R.id.emulator_logo)
+        val emulatorName = view.findViewById<TextView>(R.id.emulator_name)
+        val emulatorDesc = view.findViewById<TextView>(R.id.emulator_desc)
 
         val item = getItem(position)
-        emulator_name.text = item["emulator_name"].toString()
-        emulator_desc.text = item["emulator_desc"].toString()
-        Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulator_logo)
+        emulatorName.text = item["emulator_name"].toString()
+        emulatorDesc.text = item["emulator_desc"].toString()
+        Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulatorLogo)
+        
+        emulatorDesc.ellipsize = TextUtils.TruncateAt.MARQUEE
+        emulatorDesc.isSelected = true
 
         card_emulator.setOnClickListener {
            val dialog = EmulatorAboutDialog(context, activity, item)

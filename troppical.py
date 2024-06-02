@@ -68,14 +68,15 @@ class QtUi(QMainWindow, Style):
         for troppical_api_data in self.logic.troppical_api:
             # Fetch and decode the logo
             logo_url = troppical_api_data['emulator_logo']
-            print (logo_url)
+            print(logo_url)
             response = requests.get(logo_url)
             if response.status_code == 200:
                 image_bytes = response.content
                 qimage = QImage.fromData(QByteArray(image_bytes))
                 pixmap = QPixmap.fromImage(qimage).scaled(112, 112, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             else:
-                print ("Failed to fetch logo:", response.status_code)
+                QMessageBox.critical(self, "Failed to fetch logo", f"Failed to fetch logo for {troppical_api_data['emulator_name']}. Status code: {response.status_code}")
+            
             # Create and style QLabel for the emulator logo
             emulator_label = QLabel()
             emulator_label.setPixmap(pixmap)
@@ -84,6 +85,10 @@ class QtUi(QMainWindow, Style):
             # Set mouse press event to set emulator
             emulator_label.mousePressEvent = lambda event, emulator=troppical_api_data['emulator_name']: self.logic.set_emulator(emulator)
 
+            # Create and style QLabel for the emulator name
+            emulator_name_label = QLabel(troppical_api_data['emulator_name'])
+            emulator_name_label.setStyleSheet("font-weight: bold; color: white;")
+
             # Create and style QLabel for the emulator description
             emulator_desc = QLabel(troppical_api_data['emulator_desc'])
             emulator_desc.setFixedHeight(112)
@@ -91,6 +96,7 @@ class QtUi(QMainWindow, Style):
 
             # Add widgets to the layout
             emulatorSelectGroupLayout.addWidget(emulator_label)
+            emulatorSelectGroupLayout.addWidget(emulator_name_label)
             descriptionGroupLayout.addWidget(emulator_desc)
 
         # Add groups to the layout

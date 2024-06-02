@@ -21,7 +21,7 @@ class APKDownloader(private val url: String, private val outputFile: File) {
 
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 if (response.isSuccessful) {
-                    response.body()?.let { body ->
+                    response.body?.let { body ->
                         val contentLength = body.contentLength()
                         try {
                             val inputStream = body.byteStream()

@@ -83,7 +83,7 @@ class RequestNetworkController private constructor() {
         try {
             if (requestNetwork.getRequestType() == REQUEST_PARAM) {
                 if (method == GET) {
-                    val httpBuilder = HttpUrl.parse(url)?.newBuilder()
+                    val httpBuilder = url.toHttpUrlOrNull()?.newBuilder()
                         ?: throw NullPointerException("unexpected url: $url")
 
                     if (requestNetwork.getParams().isNotEmpty()) {
@@ -106,7 +106,7 @@ class RequestNetworkController private constructor() {
                 }
             } else {
                 val reqBody = RequestBody.create(
-                    MediaType.parse("application/json"),
+                    ("application/json").toMediaTypeOrNull(),
                     Gson().toJson(requestNetwork.getParams())
                 )
 
@@ -127,10 +127,10 @@ class RequestNetworkController private constructor() {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val responseBody = response.body()?.string()?.trim() ?: ""
+                    val responseBody = response.body?.string()?.trim() ?: ""
                     requestNetwork.getActivity().runOnUiThread {
                         val responseHeaders = HashMap<String, Any>()
-                        response.headers().names().forEach { name ->
+                        response.headers.names().forEach { name ->
                             responseHeaders[name] = response.header(name) ?: "null"
                         }
                         requestListener.onResponse(tag, responseBody, responseHeaders)

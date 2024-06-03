@@ -19,12 +19,13 @@ Troppical is a simple app that lets you manage your emulators with an easy insta
 
 **For now, we have these emulators**
 
-- Sudachi (Y**u fork)
+- Sudachi
 - Lime3DS
 - Citra Enhanced
 - PabloMK7's Citra fork
 - Panda3DS
-- Torzu (Soon)
+- Torzu (Windows only for now)
+- Strato (Android build (soon))
 
 If you'd like an emulator to be added, feel free to open a feature request issue. **Keep in mind that:**
 
@@ -32,7 +33,10 @@ If you'd like an emulator to be added, feel free to open a feature request issue
 - The emulator needs to be distributed on GitHub
 
 # Downloading
-- Go to releases and download the latest release `troppical.exe` for Windows or `troppical.apk` for Android
+
+**[Troppical Windows](https://nightly.link/kleidis/Troppical/workflows/build/master/troppical-nightly.zip)**
+
+**[Troppical Android](https://nightly.link/kleidis/Troppical/workflows/build/master/app-debug.zip)**
 
 # Usage
 

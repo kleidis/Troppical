@@ -450,6 +450,9 @@ class Logic:
             executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'Sudachi.exe'))
         elif self.emulator == "Panda3DS":
             executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'Alber.exe'))
+        elif self.emulator == "Torzu":
+            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'yuzu.exe'))
+    
         if qtui.desktopShortcutCheckbox.isChecked():
             self.define_shortcut(executable_path, 'desktop')
         if qtui.startMenuShortcutCheckbox.isChecked():

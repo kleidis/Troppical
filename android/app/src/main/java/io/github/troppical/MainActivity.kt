@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showErrorDialog(swipeRefresh: SwipeRefreshLayout) {
-        MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+        MaterialAlertDialogBuilder(this)
             .setTitle("Error")
             .setMessage("An error occurred while processing your request. Please try again.")
             .setPositiveButton("Retry") { dialog, which ->

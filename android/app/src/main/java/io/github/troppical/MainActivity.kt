@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(_param1: String, _param2: String, _param3: HashMap<String, Any>) {
                 val _response = _param2
                 listmap = Gson().fromJson(_response, object : TypeToken<ArrayList<HashMap<String, Any>>>() {}.type)
+                listmap = listmap.filter { it["emulator_platform"].toString() != "pc" } as ArrayList<HashMap<String, Any>>
                 val gridEmulators: GridView = findViewById(R.id.grid_emulators)
                 gridEmulators.adapter = EmulatorAdapter(this@MainActivity, this@MainActivity, listmap)
                 swipeRefresh.isRefreshing = false

@@ -4,11 +4,6 @@
     <style name="ThemeOverlay.Troppical.Dark" parent="">
         <item name="colorSurface">@android:color/black</item>
         <item name="android:colorBackground">@android:color/black</item>
-        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
-    </style>
-
-    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
-        <item name="android:textColor">?attr/colorOnSurface</item>
     </style>
 
 </resources>

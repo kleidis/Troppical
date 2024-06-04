@@ -100,9 +100,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showErrorDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_message, null)
         MaterialAlertDialogBuilder(this)
             .setTitle("Error")
-            .setMessage("An error occurred while processing your request. Please try again.")
+            .setView(dialogView)
             .setPositiveButton("Retry") { dialog, which ->
                 // Retry the network request
                 val net = RequestNetwork(this)

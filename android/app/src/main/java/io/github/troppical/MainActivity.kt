@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onErrorResponse(_param1: String, _param2: String) {
                 swipeRefresh.isRefreshing = false
-                showErrorDialog()
+                showErrorDialog(swipeRefresh)
             }
         }
 
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showErrorDialog() {
+    private fun showErrorDialog(swipeRefresh: SwipeRefreshLayout) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_message, null)
         MaterialAlertDialogBuilder(this)
             .setTitle("Error")

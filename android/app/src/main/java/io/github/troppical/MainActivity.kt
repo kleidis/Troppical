@@ -105,6 +105,7 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Error")
             .setView(dialogView)
             .setPositiveButton("Retry") { dialog, which ->
+                swipeRefresh.isRefreshing = true
                 // Retry the network request
                 val net = RequestNetwork(this)
                 net.startRequestNetwork(

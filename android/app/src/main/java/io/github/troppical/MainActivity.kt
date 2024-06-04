@@ -100,10 +100,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showErrorDialog(swipeRefresh: SwipeRefreshLayout) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_message, null)
-        MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
             .setTitle("Error")
-            .setView(dialogView)
+            .setMessage("An error occurred while processing your request. Please try again.")
             .setPositiveButton("Retry") { dialog, which ->
                 swipeRefresh.isRefreshing = true
                 // Retry the network request

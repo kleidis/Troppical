@@ -35,4 +35,8 @@
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.App.MaterialAlertDialog">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
 </resources>

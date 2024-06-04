@@ -7,6 +7,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.troppical.network.RequestNetwork
 import io.github.troppical.network.RequestNetworkController
 import io.github.troppical.adapters.EmulatorAdapter
@@ -35,8 +36,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onErrorResponse(_param1: String, _param2: String) {
-                // TODO: Handle this situation
-                swipeRefresh.isRefreshing = true
+                swipeRefresh.isRefreshing = false
+                showErrorDialog(swipeRefresh)
             }
         }
 
@@ -96,5 +97,24 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun showErrorDialog(swipeRefresh: SwipeRefreshLayout) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Error")
+            .setMessage("An error occurred while processing your request. Please try again.")
+            .setPositiveButton("Retry") { dialog, which ->
+                swipeRefresh.isRefreshing = true
+                // Retry the network request
+                val net = RequestNetwork(this)
+                net.startRequestNetwork(
+                    RequestNetworkController.GET,
+                    "https://script.googleusercontent.com/macros/echo?user_content_key=Hw-G9S_OHELhOUAsT-oQr8ux2HPMIpva3U1w0Su7P1ZYrr1ngXyqlN6LBhfev1taFoRtJ07w_KDhWVbMaBaeJ3c86H4e0k8Xm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnL69XsVZDOhipZMwrhs3JioNozSVnp4Chm6SveAF_nlUSMgTaOh-zk0bQ5F9LtyaiRZKic-heYuYVV866SySaVfv-0TkTPKcCtz9Jw9Md8uu&lib=MmjrdpKGbUxdyxLDAqWkoFhoZjK-0W8qS",
+                    "",
+                    netRequestListener
+                )
+            }
+            .setCancelable(false)
+            .show()
     }
 }

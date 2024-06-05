@@ -69,7 +69,7 @@ jobs:
         env:
          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
-         echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ks.jks
+         echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ${{ github.workspace }}/android/app/ks.jks
       
       - name: Build with Gradle
         run: |

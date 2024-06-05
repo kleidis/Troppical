@@ -33,16 +33,6 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
-
-        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
-    </style>
-
-    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
-        <item name="materialAlertDialogBodyTextStyle">@style/AlertDialog.Body</item>
-    </style>
-
-    <style name="AlertDialog.Body" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
-        <item name="android:textColor">?attr/colorOnSurface</item>
     </style>    
 
 </resources>

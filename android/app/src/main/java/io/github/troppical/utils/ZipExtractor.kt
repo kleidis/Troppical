@@ -23,8 +23,8 @@ class ZipExtractor(
 
         try {
             FileInputStream(zipFilePath).use { fis ->
-                val totalSize = fis.available()
-                var extractedSize = 0
+                val totalSize = zipFilePath.length()
+                var processedSize = 0L
 
                 ZipInputStream(fis).use { zipIn ->
                     var entry: ZipEntry? = zipIn.nextEntry
@@ -37,8 +37,8 @@ class ZipExtractor(
                             if (filePath.extension.equals("apk", ignoreCase = true)) {
                                 apkFilePath = filePath
                             }
-                            extractedSize += fileSize
-                            val progress = (extractedSize.toDouble() / totalSize * 100).toInt()
+                            processedSize += fileSize
+                            val progress = (processedSize.toDouble() / totalSize * 100).toInt()
                             progressCallback(progress)
                         } else {
                             // Create the directory
@@ -59,8 +59,8 @@ class ZipExtractor(
     }
 
     @Throws(IOException::class)
-    private fun extractFile(zipIn: ZipInputStream, filePath: File): Int {
-        var fileSize = 0
+    private fun extractFile(zipIn: ZipInputStream, filePath: File): Long {
+        var fileSize = 0L
         BufferedOutputStream(FileOutputStream(filePath)).use { bos ->
             val bytesIn = ByteArray(BUFFER_SIZE)
             var read: Int

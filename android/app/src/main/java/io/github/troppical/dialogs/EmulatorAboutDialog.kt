@@ -48,6 +48,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         emulatorName.text = item["emulator_name"].toString()
         emulatorDesc.text = item["emulator_desc"].toString()
         Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulatorLogo)
+        unInstallButton.visibility = View.GONE
 
         fetcherScope.launch {
             val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())
@@ -58,8 +59,8 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 emulatorLatestVersion.text = tag
                 
                 updateInstallButtonText(installButton)
-                if (!isUnInstallable) {
-                    unInstallButton.visibility = View.GONE
+                if (isUnInstallable) {
+                    unInstallButton.visibility = View.VISIBLE
                 }
 
                 if (directLink != null) {

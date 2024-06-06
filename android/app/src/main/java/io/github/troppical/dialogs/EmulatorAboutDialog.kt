@@ -3,6 +3,7 @@ package io.github.troppical.dialogs
 import android.content.Context
 import android.os.Bundle
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -38,6 +39,10 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         val emulatorLogo = findViewById<ImageView>(R.id.emulator_logo)
         val emulatorLatestVersion = findViewById<TextView>(R.id.emulator_latest_version)
         val installButton = findViewById<MaterialButton>(R.id.install)
+
+        if (isAppInstalled(item["emulator_package"].toString())) {
+            installButton.setText("Update")
+        }      
 
         emulatorName.text = item["emulator_name"].toString()
         emulatorDesc.text = item["emulator_desc"].toString()
@@ -143,6 +148,15 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 }
             }
         )
+    }
+
+    fun isAppInstalled(packageName: String): Boolean {
+        return try {
+            context.packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
+            true
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
+        }
     }
 
     override fun onStop() {

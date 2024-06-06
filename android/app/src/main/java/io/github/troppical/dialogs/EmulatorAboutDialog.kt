@@ -50,32 +50,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         Glide.with(context).load(Uri.parse(item["emulator_logo"].toString())).into(emulatorLogo)
         unInstallButton.visibility = View.GONE
 
-        fetcherScope.launch {
-            val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())
-            try {
-                val artifactName = item["emulator_artifact_name"].toString()
-                val (directLink, tag) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
-                tagName = tag
-                emulatorLatestVersion.text = tag
-                
-                updateInstallButtonText(installButton)
-                if (isUnInstallable) {
-                    unInstallButton.visibility = View.VISIBLE
-                }
-
-                if (directLink != null) {
-                    downloadUrl = directLink 
-                    Log.w("EmulatorAboutDialog", "Direct download link is $directLink")
-                } else {
-                    Log.e("EmulatorAboutDialog", "Artifact not found")
-                }
-            } catch (e: Exception) {
-                Log.e("EmulatorAboutDialog", "Error fetching version", e)
-                emulatorLatestVersion.text = "Error fetching version"
-            } finally {
-                fetcher.close()
-            }
-        }
+        fetchGitHubRelease()
         
         installButton.setOnClickListener {
             if (isOpenEnabled) {
@@ -117,7 +92,16 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                     if (success) {
                         if (outputFile.extension.equals("apk", ignoreCase = true)) {
                             val installer = APKInstaller(context)
-                            installer.install(outputFile)
+                            installer.install(outputFile,
+                                onComplete = {
+                                    Log.i("EmulatorAboutDialog", "Installation succeeded")
+                                    fetchGitHubRelease()
+                                },
+                                onFailure = { e ->
+                                    Log.e("EmulatorAboutDialog", "Installation failed", e)
+                                    // nothing to do
+                                }
+                            )
                             apkPath = outputFile
                         } else {
                             val progressDialogExtract = MaterialAlertDialogBuilder(context)
@@ -144,7 +128,16 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                                         progressDialogExtract.dismiss()
                                         if (success && apkFilePath != null) {
                                             val installer = APKInstaller(context)
-                                            apkFilePath?.let { installer.install(it) }
+                                            apkFilePath?.let { installer.install(it,
+                                            onComplete = {
+                                                Log.i("EmulatorAboutDialog", "Installation succeeded")
+                                                fetchGitHubRelease()
+                                            },
+                                            onFailure = { e ->
+                                                Log.e("EmulatorAboutDialog", "Installation failed", e)
+                                                // nothing to do
+                                            }
+                                        ) }
                                         } else {
                                             // TODO: Handle extraction failure
                                             Log.e("EmulatorAboutDialog", "Extraction failed or no APK file found.")
@@ -260,6 +253,35 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
             }
         }
         return 0
+    }
+
+    private fun fetchGitHubRelease() {
+        fetcherScope.launch {
+            val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())
+            try {
+                val artifactName = item["emulator_artifact_name"].toString()
+                val (directLink, tag) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
+                tagName = tag
+                emulatorLatestVersion.text = tag
+                
+                updateInstallButtonText(installButton)
+                if (isUnInstallable) {
+                    unInstallButton.visibility = View.VISIBLE
+                }
+
+                if (directLink != null) {
+                    downloadUrl = directLink 
+                    Log.w("EmulatorAboutDialog", "Direct download link is $directLink")
+                } else {
+                    Log.e("EmulatorAboutDialog", "Artifact not found")
+                }
+            } catch (e: Exception) {
+                Log.e("EmulatorAboutDialog", "Error fetching version", e)
+                emulatorLatestVersion.text = "Error fetching version"
+            } finally {
+                fetcher.close()
+            }
+        }
     }
         
 

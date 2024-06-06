@@ -153,8 +153,10 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     fun isAppInstalled(packageName: String): Boolean {
         return try {
             context.packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
+            Log.i("EmulatorAboutDialog", "Package ${packageInfo.packageName} is installed.")
             true
         } catch (e: PackageManager.NameNotFoundException) {
+            Log.i("EmulatorAboutDialog", "Package $packageName is not installed.")
             false
         }
     }

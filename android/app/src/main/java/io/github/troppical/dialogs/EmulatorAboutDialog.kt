@@ -30,7 +30,6 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     private lateinit var downloadUrl: String
     private var apkPath: File? = null
     private var tagName: String? = null
-    private var install
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

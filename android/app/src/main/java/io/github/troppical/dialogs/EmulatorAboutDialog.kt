@@ -192,7 +192,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                         isOpenEnabled = true
                     }
                 } else {
-                    installButton.setText(R.string.install)
+                    installButton.setText(R.string.update)
                     isOpenEnabled = false
                 }
             } else {

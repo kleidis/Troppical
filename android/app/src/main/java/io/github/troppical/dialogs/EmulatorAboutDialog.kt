@@ -32,6 +32,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     private var apkPath: File? = null
     private var tagName: String? = null
     private var isOpenEnabled: Boolean = false
+    private var isUnInstallable: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +42,8 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         val emulatorDesc = findViewById<TextView>(R.id.emulator_desc)
         val emulatorLogo = findViewById<ImageView>(R.id.emulator_logo)
         val emulatorLatestVersion = findViewById<TextView>(R.id.emulator_latest_version)
-        val installButton = findViewById<MaterialButton>(R.id.install)      
+        val installButton = findViewById<MaterialButton>(R.id.install)  
+        val unInstallButton = findViewById<MaterialButton>(R.id.uninstall)
 
         emulatorName.text = item["emulator_name"].toString()
         emulatorDesc.text = item["emulator_desc"].toString()
@@ -54,8 +56,11 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 val (directLink, tag) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
                 tagName = tag
                 emulatorLatestVersion.text = tag
-
+                
                 updateInstallButtonText(installButton)
+                if (!isUnInstallable) {
+                    unInstallButton.setVisibiliy(View.GONE)
+                }
 
                 if (directLink != null) {
                     downloadUrl = directLink 
@@ -76,8 +81,12 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 openApp(item["emulator_package"].toString())
             } else {
                 install()
-            }      
-        }                 
+            }
+        }
+
+        unInstallButton.setOnClickListener {
+            uninstallApp(item["emulator_package"].toString())
+        }
     }
 
     private fun install() {
@@ -156,6 +165,17 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         )
     }
 
+    private fun uninstallApp(packageName: String) {
+        try {
+            val intent = Intent(Intent.ACTION_DELETE)
+            intent.data = Uri.parse("package:$packageName")
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+   }
+
     private fun openApp(packageName: String) {
         val launchIntent: Intent? = context.packageManager.getLaunchIntentForPackage(packageName)
         if (launchIntent != null) {
@@ -188,21 +208,26 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                     if (compareVersions(installedVersion, fetchedVersion) < 0) {
                         installButton.setText(R.string.update)
                         isOpenEnabled = false
+                        isUnInstallable = true
                     } else {
                         installButton.setText(R.string.open)
                         isOpenEnabled = true
+                        isUnInstallable = true
                     }
                 } else {
                     installButton.setText(R.string.update)
                     isOpenEnabled = false
+                    isUnInstallable = true
                 }
             } else {
                 installButton.setText(R.string.install)
                 isOpenEnabled = false
+                isUnInstallable = false
             }
         } else {
             installButton.setText(R.string.install)
             isOpenEnabled = false
+            isUnInstallable = false
         }
     }
 

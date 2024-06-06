@@ -199,21 +199,26 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     }
 
     private fun isVersionFormat(version: String): Boolean {
-        val versionRegex = Regex("""\d+\.\d+\.\d+""")
+        val versionRegex = Regex("""\d+(\.\d+){1,2}""")
         return versionRegex.matches(version)
     }
 
     private fun compareVersions(version1: String, version2: String): Int {
-        val parts1 = version1.split(".").map { it.toInt() }
-        val parts2 = version2.split(".").map { it.toInt() }
+        val parts1 = version1.split(".").map { it.toIntOrNull() ?: 0 }
+        val parts2 = version2.split(".").map { it.toIntOrNull() ?: 0 }
 
-        for (i in parts1.indices) {
-            if (parts1[i] != parts2[i]) {
-                return parts1[i] - parts2[i]
+        val maxLength = maxOf(parts1.size, parts2.size)
+        val paddedParts1 = parts1 + List(maxLength - parts1.size) { 0 }
+        val paddedParts2 = parts2 + List(maxLength - parts2.size) { 0 }
+
+        for (i in 0 until maxLength) {
+            if (paddedParts1[i] != paddedParts2[i]) {
+                return paddedParts1[i] - paddedParts2[i]
             }
         }
         return 0
     }
+        
 
     override fun onStop() {
         super.onStop()

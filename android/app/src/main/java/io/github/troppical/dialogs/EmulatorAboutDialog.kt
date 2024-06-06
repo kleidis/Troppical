@@ -185,22 +185,22 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
             if (fetchedVersion != null && isVersionFormat(fetchedVersion)) {
                 if (installedVersion != null && isVersionFormat(installedVersion)) {
                     if (compareVersions(installedVersion, fetchedVersion) < 0) {
-                        installButton.setText("Update")
+                        installButton.setText(R.string.update)
                         isOpenEnabled = false
                     } else {
-                        installButton.setText("Open")
+                        installButton.setText(R.string.open)
                         isOpenEnabled = true
                     }
                 } else {
-                    installButton.setText("Update")
+                    installButton.setText(R.string.install)
                     isOpenEnabled = false
                 }
             } else {
-                installButton.setText("Install")
+                installButton.setText(R.string.install)
                 isOpenEnabled = false
             }
         } else {
-            installButton.setText("Install")
+            installButton.setText(R.string.install)
             isOpenEnabled = false
         }
     }

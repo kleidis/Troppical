@@ -91,7 +91,7 @@
             android:text="@string/uninstall"
             android:textColor="?colorOnSurface"
             android:backgroundTint="@android:color/transparent"
-            app:rippleColor="?colorOnSurface"/>
+            android:layout_marginHorizontal="10dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/install"

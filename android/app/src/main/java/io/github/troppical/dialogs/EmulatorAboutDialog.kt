@@ -30,6 +30,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     private lateinit var downloadUrl: String
     private var apkPath: File? = null
     private var tagName: String? = null
+    private var isOpenEnabled: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,11 +40,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         val emulatorDesc = findViewById<TextView>(R.id.emulator_desc)
         val emulatorLogo = findViewById<ImageView>(R.id.emulator_logo)
         val emulatorLatestVersion = findViewById<TextView>(R.id.emulator_latest_version)
-        val installButton = findViewById<MaterialButton>(R.id.install)
-
-        if (isAppInstalled(item["emulator_package"].toString())) {
-            installButton.setText("Update")
-        }      
+        val installButton = findViewById<MaterialButton>(R.id.install)      
 
         emulatorName.text = item["emulator_name"].toString()
         emulatorDesc.text = item["emulator_desc"].toString()
@@ -74,7 +71,11 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         }
         
         installButton.setOnClickListener {
-           install()
+            if (isOpenEnabled) {
+                openApp(item["emulator_package"].toString())
+            } else {
+                install()
+            }      
         }                 
     }
 
@@ -154,6 +155,16 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         )
     }
 
+    private fun openApp(packageName: String) {
+        val launchIntent: Intent? = context.packageManager.getLaunchIntentForPackage(packageName)
+        if (launchIntent != null) {
+            context.startActivity(launchIntent)
+        } else {
+            Log.e("EmulatorAboutDialog", "Cannot open app with package name $packageName")
+        }
+    }
+        
+
     private fun isAppInstalled(packageName: String): Boolean {
         return try {
             val packageInfo = context.packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
@@ -175,17 +186,22 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 if (installedVersion != null && isVersionFormat(installedVersion)) {
                     if (compareVersions(installedVersion, fetchedVersion) < 0) {
                         installButton.setText("Update")
+                        isOpenEnabled = false
                     } else {
                         installButton.setText("Open")
+                        isOpenEnabled = true
                     }
                 } else {
                     installButton.setText("Update")
+                    isOpenEnabled = false
                 }
             } else {
                 installButton.setText("Install")
+                isOpenEnabled = false
             }
         } else {
             installButton.setText("Install")
+            isOpenEnabled = false
         }
     }
 

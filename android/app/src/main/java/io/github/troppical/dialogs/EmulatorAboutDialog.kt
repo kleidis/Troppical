@@ -29,6 +29,8 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     private val fetcherScope = CoroutineScope(Dispatchers.Main + Job())
     private lateinit var downloadUrl: String
     private var apkPath: File? = null
+    private var tagName: String? = null
+    private var install
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,8 +54,11 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
             val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())
             try {
                 val artifactName = item["emulator_artifact_name"].toString()
-                val (directLink, tagName) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
-                emulatorLatestVersion.text = tagName
+                val (directLink, tag) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
+                tagName = tag
+                emulatorLatestVersion.text = tag
+
+                updateInstallButtonText(installButton)
 
                 if (directLink != null) {
                     downloadUrl = directLink 
@@ -150,7 +155,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         )
     }
 
-    fun isAppInstalled(packageName: String): Boolean {
+    private fun isAppInstalled(packageName: String): Boolean {
         return try {
             val packageInfo = context.packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
             Log.i("EmulatorAboutDialog", "Package ${packageInfo.packageName} is installed.")
@@ -159,6 +164,56 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
             Log.i("EmulatorAboutDialog", "Package $packageName is not installed.")
             false
         }
+    }
+
+    private fun updateInstallButtonText(installButton: MaterialButton) {
+        val packageName = item["emulator_package"].toString()
+        if (isAppInstalled(packageName)) {
+            val installedVersion = getInstalledAppVersion(packageName)
+            val fetchedVersion = tagName?.removePrefix("v")
+            
+            if (fetchedVersion != null && isVersionFormat(fetchedVersion)) {
+                if (installedVersion != null && isVersionFormat(installedVersion)) {
+                    if (compareVersions(installedVersion, fetchedVersion) < 0) {
+                        installButton.setText("Update")
+                    } else {
+                        installButton.setText("Open")
+                    }
+                } else {
+                    installButton.setText("Update")
+                }
+            } else {
+                installButton.setText("Install")
+            }
+        } else {
+            installButton.setText("Install")
+        }
+    }
+
+    private fun getInstalledAppVersion(packageName: String): String? {
+        return try {
+            val packageInfo = context.packageManager.getPackageInfo(packageName, 0)
+            packageInfo.versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
+        }
+    }
+
+    private fun isVersionFormat(version: String): Boolean {
+        val versionRegex = Regex("""\d+\.\d+\.\d+""")
+        return versionRegex.matches(version)
+    }
+
+    private fun compareVersions(version1: String, version2: String): Int {
+        val parts1 = version1.split(".").map { it.toInt() }
+        val parts2 = version2.split(".").map { it.toInt() }
+
+        for (i in parts1.indices) {
+            if (parts1[i] != parts2[i]) {
+                return parts1[i] - parts2[i]
+            }
+        }
+        return 0
     }
 
     override fun onStop() {

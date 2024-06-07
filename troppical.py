@@ -417,10 +417,6 @@ class Logic:
 
     # Extract and install function 
     def extract_and_install(self, temp_file, extract_to):
-        # Clear the target directory before extracting new files
-        if os.path.exists(extract_to):
-            shutil.rmtree(extract_to)
-
         # Rename the temporary file to have a .zip extension and create a temporary extraction folder
         zip_file_path = f"{temp_file}.zip"
         os.rename(temp_file, zip_file_path)
@@ -451,7 +447,12 @@ class Logic:
         dest_path = extract_to
         os.makedirs(dest_path, exist_ok=True)
         for item in os.listdir(src_path):
-            shutil.move(os.path.join(src_path, item), dest_path)
+            src_item_path = os.path.join(src_path, item)
+            dest_item_path = os.path.join(dest_path, item)
+            if os.path.isdir(src_item_path):
+                shutil.copytree(src_item_path, dest_item_path, dirs_exist_ok=True)
+            else:
+                shutil.copy2(src_item_path, dest_item_path)
        
         # Mark the installation as complete
         self.installation_complete()

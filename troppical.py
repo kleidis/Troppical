@@ -73,6 +73,7 @@ class QtUi(QMainWindow, Style):
         for troppical_api_data in self.logic.troppical_api:
             emulator_system = troppical_api_data['emulator_system']
             emulator_name = troppical_api_data['emulator_name']
+            emulator_desc = troppical_api_data.get('emulator_desc', '')
 
             # Fetch and decode the logo
             logo_url = troppical_api_data['emulator_logo']
@@ -100,6 +101,7 @@ class QtUi(QMainWindow, Style):
             emulator_item = QTreeWidgetItem(system_item)
             emulator_item.setText(0, emulator_name)
             emulator_item.setIcon(0, icon)
+            emulator_item.setToolTip(0, emulator_desc) 
 
         # Set layout for the group and add to the main layout
         emulatorSelectGroup.setLayout(emulatorSelectGroupLayout)

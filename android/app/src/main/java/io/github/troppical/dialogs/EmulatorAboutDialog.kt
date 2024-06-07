@@ -108,10 +108,19 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                                 onComplete = {
                                     Log.i("EmulatorAboutDialog", "Installation succeeded")
                                     fetchGitHubRelease()
+                                    apkPath?.let {
+                                        if (it.exists()) {
+                                            it.delete() // Ensure that the apk is deleted after installation 
+                                        }
+                                    }
                                 },
                                 onFailure = { e ->
                                     Log.e("EmulatorAboutDialog", "Installation failed", e)
-                                    // nothing to do
+                                    apkPath?.let {
+                                        if (it.exists()) {
+                                            it.delete() // Ensure that the apk is deleted after installation failed
+                                        }
+                                    }
                                 }
                             )
                             apkPath = outputFile
@@ -144,10 +153,19 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                                             onComplete = {
                                                 Log.i("EmulatorAboutDialog", "Installation succeeded")
                                                 fetchGitHubRelease()
+                                                apkPath?.let {
+                                                    if (it.exists()) {
+                                                        it.delete() // Ensure that the apk is deleted after installation 
+                                                    }
+                                                }
                                             },
                                             onFailure = { e ->
                                                 Log.e("EmulatorAboutDialog", "Installation failed", e)
-                                                // nothing to do
+                                                apkPath?.let {
+                                                    if (it.exists()) {
+                                                        it.delete() // Ensure that the apk is deleted after installation failed
+                                                    }
+                                                }
                                             }
                                         ) }
                                         } else {

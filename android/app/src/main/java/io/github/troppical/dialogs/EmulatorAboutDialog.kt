@@ -23,6 +23,7 @@ import io.github.troppical.network.GitHubReleaseFetcher
 import io.github.troppical.network.APKDownloader
 import io.github.troppical.network.APKInstaller
 import io.github.troppical.utils.ZipExtractor
+import io.github.troppical.network.AppUninstallReceiver
 import java.io.File
 
 class EmulatorAboutDialog(context: Context, private val activity: Activity, private val item: HashMap<String, Any>) : BaseSheetDialog(context) {

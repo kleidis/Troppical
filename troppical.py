@@ -457,17 +457,17 @@ class Logic:
     # Install is complete
     def installation_complete(self):
         qtui.extractionProgressBar.setValue(100)
-        if self.emulator == "Lime3DS":
-            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'lime3ds-gui.exe'))
-        elif self.emulator == "PabloMK7's Citra" or self.emulator == "Citra Enhanced":           
-            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'citra-qt.exe')) # Declare exe path for the shortcuts
-        elif self.emulator == "Sudachi":
-            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'Sudachi.exe'))
-        elif self.emulator == "Panda3DS":
-            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'Alber.exe'))
-        elif self.emulator == "Torzu":
-            executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), 'yuzu.exe'))
-    
+        
+        # Fetch the executable path from the troppical_api data
+        for troppical_api_data in self.troppical_api:
+            if troppical_api_data['emulator_name'] == self.emulator:
+                exe_name = troppical_api_data.get('exe_path', '')
+                executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), exe_name))   
+                print (executable_path)
+        if executable_path is None:
+            QMessageBox.critical(qtui, "Error", f"Executable path not found for emulator: {self.emulator}")
+            return
+        
         if qtui.desktopShortcutCheckbox.isChecked():
             self.define_shortcut(executable_path, 'desktop')
         if qtui.startMenuShortcutCheckbox.isChecked():

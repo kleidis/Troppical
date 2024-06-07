@@ -275,24 +275,29 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     }
 
     private fun isVersionFormat(version: String): Boolean {
-        val versionRegex = Regex("""\d+(\.\d+){1,2}""")
-        return versionRegex.matches(version)
+        val versionRegex1 = Regex("""\d+(\.\d+){1,2}""")
+        val versionRegex2 = Regex("""\d{8}""")
+        return versionRegex1.matches(version) || versionRegex2.matches(version)
     }
 
     private fun compareVersions(version1: String, version2: String): Int {
-        val parts1 = version1.split(".").map { it.toIntOrNull() ?: 0 }
-        val parts2 = version2.split(".").map { it.toIntOrNull() ?: 0 }
+        return if (version1.length == 8 && version2.length == 8) {
+            version1.compareTo(version2)
+        } else {
+            val parts1 = version1.split(".").map { it.toIntOrNull() ?: 0 }
+            val parts2 = version2.split(".").map { it.toIntOrNull() ?: 0 }
 
-        val maxLength = maxOf(parts1.size, parts2.size)
-        val paddedParts1 = parts1 + List(maxLength - parts1.size) { 0 }
-        val paddedParts2 = parts2 + List(maxLength - parts2.size) { 0 }
+            val maxLength = maxOf(parts1.size, parts2.size)
+            val paddedParts1 = parts1 + List(maxLength - parts1.size) { 0 }
+            val paddedParts2 = parts2 + List(maxLength - parts2.size) { 0 }
 
-        for (i in 0 until maxLength) {
-            if (paddedParts1[i] != paddedParts2[i]) {
-                return paddedParts1[i] - paddedParts2[i]
+            for (i in 0 until maxLength) {
+                if (paddedParts1[i] != paddedParts2[i]) {
+                    return paddedParts1[i] - paddedParts2[i]
+                }
             }
+            0
         }
-        return 0
     }
 
     private fun fetchGitHubRelease() {

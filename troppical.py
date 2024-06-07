@@ -57,7 +57,7 @@ class QtUi(QMainWindow, Style):
     def selection_page(self):
         self.emulatorSelectPage = QWidget()
         emulatorSelectLayout = QVBoxLayout()
-        emulatorSelectGroup = QGroupBox("Select your emulator from the tree")
+        emulatorSelectGroup = QGroupBox("Select your emulator from the list")
         emulatorSelectGroupLayout = QVBoxLayout()
 
         # Create a QTreeWidget
@@ -67,10 +67,9 @@ class QtUi(QMainWindow, Style):
         
         emulatorSelectGroupLayout.addWidget(self.emulatorTreeWidget)
 
-        # Dictionary to keep track of emulator systems
+        # Keep track of emulator systems
         system_items = {}
 
-        # Iterate over each emulator in the API data
         for troppical_api_data in self.logic.troppical_api:
             emulator_system = troppical_api_data['emulator_system']
             emulator_name = troppical_api_data['emulator_name']

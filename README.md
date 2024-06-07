@@ -5,14 +5,6 @@
   <strong>Troppical</strong>
 </h1>
 
-<p align="center">
-  <img src="https://img.shields.io/github/downloads/kleidis/Troppical/total" alt="GitHub all releases"/>
-  <a href="https://github.com/kleidis/Troppical/releases/latest">
-    <img src="https://img.shields.io/badge/Download-Latest_Release-2ea44f?logo=github&logoColor=white" alt="Download - Latest Release"/>
-  </a>
-  <br>
-</p>
-
 # What is this?
 
 Troppical is a simple app that lets you manage your emulators with an easy installation and updating process.
@@ -57,7 +49,8 @@ If you'd like an emulator to be added, feel free to open a feature request issue
 - Troppical is in the beta stages of development. Things may break so please report any bugs you encounter and I;ll try my best to fix them. Note that this is my first project and I'm a beginner so please be patient
 
 # Screenshot
-<img src="https://github.com/kleidis/Troppical/assets/167202775/4fefa8c3-a70d-4c91-9c7c-a8d59faf5753" width="500">
+![Screenshot 2024-06-07 120452](https://github.com/kleidis/Troppical/assets/167202775/0e6d0c83-7132-414e-80dd-55dbc4ca9b29)
+
 
 # Building for Windows
 

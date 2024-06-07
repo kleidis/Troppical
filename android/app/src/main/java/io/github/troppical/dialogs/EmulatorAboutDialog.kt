@@ -311,6 +311,8 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 updateInstallButtonText(installButton)
                 if (isUnInstallable) {
                     unInstallButton.visibility = View.VISIBLE
+                } else {
+                    unInstallButton.visibility = View.GONE
                 }
 
                 if (directLink != null) {

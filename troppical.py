@@ -374,7 +374,7 @@ class Logic:
             releases = response.json()
             for release in releases:
                 if release['tag_name'] == self.selection:
-                    windows_assets = [asset for asset in release['assets'] if '_win' in asset['name'].lower() or 'win' in asset['name'].lower() and asset['name'].endswith('.zip')]
+                    windows_assets = [asset for asset in release['assets'] if '_win' in asset['name'].lower() or 'win' in asset['name'].lower() or 'xenia' in asset['name'].lower() and asset['name'].endswith('.zip')]
                     if len(windows_assets) > 1:
                         options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
                         choice, ok = QInputDialog.getItem(qtui, "Select Version", "Multiple Windows versions found. Please select one:\n" + options, [asset['name'] for asset in windows_assets], 0, False)

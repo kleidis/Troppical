@@ -256,6 +256,10 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     }
 
     private fun fetchGitHubRelease() {
+        val emulatorLatestVersion = findViewById<TextView>(R.id.emulator_latest_version)
+        val installButton = findViewById<MaterialButton>(R.id.install)  
+        val unInstallButton = findViewById<MaterialButton>(R.id.uninstall)
+        
         fetcherScope.launch {
             val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())
             try {

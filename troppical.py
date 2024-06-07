@@ -331,6 +331,17 @@ class Logic:
         latest_release = response.json()
         latest_version = latest_release['tag_name']
 
+        # Check for specific emulators that use a rolling-release
+        if self.emulator in ['Vita3K', 'NooDS']:
+            reply = QMessageBox.question(qtui, "Rolling-Release Emulator Detected", f"{self.emulator} uses rolling-releases instead of numbered releases. This means that the latest version may not be the one you have installed (We cannot detect the version). Would you like to proceed with the download anyway?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            if reply == QMessageBox.StandardButton.Yes:
+                self.install_mode = "Update"
+                qtui.layout.setCurrentIndex(3)
+                self.Prepare_Download()
+                return
+            else:
+                pass
+
         if latest_version > installed_emulator:
             reply = QMessageBox.question(qtui, "Update Found", "Would you like to update " + self.emulator + " to " +  latest_version + "?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
@@ -340,7 +351,7 @@ class Logic:
             else:
                 pass
         else:
-            QMessageBox.information(qtui, "No Update Found", f"You are up to date with the latest version of {self.emulator}", QMessageBox.StandardButton.Ok)      
+            QMessageBox.information(qtui, "No Update Found", f"You are up to date with the latest version of {self.emulator}", QMessageBox.StandardButton.Ok)
     
     # Preparing which file to downlaod
     def Prepare_Download(self):

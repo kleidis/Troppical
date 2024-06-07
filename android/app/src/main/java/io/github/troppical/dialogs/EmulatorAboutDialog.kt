@@ -268,7 +268,11 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     private fun getInstalledAppVersion(packageName: String): String? {
         return try {
             val packageInfo = context.packageManager.getPackageInfo(packageName, 0)
-            packageInfo.versionName
+            if (item["emulator_package"].toString() == "org.vita3k.emulator") {
+                packageInfo.versionName.split("-").getOrNull(1)
+            } else {
+                packageInfo.versionName
+            }
         } catch (e: PackageManager.NameNotFoundException) {
             null
         }

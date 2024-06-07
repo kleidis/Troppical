@@ -567,7 +567,9 @@ class Logic:
                     shutil.rmtree(dirpath)
                     winreg.DeleteKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")
                     QMessageBox.information(qtui, "Uninstall", f"{self.emulator} has been successfully uninstalled.")
-                    exit()
+                    qtui.updateButton.setEnabled(False)   
+                    qtui.uninstallButton.setEnabled(False)    
+                    qtui.installButton.setEnabled(True)
                 else:
                     QMessageBox.critical(qtui, "Error", "The directory might have been moved or deleted. Please reinstall the program.")
                     winreg.DeleteKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")

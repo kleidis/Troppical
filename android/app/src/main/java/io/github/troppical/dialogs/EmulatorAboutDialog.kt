@@ -1,7 +1,9 @@
 package io.github.troppical.dialogs
 
 import android.content.Context
+import android.content.BroadcastReceiver
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.app.Activity
 import android.content.pm.PackageManager

@@ -103,6 +103,12 @@ class QtUi(QMainWindow, Style):
             emulator_item.setIcon(0, icon)
             emulator_item.setToolTip(0, emulator_desc) 
 
+        # Sort the systems and emulators alphabetically
+        self.emulatorTreeWidget.sortItems(0, Qt.SortOrder.AscendingOrder)
+        for i in range(self.emulatorTreeWidget.topLevelItemCount()):
+            system_item = self.emulatorTreeWidget.topLevelItem(i)
+            system_item.sortChildren(0, Qt.SortOrder.AscendingOrder)
+
         # Set layout for the group and add to the main layout
         emulatorSelectGroup.setLayout(emulatorSelectGroupLayout)
         emulatorSelectLayout.addWidget(emulatorSelectGroup)

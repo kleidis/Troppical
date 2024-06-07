@@ -2,7 +2,7 @@ import os
 import sys
 import requests
 import json
-from PyQt6.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QCheckBox, QStackedLayout, QHBoxLayout, QGroupBox, QComboBox, QProgressBar, QLineEdit, QMessageBox, QFileDialog, QVBoxLayout, QInputDialog
+from PyQt6.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QCheckBox, QStackedLayout, QHBoxLayout, QGroupBox, QComboBox, QProgressBar, QLineEdit, QMessageBox, QFileDialog, QVBoxLayout, QInputDialog, QTreeWidget, QTreeWidgetItem
 from PyQt6.QtGui import QPixmap, QIcon, QImage
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QByteArray, QFile, pyqtSignal, pyqtSlot
 from zipfile import ZipFile 
@@ -46,6 +46,8 @@ class QtUi(QMainWindow, Style):
         self.setWindowTitle(f'Troppical - {version}')  # Window name with version        
         self.setCentralWidget(QWidget(self))  # Set a central widget
         self.layout = QStackedLayout(self.centralWidget())  # Set the layout on the central widget
+        self.setMaximumSize(1000, 720)  # Set the maximum window size to 1280x720
+        self.setMinimumSize(1000, 720)  # Set the minimum window size to 800x600
         # Set the window icon
         icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
         self.setWindowIcon(QIcon(icon_path))
@@ -54,55 +56,62 @@ class QtUi(QMainWindow, Style):
     # Emulator Select Page
     def selection_page(self):
         self.emulatorSelectPage = QWidget()
-        emulatorSelectLayout = QHBoxLayout()
-        emulatorSelectGroup = QGroupBox("Emulators")
+        emulatorSelectLayout = QVBoxLayout()
+        emulatorSelectGroup = QGroupBox("Select your emulator from the tree")
         emulatorSelectGroupLayout = QVBoxLayout()
-        descriptionGroup = QGroupBox("Emulator Descriptions")
-        descriptionGroupLayout = QVBoxLayout()
 
-        self.emulatorSelectPage.setLayout(emulatorSelectLayout)
-        emulatorSelectGroup.setLayout(emulatorSelectGroupLayout)
-        descriptionGroup.setLayout(descriptionGroupLayout)
+        # Create a QTreeWidget
+        self.emulatorTreeWidget = QTreeWidget()
+        self.emulatorTreeWidget.setHeaderHidden(True)
+        self.emulatorTreeWidget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        
+        emulatorSelectGroupLayout.addWidget(self.emulatorTreeWidget)
+
+        # Dictionary to keep track of emulator systems
+        system_items = {}
 
         # Iterate over each emulator in the API data
         for troppical_api_data in self.logic.troppical_api:
+            emulator_system = troppical_api_data['emulator_system']
+            emulator_name = troppical_api_data['emulator_name']
+
             # Fetch and decode the logo
             logo_url = troppical_api_data['emulator_logo']
-            print(logo_url)
             response = requests.get(logo_url)
             if response.status_code == 200:
                 image_bytes = response.content
                 qimage = QImage.fromData(QByteArray(image_bytes))
-                pixmap = QPixmap.fromImage(qimage).scaled(112, 112, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                pixmap = QPixmap.fromImage(qimage).scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                icon = QIcon(pixmap)
+                print(logo_url)
             else:
-                QMessageBox.critical(self, "Failed to fetch logo", f"Failed to fetch logo for {troppical_api_data['emulator_name']}. Status code: {response.status_code}")
-            
-            # Create and style QLabel for the emulator logo
-            emulator_label = QLabel()
-            emulator_label.setPixmap(pixmap)
-            emulator_label.setStyleSheet("QLabel:hover { background-color: rgba(255, 255, 255, 50); }")
+                QMessageBox.critical(self, "Failed to fetch logo", f"Failed to fetch logo for {emulator_name}. Status code: {response.status_code}")
+                icon = QIcon()
 
-            # Set mouse press event to set emulator
-            emulator_label.mousePressEvent = lambda event, emulator=troppical_api_data['emulator_name']: self.logic.set_emulator(emulator)
+            # Check if the emulator system already has a tree item, if not create one
+            if emulator_system not in system_items:
+                system_item = QTreeWidgetItem(self.emulatorTreeWidget)
+                system_item.setText(0, emulator_system)
+                system_item.setExpanded(True)  # Uncollapse the category by default
+                system_items[emulator_system] = system_item
+            else:
+                system_item = system_items[emulator_system]
 
-            # Create and style QLabel for the emulator name
-            emulator_name_label = QLabel(troppical_api_data['emulator_name'])
-            emulator_name_label.setStyleSheet("font-weight: bold; color: white;")
+            # Add the emulator to the appropriate tree item
+            emulator_item = QTreeWidgetItem(system_item)
+            emulator_item.setText(0, emulator_name)
+            emulator_item.setIcon(0, icon)
 
-            # Create and style QLabel for the emulator description
-            emulator_desc = QLabel(troppical_api_data['emulator_desc'])
-            emulator_desc.setFixedHeight(112)
-            emulator_desc.setStyleSheet("background-color: rgba(255, 255, 255, 16); color: white; border-radius: 5px; padding: 5px;")
-
-            # Add widgets to the layout
-            emulatorSelectGroupLayout.addWidget(emulator_label)
-            emulatorSelectGroupLayout.addWidget(emulator_name_label)
-            descriptionGroupLayout.addWidget(emulator_desc)
-
-        # Add groups to the layout
+        # Set layout for the group and add to the main layout
+        emulatorSelectGroup.setLayout(emulatorSelectGroupLayout)
         emulatorSelectLayout.addWidget(emulatorSelectGroup)
-        emulatorSelectLayout.addWidget(descriptionGroup)
+        self.emulatorSelectPage.setLayout(emulatorSelectLayout)  # Set the layout for the emulator selection page
         self.layout.addWidget(self.emulatorSelectPage)
+
+        # Next button to confirm selection
+        self.nextButton = QPushButton("Next")
+        self.nextButton.clicked.connect(self.logic.set_emulator)
+        emulatorSelectLayout.addWidget(self.nextButton)
 
         # Welcome page
         self.welcomePage = QWidget()
@@ -229,7 +238,14 @@ class Logic:
 
     # Set which emulator to use for the installer depeanding on the selected emulator 
     def set_emulator(self, emulator):
-        self.emulator = emulator
+        selected_item = qtui.emulatorTreeWidget.currentItem()
+        if selected_item and selected_item.parent():
+            emulator_name = selected_item.text(0)
+        else:
+            QMessageBox.warning(qtui, "Selection Error", "Please select an emulator.")
+
+
+        self.emulator = emulator_name
         reg_result = self.checkreg()
         if reg_result is None:
             installed_emulator = "Not Installed"

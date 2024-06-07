@@ -1,4 +1,5 @@
-    # Define the dark stylesheet
+# Credit to QtWin11 project
+
 class Style:
     dark_stylesheet = """
         QWidget {
@@ -219,4 +220,147 @@ class Style:
             background-color: rgba(255, 255, 255, 13);
             border: 1px solid rgba(255, 255, 255, 5);
         }
+        /*TREEWIDGET*/
+        QTreeWidget {
+            background-color: #2D2D2D; 
+            color: white;
+        }
+        QTreeView {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            outline: 0;
+            padding-right: 5px;
+        }
+
+        QTreeView::item {
+            padding: 7px;
+            margin-top: 3px;
+        }
+
+        QTreeView::item:selected {
+            background-color: #2D2D2D;
+            border-radius: 0px;
+            margin-bottom: 3px;
+            padding-left: 0px;
+        }
+
+        QTreeView::item:!selected:hover {
+            background-color: rgba(255, 255, 255, 0.06);
+            border-radius: 0px;
+            margin-bottom: 3px;
+            padding-left: 0px;
+        }
+
+        QTreeView::branch:has-children:!has-siblings:closed,
+        QTreeView::branch:closed:has-children:has-siblings {
+            image: url(:/TreeView/img dark/TreeViewClose.png);
+        }
+
+        QTreeView::branch:open:has-children:!has-siblings,
+        QTreeView::branch:open:has-children:has-siblings {
+            image: url(:/TreeView/img dark/TreeViewOpen.png);
+        }
+
+        QTreeView:disabled {
+            color: rgb(150, 150, 150);
+        }
+        /*SCROLLVERTICAL*/
+        QScrollBar:vertical {
+            border: 6px solid rgba(255, 255, 255, 0);
+            margin: 14px 0px 14px 0px;
+            width: 16px;
+        }
+
+        QScrollBar:vertical:hover {
+            border: 5px solid rgba(255, 255, 255, 0);
+        }
+
+        QScrollBar::handle:vertical {
+            background-color: rgba(255, 255, 255, 0.51);
+            border-radius: 2px;
+            min-height: 25px;
+        }
+
+        QScrollBar::sub-line:vertical {
+            image: url(:/ScrollVertical/img dark/ScrollTop.png);
+            subcontrol-position: top;
+            subcontrol-origin: margin;
+        }
+
+        QScrollBar::sub-line:vertical:hover {
+            image: url(:/ScrollVertical/img dark/ScrollTopHover.png);
+        }
+
+        QScrollBar::sub-line:vertical:pressed {
+            image: url(:/ScrollVertical/img dark/ScrollTopPressed.png);
+        }
+
+        QScrollBar::add-line:vertical {
+            image: url(:/ScrollVertical/img dark/ScrollBottom.png);
+            subcontrol-position: bottom;
+            subcontrol-origin: margin;
+        }
+
+        QScrollBar::add-line:vertical:hover {
+            image: url(:/ScrollVertical/img dark/ScrollBottomHover.png);
+        }
+
+        QScrollBar::add-line:vertical:pressed {
+            image: url(:/ScrollVertical/img dark/ScrollBottomPressed.png);
+        }
+
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: none;
+        }
+
+        /*SCROLLHORIZONTAL*/
+        QScrollBar:horizontal {
+            border: 6px solid rgba(255, 255, 255, 0);
+            margin: 0px 14px 0px 14px;
+            height: 16px;
+        }
+
+        QScrollBar:horizontal:hover {
+            border: 5px solid rgba(255, 255, 255, 0);
+        }
+
+        QScrollBar::handle:horizontal {
+            background-color: rgba(255, 255, 255, 0.51);
+            border-radius: 2px;
+            min-width: 25px;
+        }
+
+        QScrollBar::sub-line:horizontal {
+            image: url(:/ScrollHorizontal/img dark/ScrollLeft.png);
+            subcontrol-position: left;
+            subcontrol-origin: margin;
+        }
+
+        QScrollBar::sub-line:horizontal:hover {
+            image: url(:/ScrollHorizontal/img dark/ScrollLeftHover.png);
+        }
+
+        QScrollBar::sub-line:horizontal:pressed {
+            image: url(:/ScrollHorizontal/img dark/ScrollLeftPressed.png);
+        }
+
+        QScrollBar::add-line:horizontal {
+            image: url(:/ScrollHorizontal/img dark/ScrollRight.png);
+            subcontrol-position: right;
+            subcontrol-origin: margin;
+        }
+
+        QScrollBar::add-line:horizontal:hover {
+            image: url(:/ScrollHorizontal/img dark/ScrollRightHover.png);
+        }
+
+        QScrollBar::add-line:horizontal:pressed {
+            image: url(:/ScrollHorizontal/img dark/ScrollRightPressed.png);
+        }
+
+        QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+            background: none;
+        }
         """
+

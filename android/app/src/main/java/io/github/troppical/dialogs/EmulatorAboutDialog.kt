@@ -280,7 +280,12 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
 
     private fun isVersionFormat(version: String): Boolean {
         val versionRegex = Regex("""\d+(\.\d+){1,2}""")
-        return versionRegex.matches(version)
+        return if (item["emulator_package"].toString() == "org.vita3k.emulator") { 
+                   true
+               } else {
+                   versionRegex.matches(version)
+               }
+                   
     }
 
     private fun compareVersions(version1: String, version2: String): Int {

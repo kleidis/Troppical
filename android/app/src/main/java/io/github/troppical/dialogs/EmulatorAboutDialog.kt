@@ -61,7 +61,16 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         }
 
         unInstallButton.setOnClickListener {
-            uninstallApp(item["emulator_package"].toString())
+            uninstallApp(item["emulator_package"].toString(),
+                onComplete = {
+                    Log.i("EmulatorAboutDialog", "Uninstallation succeeded")
+                    fetchGitHubRelease()
+                },
+                onFailure = { e ->
+                    Log.w("EmulatorAboutDialog", "Uninstallation failed", e)
+                    // nothing to do
+                }
+            )
         }
     }
 
@@ -159,16 +168,26 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         )
     }
 
-    private fun uninstallApp(packageName: String) {
+    private fun uninstallApp(packageName: String, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
         try {
             val intent = Intent(Intent.ACTION_DELETE)
             intent.data = Uri.parse("package:$packageName")
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+
+            // Listen for uninstallation result
+            val receiver = AppUninstallReceiver(onComplete, onFailure)
+            context.registerReceiver(receiver, IntentFilter().apply {
+                addAction(Intent.ACTION_PACKAGE_REMOVED)
+                addDataScheme("package")
+            })
+
             context.startActivity(intent)
         } catch (e: Exception) {
-            e.printStackTrace()
+            onFailure(e)
         }
    }
+
+
 
     private fun openApp(packageName: String) {
         val launchIntent: Intent? = context.packageManager.getLaunchIntentForPackage(packageName)

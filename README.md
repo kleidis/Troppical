@@ -69,9 +69,11 @@ Get `init_troppical.exe` for Windows or `troppical-android.apk` for Android from
 ### Compile:
 
 - For main.py
+
 `pyinstaller --clean --onefile --icon=icon.ico --windowed main.py`
 
 - For init_troppical.py (This is just a script that downloads the latest compiled `main.py` exe from Github Actions and runs it)
+
 `pyinstaller --clean --onefile --icon=icon.ico --windowed init_troppical.py.py`
 
 

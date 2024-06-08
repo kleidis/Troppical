@@ -13,7 +13,6 @@ import win32com.client
 import winreg
 from stylesheet import Style
 from pathlib import Path
-import subprocess
 
 class QtUi(QMainWindow, Style):
     def __init__(self):

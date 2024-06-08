@@ -268,19 +268,28 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     private fun getInstalledAppVersion(packageName: String): String? {
         return try {
             val packageInfo = context.packageManager.getPackageInfo(packageName, 0)
-            packageInfo.versionName
+            if (item["emulator_package"].toString() == "org.vita3k.emulator") {
+                packageInfo.versionName.split("-").getOrNull(1)
+            } else {
+                packageInfo.versionName
+            }
         } catch (e: PackageManager.NameNotFoundException) {
             null
         }
     }
 
     private fun isVersionFormat(version: String): Boolean {
-        val versionRegex = Regex("""\d+(\.\d+){1,2}(-rc\d+)?(-\d+)?""")
-        return versionRegex.matches(version)
+        val versionRegex = Regex("""\d+(\.\d+){1,2}(-rc\d+)?""")
+        return if (item["emulator_package"].toString() == "org.vita3k.emulator") {
+            true
+        } else {
+            versionRegex.matches(version)
+        }
     }
 
+
     private fun compareVersions(version1: String, version2: String): Int {
-        val versionRegex = Regex("""(\d+(\.\d+){1,2})(-rc(\d+))?(-(\d+))?""")
+        val versionRegex = Regex("""(\d+(\.\d+){1,2})(-rc(\d+))?""")
 
         val match1 = versionRegex.matchEntire(version1)
         val match2 = versionRegex.matchEntire(version2)
@@ -305,19 +314,11 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
             // Compare RC versions if base versions are equal
             val rcVersion1 = match1.groupValues[4].toIntOrNull() ?: Int.MAX_VALUE
             val rcVersion2 = match2.groupValues[4].toIntOrNull() ?: Int.MAX_VALUE
-            if (rcVersion1 != rcVersion2) {
-                return rcVersion1 - rcVersion2
-            }
 
-            // Compare numeric suffixes if RC versions are equal
-            val suffix1 = match1.groupValues[6].toIntOrNull() ?: Int.MAX_VALUE
-            val suffix2 = match2.groupValues[6].toIntOrNull() ?: Int.MAX_VALUE
-
-            return suffix1 - suffix2
+            return rcVersion1 - rcVersion2
         }
         return 0
    }
-    
 
 
     private fun fetchGitHubRelease() {

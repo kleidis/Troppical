@@ -61,7 +61,8 @@ def main():
     success = download_and_launch()
     if success:
         QMessageBox.information(None, "Bye!", "Thanks for using Troppical.")
-    sys.exit(app.exec())
+    app.quit()
 
 if __name__ == '__main__':
     main()
+    sys.exit(0)

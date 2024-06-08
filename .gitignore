@@ -10,3 +10,4 @@ citra_util.spec
 /__pycache__
 /dist
 troppical.spec
+.old

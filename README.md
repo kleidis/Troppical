@@ -28,7 +28,7 @@ If you'd like an emulator to be added, feel free to open a feature request issue
 
 **[Troppical Windows](https://nightly.link/kleidis/Troppical/workflows/build/master/troppical-nightly.zip)**
 
-**[Troppical Android](https://nightly.link/kleidis/Troppical/workflows/build/master/app-debug.zip)**
+**[Troppical Android](https://nightly.link/kleidis/Troppical/workflows/build/master/app-release.zip)**
 
 # Usage
 

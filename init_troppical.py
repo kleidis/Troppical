@@ -60,7 +60,7 @@ def main():
     app = QApplication(sys.argv)
     success = download_and_launch()
     if success:
-        QMessageBox.information(None, "Update Completed", "The updated version has been launched and cleaned up.")
+        QMessageBox.information(None, "Bye!", "Thanks for using Troppical.")
     sys.exit(app.exec())
 
 if __name__ == '__main__':

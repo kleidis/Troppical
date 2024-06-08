@@ -18,15 +18,19 @@ jobs:
           python-version: '3.12'
 
       - name: Bump version
-        if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          $NEW_VERSION="${{ github.ref_name }}"
-          (Get-Content troppical.py) -replace 'version = ".*"', "version = `"$NEW_VERSION`"" | Set-Content troppical.py
+          $NEW_VERSION="${{ github.sha }}"
+          # Update the version in main.py
+          (Get-Content main.py) -replace 'version = ".*"', "version = '$NEW_VERSION'" | Set-Content main.py
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add troppical.py
-          git commit -m "Update version to $NEW_VERSION"
-          git push origin HEAD:master --force --follow-tags --verbose
+          git add main.py
+          # Check if there are changes other than main.py
+          $CHANGES=$(git status --porcelain | Where-Object { $_ -notmatch 'main.py' })
+          if ($CHANGES) {
+            git commit -m "Update version to $NEW_VERSION"
+            git push origin HEAD:master --force --follow-tags --verbose
+          }
         shell: pwsh
 
       - name: Cache pip
@@ -92,3 +96,59 @@ jobs:
         with:
           name: troppical-android
           path: ./android/app/build/outputs/apk/release/app-release.apk
+  
+  create-release:
+    needs: [Windows-build, Android-build]
+    runs-on: ubuntu-latest
+#    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifact init_troppical
+        uses: actions/download-artifact@v3
+        with:
+          name: init-troppical-windows
+
+      - name: Download artifact troppical-android
+        uses: actions/download-artifact@v3
+        with:
+          name: troppical-android
+
+      - name: Extract artifacts
+        run: |
+          mkdir -p extracted/init_troppical
+          mkdir -p extracted/troppical-android
+          unzip init_troppical-windows -d extracted/init_troppical
+          unzip troppical-android -d extracted/troppical-android
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.sha }}
+          release_name: Release ${{ github.sha }}
+          draft: true
+          prerelease: false
+
+      - name: Upload Release Asset init_troppical
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./extracted/init_troppical/init_troppical.exe
+          asset_name: init_troppical.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Asset troppical-android
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./extracted/troppical-android/app-release.apk
+          asset_name: app-release.apk
+          asset_content_type: application/vnd.android.package-archive        

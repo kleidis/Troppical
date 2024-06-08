@@ -16,17 +16,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      
+      - name: Get short SHA
+        id: sha
+        run: echo "::set-output name=short::$(git rev-parse --short ${{ github.sha }})"
 
       - name: Bump version
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, 'main.py')
         run: |
-          $NEW_VERSION="${{ github.ref_name }}"
-          (Get-Content troppical.py) -replace 'version = ".*"', "version = `"$NEW_VERSION`"" | Set-Content troppical.py
+          $NEW_VERSION="${{ steps.sha.outputs.short }}"
+          # Update the version in main.py
+          (Get-Content main.py) -replace 'version = .*', "version = '$NEW_VERSION'" | Set-Content main.py
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add troppical.py
+          git add main.py
           git commit -m "Update version to $NEW_VERSION"
-          git push origin HEAD:master --force --follow-tags --verbose
+          git push origin HEAD:master --force --verbose
         shell: pwsh
 
       - name: Cache pip
@@ -45,16 +50,20 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          mkdir -p ${{ github.workspace }}/bin
-          pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed troppical.py
-
+          pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed main.py
+          pyinstaller --clean --onefile --icon=icon.ico --windowed init_troppical.py
       - name: Upload troppical
         uses: actions/upload-artifact@v4
         with:
-          name: troppical-nightly
-          path: ${{ github.workspace }}/dist/troppical.exe
+          name: troppical-windows
+          path: ${{ github.workspace }}/dist/main.exe
 
-  android-build:
+      - name: Upload init_troppical
+        uses: actions/upload-artifact@v4
+        with:
+          name: init-troppical-windows
+          path: ${{ github.workspace }}/dist/init_troppical.exe
+  Android-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -86,5 +95,75 @@ jobs:
       - name: Upload Android Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
+          name: troppical-android
           path: ./android/app/build/outputs/apk/release/app-release.apk
+  
+  Automated-Release:
+    needs: [Windows-build, Android-build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download init_troppical-windows
+        run: |
+          mkdir -p extracted/init_troppical
+          curl -L -o init-troppical-windows.zip https://nightly.link/kleidis/Troppical/workflows/build/updater/init-troppical-windows.zip
+          unzip init-troppical-windows.zip -d extracted/init_troppical
+
+      - name: Download troppical-android
+        run: |
+          mkdir -p extracted/troppical-android
+          curl -L -o troppical-android.zip https://nightly.link/kleidis/Troppical/workflows/build/updater/troppical-android.zip
+          unzip troppical-android.zip -d extracted/troppical-android
+
+      - name: Get short SHA
+        id: sha
+        run: echo "::set-output name=short::$(git rev-parse --short ${{ github.sha }})"
+  
+      - name: Delete Existing Release
+        id: delete_release
+        run: |
+          release_id=$(gh release view ${{ steps.sha.outputs.short }} --json id --jq '.id' || echo "")
+          if [ -n "$release_id" ]; then
+            gh release delete ${{ steps.sha.outputs.short }} --yes
+          fi
+          tag_exists=$(git tag -l ${{ steps.sha.outputs.short }})
+          if [ -n "$tag_exists" ]; then
+            git push --delete origin ${{ steps.sha.outputs.short }}
+            git tag -d ${{ steps.sha.outputs.short }}
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+        with:
+          tag_name: ${{ steps.sha.outputs.short }}
+          release_name: Troppical ${{ steps.sha.outputs.short }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset init_troppical
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./extracted/init_troppical/init_troppical.exe
+          asset_name: init_troppical.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Asset troppical-android
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./extracted/troppical-android/app-release.apk
+          asset_name: app-release.apk
+          asset_content_type: application/vnd.android.package-archive        

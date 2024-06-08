@@ -19,6 +19,15 @@ class QtUi(QMainWindow, Style):
         super().__init__()
         self.logic = Logic()
         self.logic.fetch_google_sheet_data()
+        # Show a message box indicating that Troppical is starting
+        self.loading_message_box = QMessageBox(self)
+        self.loading_message_box.setIcon(QMessageBox.Icon.Information)
+        self.loading_message_box.setText("Troppical is starting.... If you get a notifcation that Troppical is not responding, ignore it.")
+        self.loading_message_box.setWindowModality(Qt.WindowModality.ApplicationModal)
+        close_button = self.loading_message_box.addButton(QMessageBox.StandardButton.Close)
+        close_button.hide()
+        self.loading_message_box.show()
+        QApplication.processEvents()
         self.ui()  # Init UI
         self.load_stylesheet()
 
@@ -50,8 +59,9 @@ class QtUi(QMainWindow, Style):
         self.setMinimumSize(1000, 720)  # Set the minimum window size to 800x600
         # Set the window icon
         icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
-        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowIcon(QIcon())
         self.selection_page()
+
 
     # Emulator Select Page
     def selection_page(self):
@@ -224,7 +234,9 @@ class QtUi(QMainWindow, Style):
         finishLayout.addWidget(finishButton)
         # Add the progress bar page to the layout
         self.layout.addWidget(self.finishPage)  
-        
+
+        self.loading_message_box.close()
+
     def load_stylesheet(app):
             app.setStyleSheet(Style.dark_stylesheet)
             
@@ -335,7 +347,7 @@ class Logic:
         installed_emulator = self.updatevalue
         response = requests.get(self.releases_url + "/latest")
         latest_release = response.json()
-        latest_version = latest_release['tag_name']
+        latest_tag = latest_release['tag_name']
 
         # Check for specific emulators that use a rolling-release
         if self.emulator in ['Vita3K', 'NooDS']:
@@ -348,8 +360,8 @@ class Logic:
             else:
                 pass
 
-        if latest_version > installed_emulator:
-            reply = QMessageBox.question(qtui, "Update Found", "Would you like to update " + self.emulator + " to " +  latest_version + "?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if latest_tag > installed_emulator:
+            reply = QMessageBox.question(qtui, "Update Found", "Would you like to update " + self.emulator + " to " +  latest_tag + "?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 self.install_mode = "Update"
                 qtui.layout.setCurrentIndex(3)

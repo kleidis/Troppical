@@ -109,13 +109,13 @@ jobs:
       - name: Download init_troppical-windows
         run: |
           mkdir -p extracted/init_troppical
-          curl -L -o init-troppical-windows.zip https://nightly.link/kleidis/Troppical/workflows/build/updater/init-troppical-windows.zip
+          curl -L -o init-troppical-windows.zip https://nightly.link/kleidis/Troppical/workflows/build/master/init-troppical-windows.zip
           unzip init-troppical-windows.zip -d extracted/init_troppical
 
       - name: Download troppical-android
         run: |
           mkdir -p extracted/troppical-android
-          curl -L -o troppical-android.zip https://nightly.link/kleidis/Troppical/workflows/build/updater/troppical-android.zip
+          curl -L -o troppical-android.zip https://nightly.link/kleidis/Troppical/workflows/build/master/troppical-android.zip
           unzip troppical-android.zip -d extracted/troppical-android
 
       - name: Get short SHA

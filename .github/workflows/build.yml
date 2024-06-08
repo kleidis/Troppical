@@ -45,7 +45,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed troppical.py
+          pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed main.py
           pyinstaller --clean --icon=icon.ico --windowed init_troppical.py
       - name: Upload troppical
         uses: actions/upload-artifact@v4
@@ -53,6 +53,11 @@ jobs:
           name: troppical-windows
           path: ${{ github.workspace }}/dist/troppical.exe
 
+      - name: Upload init_troppical
+        uses: actions/upload-artifact@v4
+        with:
+          name: init-troppical-windows
+          path: ${{ github.workspace }}/dist/init_troppical.exe
   Android-build:
     runs-on: ubuntu-latest
     steps:

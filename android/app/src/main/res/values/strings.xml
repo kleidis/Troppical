@@ -3,4 +3,7 @@
     <string name="about">ABOUT</string>
     <string name="latest_version">LATEST VERSION</string>
     <string name="install">Install</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="open">Open</string>
+    <string name="update">Update</string>
 </resources>

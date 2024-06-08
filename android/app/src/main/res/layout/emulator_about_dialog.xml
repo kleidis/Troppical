@@ -84,6 +84,16 @@
         android:gravity="end|center">
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/uninstall"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/uninstall"
+            android:textColor="?colorOnSurface"
+            android:backgroundTint="@android:color/transparent"
+            android:layout_marginHorizontal="10dp"/>
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/install"
             android:paddingHorizontal="20dp"
             android:layout_width="wrap_content"

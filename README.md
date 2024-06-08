@@ -3,11 +3,6 @@
 </p>
 <p align="center" style="font-size:144px;">
   <strong>Troppical</strong>
-<p align="center">
-  <img src="https://img.shields.io/github/downloads/kleidis/Troppical/total" alt="GitHub all releases"/>
-  <a href="https://github.com/kleidis/Troppical/releases/latest">
-    <img src="https://img.shields.io/badge/Download-Latest_Release-2ea44f?logo=github&logoColor=white" alt="Download - Latest Release"/>
-  </a>  
 </h1>
 
 # What is this?
@@ -23,7 +18,7 @@ If you'd like an emulator to be added, feel free to open a feature request issue
 
 # Downloading
 
-Get `init_troppical.exe` for Windows or `troppical-android.apk` for Android from [Releases](https://github.com/kleidis/Troppical/releases)
+Get `init_troppical.exe` for Windows or `app-release.apk` for Android from [Releases](https://github.com/kleidis/Troppical/releases)
 
 # Usage
 

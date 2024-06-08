@@ -11,3 +11,4 @@ citra_util.spec
 /dist
 troppical.spec
 .old
+*.spec

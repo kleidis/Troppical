@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: troppical-windows
-          path: ${{ github.workspace }}/dist/troppical.exe
+          path: ${{ github.workspace }}/dist/main.exe
 
       - name: Upload init_troppical
         uses: actions/upload-artifact@v4

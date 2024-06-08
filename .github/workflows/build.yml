@@ -101,6 +101,8 @@ jobs:
   Automated-Release:
     needs: [Windows-build, Android-build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout code
@@ -122,18 +124,16 @@ jobs:
         id: sha
         run: echo "::set-output name=short::$(git rev-parse --short ${{ github.sha }})"
   
-      - name: Delete Existing Release
-        id: delete_release
+      - name: Delete Previous Releases
         run: |
-          release_id=$(gh release view ${{ steps.sha.outputs.short }} --json id --jq '.id' || echo "")
-          if [ -n "$release_id" ]; then
-            gh release delete ${{ steps.sha.outputs.short }} --yes
-          fi
-          tag_exists=$(git tag -l ${{ steps.sha.outputs.short }})
-          if [ -n "$tag_exists" ]; then
-            git push --delete origin ${{ steps.sha.outputs.short }}
-            git tag -d ${{ steps.sha.outputs.short }}
-          fi
+          for release in $(gh release list --limit 100 --json tagName --jq '.[].tagName'); do
+            gh release delete $release --yes
+          done
+          for tag in $(git tag); do
+            git push --delete origin $tag
+            git tag -d $tag
+          done
+        shell: /usr/bin/bash -e {0}
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD }}
 

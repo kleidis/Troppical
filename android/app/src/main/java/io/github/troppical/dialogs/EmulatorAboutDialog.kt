@@ -279,30 +279,47 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
     }
 
     private fun isVersionFormat(version: String): Boolean {
-        val versionRegex = Regex("""\d+(\.\d+){1,2}""")
-        return if (item["emulator_package"].toString() == "org.vita3k.emulator") { 
-                   true
-               } else {
-                   versionRegex.matches(version)
-               }
-                   
+        val versionRegex = Regex("""\d+(\.\d+){1,2}(-rc\d+)?""")
+        return if (item["emulator_package"].toString() == "org.vita3k.emulator") {
+            true
+        } else {
+            versionRegex.matches(version)
+        }
     }
+
 
     private fun compareVersions(version1: String, version2: String): Int {
-        val parts1 = version1.split(".").map { it.toIntOrNull() ?: 0 }
-        val parts2 = version2.split(".").map { it.toIntOrNull() ?: 0 }
+        val versionRegex = Regex("""(\d+(\.\d+){1,2})(-rc(\d+))?""")
 
-        val maxLength = maxOf(parts1.size, parts2.size)
-        val paddedParts1 = parts1 + List(maxLength - parts1.size) { 0 }
-        val paddedParts2 = parts2 + List(maxLength - parts2.size) { 0 }
+        val match1 = versionRegex.matchEntire(version1)
+        val match2 = versionRegex.matchEntire(version2)
 
-        for (i in 0 until maxLength) {
-            if (paddedParts1[i] != paddedParts2[i]) {
-                return paddedParts1[i] - paddedParts2[i]
+        if (match1 != null && match2 != null) {
+            val baseVersion1 = match1.groupValues[1]
+            val baseVersion2 = match2.groupValues[1]
+
+            val parts1 = baseVersion1.split(".").map { it.toIntOrNull() ?: 0 }
+            val parts2 = baseVersion2.split(".").map { it.toIntOrNull() ?: 0 }
+
+            val maxLength = maxOf(parts1.size, parts2.size)
+            val paddedParts1 = parts1 + List(maxLength - parts1.size) { 0 }
+            val paddedParts2 = parts2 + List(maxLength - parts2.size) { 0 }
+
+            for (i in 0 until maxLength) {
+                if (paddedParts1[i] != paddedParts2[i]) {
+                    return paddedParts1[i] - paddedParts2[i]
+                }
             }
+
+            // Compare RC versions if base versions are equal
+            val rcVersion1 = match1.groupValues[4].toIntOrNull() ?: Int.MAX_VALUE
+            val rcVersion2 = match2.groupValues[4].toIntOrNull() ?: Int.MAX_VALUE
+
+            return rcVersion1 - rcVersion2
         }
         return 0
-    }
+   }
+
 
     private fun fetchGitHubRelease() {
         val emulatorLatestVersion = findViewById<TextView>(R.id.emulator_latest_version)

@@ -347,7 +347,7 @@ class Logic:
         installed_emulator = self.updatevalue
         response = requests.get(self.releases_url + "/latest")
         latest_release = response.json()
-        latest_version = latest_release['tag_name']
+        latest_tag = latest_release['tag_name']
 
         # Check for specific emulators that use a rolling-release
         if self.emulator in ['Vita3K', 'NooDS']:
@@ -360,8 +360,8 @@ class Logic:
             else:
                 pass
 
-        if latest_version > installed_emulator:
-            reply = QMessageBox.question(qtui, "Update Found", "Would you like to update " + self.emulator + " to " +  latest_version + "?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if latest_tag > installed_emulator:
+            reply = QMessageBox.question(qtui, "Update Found", "Would you like to update " + self.emulator + " to " +  latest_tag + "?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 self.install_mode = "Update"
                 qtui.layout.setCurrentIndex(3)

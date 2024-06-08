@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import QApplication, QMessageBox
 import shutil
 
 def download_and_launch():
-    url = 'https://nightly.link/kleidis/Troppical/workflows/build/master/troppical-nightly.zip'
+    url = 'https://nightly.link/kleidis/Troppical/workflows/build/master/init-troppical-windows.zip'
     response = requests.get(url, stream=True)
     if response.status_code == 200:
         # Create a temporary file for the ZIP

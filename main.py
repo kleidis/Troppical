@@ -227,10 +227,22 @@ class QtUi(QMainWindow, Style):
         finishLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Center the text horizontally
         finishButton = QPushButton("Finish")
         finishButton.clicked.connect(self.close)
+        installAnotherButton = QPushButton("Install another emulator")
+        installAnotherButton.clicked.connect(lambda: (
+            self.layout.setCurrentIndex(0),
+            self.downloadProgressBar.setValue(0),
+            self.extractionProgressBar.setValue(0),
+            setattr(self.logic, 'install_mode', None),
+            setattr(self.logic, 'selection', None)
+        ))        
         ## Add widgets / layouts
         finishLayout.addLayout(self.Header())  # Add the icon self.header
         finishLayout.addWidget(finishLabel)
-        finishLayout.addWidget(finishButton)
+        # Create a horizontal layout for the buttons
+        buttonLayout = QHBoxLayout()
+        buttonLayout.addWidget(finishButton)
+        buttonLayout.addWidget(installAnotherButton)
+        finishLayout.addLayout(buttonLayout)
         # Add the progress bar page to the layout
         self.layout.addWidget(self.finishPage)  
 
@@ -301,7 +313,7 @@ class Logic:
             qtui.updateButton.setEnabled(True)
             qtui.uninstallButton.setEnabled(True)               
 
-    # Welcome page buttons button clinking function
+    # Button clinking function
     def qt_button_click(self):
         button = qtui.sender()
         if button is qtui.installButton:
@@ -339,6 +351,9 @@ class Logic:
         response = requests.get(self.releases_url)
         self.releases = response.json()[:5] 
 
+        # Clear the combo box before adding new items
+        qtui.installationSourceComboBox.clear()
+
         # Remove or add items based on the emulator
         for release in self.releases: 
             qtui.installationSourceComboBox.addItem(release['tag_name'])
@@ -375,6 +390,7 @@ class Logic:
     
     # Preparing which file to downlaod
     def Prepare_Download(self):
+        print (self.install_mode)
         reg_key = self.checkreg()
         if reg_key is not None:
             UpdateChannelValue = reg_key[1]
@@ -447,7 +463,12 @@ class Logic:
         self.download_thread.started.connect(self.download_worker.do_download)
         self.download_worker.progress.connect(qtui.downloadProgressBar.setValue)
         self.download_thread.start()
-        self.download_worker.finished.connect(lambda: self.extract_and_install(temp_file, self.installationPath))
+        self.download_worker.finished.connect(self.on_download_finished)
+        self.download_worker.finished.connect(self.download_thread.quit)
+        self.download_worker.finished.connect(self.download_worker.deleteLater)
+        self.download_thread.finished.connect(self.download_thread.deleteLater)
+    def on_download_finished(self):
+        self.extract_and_install(self.download_worker.dest, self.installationPath)
 
     # Extract and install function 
     def extract_and_install(self, temp_file, extract_to):

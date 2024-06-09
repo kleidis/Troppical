@@ -59,7 +59,7 @@ class QtUi(QMainWindow, Style):
         self.setMinimumSize(1000, 720)  # Set the minimum window size to 800x600
         # Set the window icon
         icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
-        self.setWindowIcon(QIcon())
+        self.setWindowIcon(QIcon(icon_path))
         self.selection_page()
 
 
@@ -129,7 +129,6 @@ class QtUi(QMainWindow, Style):
         self.nextButton = QPushButton("Next")
         self.nextButton.clicked.connect(self.logic.set_emulator)
         emulatorSelectLayout.addWidget(self.nextButton)
-
         # Welcome page
         self.welcomePage = QWidget()
         ## Layout and gorup
@@ -244,6 +243,7 @@ class Logic:
     def __init__(self):
         self.regvalue = None  
         self.install_mode = None
+        self.emulator = None
    
     def fetch_google_sheet_data(self):
         url = "https://script.googleusercontent.com/macros/echo?user_content_key=Hw-G9S_OHELhOUAsT-oQr8ux2HPMIpva3U1w0Su7P1ZYrr1ngXyqlN6LBhfev1taFoRtJ07w_KDhWVbMaBaeJ3c86H4e0k8Xm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnL69XsVZDOhipZMwrhs3JioNozSVnp4Chm6SveAF_nlUSMgTaOh-zk0bQ5F9LtyaiRZKic-heYuYVV866SySaVfv-0TkTPKcCtz9Jw9Md8uu&lib=MmjrdpKGbUxdyxLDAqWkoFhoZjK-0W8qS"
@@ -256,33 +256,35 @@ class Logic:
             print("Failed to fetch data:", response.status_code)
 
     # Set which emulator to use for the installer depeanding on the selected emulator 
-    def set_emulator(self, emulator):
+    def set_emulator(self):
         selected_item = qtui.emulatorTreeWidget.currentItem()
-        if selected_item and selected_item.parent():
-            emulator_name = selected_item.text(0)
-        else:
+        if not selected_item or not selected_item.parent():
             QMessageBox.warning(qtui, "Selection Error", "Please select an emulator.")
+            return
 
+        emulator_name = selected_item.text(0)
+        if self.emulator != emulator_name:
+            # Clear previous emulator settings
+            qtui.labeldown.setText("Downloading: ")
+            qtui.labelext.setText("Extracting: ")
+            qtui.welcomerLabel.setText("")
 
-        self.emulator = emulator_name
-        reg_result = self.checkreg()
-        if reg_result is None:
-            installed_emulator = "Not Installed"
-        else:
-            installed_emulator = reg_result[1]
+            # Set new emulator
+            self.emulator = emulator_name
+
         for selected_emulator in self.troppical_api:
             if selected_emulator['emulator_name'] == self.emulator:
                 self.releases_url = f"https://api.github.com/repos/{selected_emulator['emulator_owner']}/{selected_emulator['emulator_repo']}/releases"
-                if self.emulator in ["Panda3DS"]:
-                    self.nightly_url = f"https://nightly.link/{selected_emulator['emulator_owner']}/{selected_emulator['emulator_repo']}/workflows/Qt_Build/master/Windows%20executable.zip"
-                else:
-                    self.nightly_url = f"https://nightly.link/{selected_emulator['emulator_owner']}/{selected_emulator['emulator_repo']}/workflows/build/master/windows-msvc.zip"
 
-        qtui.installationPathLineEdit.setText(QLineEdit(os.path.join(os.environ['LOCALAPPDATA'], self.emulator)).text()) 
-        qtui.labeldown.setText(qtui.labeldown.text() + self.emulator)
-        qtui.labelext.setText(qtui.labelext.text() + self.emulator)
+        # Update UI components with new emulator settings
+        reg_result = self.checkreg()
+        installed_emulator = "Not Installed" if reg_result is None else reg_result[1]
+        qtui.installationPathLineEdit.setText(os.path.join(os.environ['LOCALAPPDATA'], self.emulator))
+        qtui.labeldown.setText("Downloading: " + self.emulator)
+        qtui.labelext.setText("Extracting: " + self.emulator)
         qtui.welcomerLabel.setText(f'<big>Your currently selected emulator is <b>{self.emulator}</b> and current version is <b>{installed_emulator}</b>.</big>')
 
+        print (self.emulator)
         self.checkreg()
         self.disable_qt_buttons_if_installed()
         qtui.layout.setCurrentIndex(1)
@@ -433,7 +435,10 @@ class Logic:
     # Download function    
     def Download_Emulator(self):
         temp_file = tempfile.NamedTemporaryFile(delete=False).name
-        self.installationPath = self.regvalue or qtui.installationPathLineEdit.text()
+        if self.install_mode == "Install":
+            self.installationPath = qtui.installationPathLineEdit.text()
+        elif self.install_mode == "Update":
+            self.installationPath = self.regvalue
         os.makedirs(self.installationPath, exist_ok=True)
         # Threads
         self.download_thread = QThread()
@@ -446,6 +451,7 @@ class Logic:
 
     # Extract and install function 
     def extract_and_install(self, temp_file, extract_to):
+        extract_to = self.installationPath
         # Rename the temporary file to have a .zip extension and create a temporary extraction folder
         zip_file_path = f"{temp_file}.zip"
         os.rename(temp_file, zip_file_path)
@@ -579,9 +585,8 @@ class Logic:
                     shutil.rmtree(dirpath)
                     winreg.DeleteKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")
                     QMessageBox.information(qtui, "Uninstall", f"{self.emulator} has been successfully uninstalled.")
-                    qtui.updateButton.setEnabled(False)   
-                    qtui.uninstallButton.setEnabled(False)    
-                    qtui.installButton.setEnabled(True)
+                    self.emulator = None
+                    qtui.layout.setCurrentIndex(0)   
                 else:
                     QMessageBox.critical(qtui, "Error", "The directory might have been moved or deleted. Please reinstall the program.")
                     winreg.DeleteKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")

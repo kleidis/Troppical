@@ -22,7 +22,7 @@ jobs:
         run: echo "::set-output name=short::$(git rev-parse --short ${{ github.sha }})"
 
       - name: Bump version
-        if: github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, 'main.py')
+        if: github.ref == 'refs/heads/master' && ${{ github.event.head_commit.modified }} contains 'main.py'
         run: |
           $NEW_VERSION="${{ steps.sha.outputs.short }}"
           # Update the version in main.py
@@ -33,7 +33,6 @@ jobs:
           git commit -m "Update version to $NEW_VERSION"
           git push origin HEAD:master --force --verbose
         shell: pwsh
-
       - name: Cache pip
         uses: actions/cache@v3
         with:

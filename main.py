@@ -404,18 +404,20 @@ class Logic:
             releases = response.json()
             for release in releases:
                 if release['tag_name'] == self.selection:
-                    windows_assets = [asset for asset in release['assets'] if '_win' in asset['name'].lower() or 'win' in asset['name'].lower() or 'xenia' in asset['name'].lower() and asset['name'].endswith('.zip')]
+                    windows_assets = [asset for asset in release['assets'] if ('_win' in asset['name'].lower() or 'win' in asset['name'].lower() or 'xenia' in asset['name'].lower()) and asset['name'].endswith('.zip') and not asset['name'].endswith('.7z')]
                     if len(windows_assets) > 1:
                         options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
                         choice, ok = QInputDialog.getItem(qtui, "Select Version", "Multiple Windows versions found. Please select one:\n" + options, [asset['name'] for asset in windows_assets], 0, False)
                         if ok:
                             self.selected_asset = next(asset for asset in windows_assets if asset['name'] == choice)
                             self.selected_asset_name = self.selected_asset['name']
-                            print (self.selected_asset_name)
+                            print(self.selected_asset_name)
                             self.target_download = self.selected_asset['browser_download_url']
                             self.url = self.target_download  # url for the download thread
                             self.Download_Emulator()
                             self.createreg()
+                        else:
+                            sys.exit("No release selected. Exiting.")
                     elif len(windows_assets) == 1:
                         self.selected_asset_name = windows_assets[0]['name']
                         self.target_download = windows_assets[0]['browser_download_url']
@@ -429,13 +431,15 @@ class Logic:
         elif self.install_mode == "Update":
             response = requests.get(self.releases_url + "/latest")
             latest_release = response.json()
-            windows_assets = [asset for asset in latest_release['assets'] if '_win' in asset['name'].lower() or 'win' in asset['name'].lower() and asset['name'].endswith('.zip')]
+            windows_assets = [asset for asset in latest_release['assets'] if ('_win' in asset['name'].lower() or 'win' in asset['name'].lower()) and asset['name'].endswith('.zip') and not asset['name'].endswith('.7z')]
             if windows_assets:
                 if len(windows_assets) > 1:
                     options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
                     choice, ok = QInputDialog.getItem(qtui, "Select Version", "Multiple Windows versions found. Please select one:\n" + options, [asset['name'] for asset in windows_assets], 0, False)
                     if ok:
                         latest_asset = next(asset for asset in windows_assets if asset['name'] == choice)
+                    else:
+                        sys.exit("No release selected. Exiting.")
                 else:
                     latest_asset = windows_assets[0]
 
@@ -447,7 +451,6 @@ class Logic:
                 self.createreg()
             else:
                 QMessageBox.critical(qtui, "Error", f"No suitable Windows download found for {self.emulator} in the latest release. Please try another release or check for updates.")
-
     # Download function    
     def Download_Emulator(self):
         temp_file = tempfile.NamedTemporaryFile(delete=False).name

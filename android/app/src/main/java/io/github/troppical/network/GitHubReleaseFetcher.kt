@@ -1,6 +1,7 @@
 package io.github.troppical.network
 
 import android.content.Context
+import android.view.View
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -12,6 +13,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import io.github.troppical.R
+import java.io.IOException
 
 @Serializable
 data class GitHubRelease(
@@ -38,29 +41,31 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
         val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
         return try {
             val progressDialog = MaterialAlertDialogBuilder(context)
-            .setTitle("Initializing")
-            .setView(R.layout.progress_dialog)
-            .setCancelable(false)
-            .create()
+                .setTitle("Initializing")
+                .setView(R.layout.progress_dialog)
+                .setCancelable(false)
+                .create()
 
             progressDialog.show()
             val response: HttpResponse = client.get(url)
-            if (response.status.isSuccess()) {
+            if (response.status.value in 200..299) {
                 val release: GitHubRelease = response.body()
 
-                val directLink = if (artifactName != "null.apk") { release.assets.firstOrNull { it.name.contains(artifactName) }?.browserDownloadUrl } else { release.assets.firstOrNull { it.name.endsWith(".apk", ignoreCase = true) }?.browserDownloadUrl }
+                val directLink = if (artifactName != "null.apk") {
+                    release.assets.firstOrNull { it.name.contains(artifactName) }?.browserDownloadUrl
+                } else {
+                    release.assets.firstOrNull { it.name.endsWith(".apk", ignoreCase = true) }?.browserDownloadUrl
+                }
                 val tagName = release.tagName
 
                 Pair(directLink, tagName)
             } else {
-                progressDialog.dismiss()
                 showErrorDialog("Server Error", "An error occurred while communicating with the server. Please try again later.")
-                null
+                Pair(null, null)
             }
         } catch (e: IOException) {
-            progressDialog.dismiss()
             showErrorDialog("Network Error", "Unable to connect to the internet. Please check your network connection and try again.")
-            null
+            Pair(null, null)
         } finally {
             progressDialog.dismiss()
         }

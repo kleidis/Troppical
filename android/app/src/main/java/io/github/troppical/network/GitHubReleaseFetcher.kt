@@ -1,5 +1,6 @@
 package io.github.troppical.network
 
+import android.content.Context
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*

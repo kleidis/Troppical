@@ -2,6 +2,9 @@ package io.github.troppical.network
 
 import android.content.Context
 import android.view.View
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -38,6 +41,11 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
     }
 
     suspend fun fetchArtifactDirectLinkAndTag(artifactName: String): Pair<String?, String?> {
+        if (!isInternetAvailable()) {
+            showErrorDialog("Network Error", "No internet connection. Please check your network settings and try again.")
+            return Pair(null, null)
+        }
+        
         val progressDialog = MaterialAlertDialogBuilder(context)
                 .setTitle("Initializing")
                 .setView(R.layout.progress_dialog)
@@ -95,5 +103,22 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
             }
             .setCancelable(false)
             .show()
+    }
+
+    private fun isInternetAvailable(): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val network = connectivityManager.activeNetwork ?: return false
+            val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+            when {
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                else -> false
+            }
+        } else {
+            val networkInfo = connectivityManager.activeNetworkInfo ?: return false
+            networkInfo.isConnected
+        }
     }
 }

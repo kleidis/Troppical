@@ -45,9 +45,17 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
                 .create()
 
         progressDialog.show()
+        progressIndicator = progressDialog.findViewById(R.id.progress_indicator)!!
         val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
         return try {
-            val response: HttpResponse = client.get(url)
+            val response: HttpResponse = client.get(url) {
+                onDownload { bytesSentTotal, contentLength ->
+                    if (contentLength != -1L) {
+                        val progress = (bytesSentTotal.toDouble() / contentLength * 100).toInt()
+                        progressIndicator.progress = progress
+                    }
+                }
+            }
             if (response.status.value in 200..299) {
                 val release: GitHubRelease = response.body()
 

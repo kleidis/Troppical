@@ -36,6 +36,13 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
     suspend fun fetchArtifactDirectLinkAndTag(artifactName: String): Pair<String?, String?> {
         val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
         return try {
+            val progressDialog = MaterialAlertDialogBuilder(context)
+            .setTitle("Initializing")
+            .setView(R.layout.progress_dialog)
+            .setCancelable(false)
+            .create()
+
+            progressDialog.show()
             val response: HttpResponse = client.get(url)
             if (response.status.isSuccess()) {
                 val release: GitHubRelease = response.body()
@@ -45,14 +52,16 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
 
                 Pair(directLink, tagName)
             } else {
+                progressDialog.dismiss()
                 showErrorDialog("Server Error", "An error occurred while communicating with the server. Please try again later.")
                 null
             }
         } catch (e: IOException) {
+            progressDialog.dismiss()
             showErrorDialog("Network Error", "Unable to connect to the internet. Please check your network connection and try again.")
             null
         } finally {
-            // TODO: Implement a progress dialog which will be dismiss here
+            progressDialog.dismiss()
         }
     }
 

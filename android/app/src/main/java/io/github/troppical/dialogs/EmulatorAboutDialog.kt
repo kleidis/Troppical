@@ -327,7 +327,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         val unInstallButton = findViewById<MaterialButton>(R.id.uninstall)
         
         fetcherScope.launch {
-            val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString())
+            val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString(), context)
             try {
                 val artifactName = item["emulator_artifact_name"].toString()
                 val (directLink, tag) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)

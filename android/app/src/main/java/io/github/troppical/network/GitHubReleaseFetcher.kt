@@ -73,12 +73,12 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
                 Pair(directLink, tagName)
             } else {
                 progressDialog.dismiss()
-                onFailure(R.string.server_error_title, R.string.server_error_desc)
+                onFailure(context.getString(R.string.server_error_title), context.getString(R.string.server_error_desc))
                 Pair(null, null)
             }
         } catch (e: IOException) {
             progressDialog.dismiss()
-            onFailure(R.string.network_error_title, R.string.network_error_desc)
+            onFailure(context.getString(R.string.network_error_title), context.getString(R.string.network_error_desc))
             Pair(null, null)
         } finally {
             progressDialog.dismiss()

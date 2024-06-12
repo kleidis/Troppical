@@ -15,6 +15,7 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import io.github.troppical.R
 import java.io.IOException
@@ -42,7 +43,7 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
 
     suspend fun fetchArtifactDirectLinkAndTag(artifactName: String): Pair<String?, String?> {
         if (!isInternetAvailable()) {
-            showErrorDialog("Network Error", "No internet connection. Please check your network settings and try again.")
+            onFailure("Network Error", "No internet connection. Please check your network settings and try again.")
             return Pair(null, null)
         }
         

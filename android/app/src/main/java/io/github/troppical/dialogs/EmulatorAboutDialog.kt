@@ -364,9 +364,9 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 dialog.dismiss() 
                 fetchGitHubRelease()
             }
-            .setNegativeButton(android.string.R.cancel) { dialog, which ->
+            .setNegativeButton(android.R.string.cancel) { dialog, which ->
                 dialog.dismiss()
-                dismiss()
+                this@EmulatorAboutDialog.dismiss()
             }
             .setCancelable(false)
             .show()

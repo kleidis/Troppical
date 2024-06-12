@@ -33,7 +33,7 @@ data class Asset(
     @SerialName("browser_download_url") val browserDownloadUrl: String
 )
 
-class GitHubReleaseFetcher(private val owner: String, private val repo: String, private val context: Context, onFailure: (errorTitle: String, errorMessage: String) -> Unit) {
+class GitHubReleaseFetcher(private val owner: String, private val repo: String, private val context: Context) {
 
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
@@ -41,7 +41,7 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
         }
     }
 
-    suspend fun fetchArtifactDirectLinkAndTag(artifactName: String): Pair<String?, String?> {
+    suspend fun fetchArtifactDirectLinkAndTag(artifactName: String, onFailure: (errorTitle: String, errorMessage: String) -> Unit): Pair<String?, String?> {
         if (!isInternetAvailable()) {
             onFailure("Network Error", "No internet connection. Please check your network settings and try again.")
             return Pair(null, null)

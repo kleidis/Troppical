@@ -327,7 +327,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
         val unInstallButton = findViewById<MaterialButton>(R.id.uninstall)
         
         fetcherScope.launch {
-            val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString(), context)
+            val fetcher = GitHubReleaseFetcher(item["emulator_owner"].toString(), item["emulator_repo"].toString(), onFailure = { errorTitle, errorMessage -> showErrorDialog(errorTitle, errorMessage) })
             try {
                 val artifactName = item["emulator_artifact_name"].toString()
                 val (directLink, tag) = fetcher.fetchArtifactDirectLinkAndTag(artifactName)
@@ -354,6 +354,18 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
                 fetcher.close()
             }
         }
+    }
+
+    private fun showErrorDialog(dialogTitle: String, dialogMessage: String) {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(dialogTitle)
+            .setMessage(dialogMessage)
+            .setPositiveButton("Retry") { dialog, which ->
+                dialog.dismiss() 
+                fetchGitHubRelease()
+            }
+            .setCancelable(false)
+            .show()
     }
         
 

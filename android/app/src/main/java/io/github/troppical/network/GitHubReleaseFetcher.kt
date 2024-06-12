@@ -32,7 +32,7 @@ data class Asset(
     @SerialName("browser_download_url") val browserDownloadUrl: String
 )
 
-class GitHubReleaseFetcher(private val owner: String, private val repo: String, onFailure: (errorTitle: String?, errorMessage: String?) -> Unit) {
+class GitHubReleaseFetcher(private val owner: String, private val repo: String, private val context: Context, onFailure: (errorTitle: String, errorMessage: String) -> Unit) {
 
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {

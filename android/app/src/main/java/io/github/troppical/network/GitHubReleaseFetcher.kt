@@ -73,12 +73,12 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
                 Pair(directLink, tagName)
             } else {
                 progressDialog.dismiss()
-                onFailure("Server Error", "An error occurred while communicating with the server. Please try again later.")
+                onFailure(R.string.server_error_title, R.string.server_error_desc)
                 Pair(null, null)
             }
         } catch (e: IOException) {
             progressDialog.dismiss()
-            onFailure("Network Error", "Unable to connect to the internet. Please check your network connection and try again.")
+            onFailure(R.string.network_error_title, R.string.network_error_desc)
             Pair(null, null)
         } finally {
             progressDialog.dismiss()

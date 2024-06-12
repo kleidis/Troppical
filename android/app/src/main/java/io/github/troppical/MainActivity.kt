@@ -101,8 +101,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun showErrorDialog(swipeRefresh: SwipeRefreshLayout) {
         MaterialAlertDialogBuilder(this)
-            .setTitle("Error")
-            .setMessage("An error occurred while processing your request. Please try again.")
+            .setTitle(R.string.server_error_title)
+            .setMessage(R.string.server_error_desc)
             .setPositiveButton("Retry") { dialog, which ->
                 swipeRefresh.isRefreshing = true
                 // Retry the network request

@@ -16,6 +16,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import io.github.troppical.R
 import java.io.IOException
 
@@ -53,7 +54,7 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
                 .create()
 
         progressDialog.show()
-        val progressIndicator = progressDialog.findViewById(R.id.progress_indicator)!!
+        val progressIndicator = progressDialog.findViewById<LinearProgressIndicator>(R.id.progress_indicator)!!
         progressIndicator.isIndeterminate = true
         val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
         return try {

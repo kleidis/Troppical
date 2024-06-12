@@ -15,7 +15,6 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import io.github.troppical.R
 import java.io.IOException
@@ -33,7 +32,7 @@ data class Asset(
     @SerialName("browser_download_url") val browserDownloadUrl: String
 )
 
-class GitHubReleaseFetcher(private val owner: String, private val repo: String, private val context: Context) {
+class GitHubReleaseFetcher(private val owner: String, private val repo: String, onFailure: (errorTitle: String?, errorMessage: String?) -> Unit) {
 
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
@@ -73,12 +72,12 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
                 Pair(directLink, tagName)
             } else {
                 progressDialog.dismiss()
-                showErrorDialog("Server Error", "An error occurred while communicating with the server. Please try again later.")
+                onFailure("Server Error", "An error occurred while communicating with the server. Please try again later.")
                 Pair(null, null)
             }
         } catch (e: IOException) {
             progressDialog.dismiss()
-            showErrorDialog("Network Error", "Unable to connect to the internet. Please check your network connection and try again.")
+            onFailure("Network Error", "Unable to connect to the internet. Please check your network connection and try again.")
             Pair(null, null)
         } finally {
             progressDialog.dismiss()
@@ -87,18 +86,6 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
 
     fun close() {
         client.close()
-    }
-
-    private fun showErrorDialog(dialogTitle: String, dialogMessage: String) {
-        MaterialAlertDialogBuilder(context)
-            .setTitle(dialogTitle)
-            .setMessage(dialogMessage)
-            .setPositiveButton("Retry") { dialog, which ->
-                dialog.dismiss() 
-                // TODO: Implement a logic to perform retry
-            }
-            .setCancelable(false)
-            .show()
     }
 
     private fun isInternetAvailable(): Boolean {

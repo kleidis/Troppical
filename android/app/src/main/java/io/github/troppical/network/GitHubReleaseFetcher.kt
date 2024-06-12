@@ -16,7 +16,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.progressindicator.LinearProgressIndicator
 import io.github.troppical.R
 import java.io.IOException
 
@@ -55,11 +54,11 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
 
         progressDialog.show()
         val progressIndicator = progressDialog.findViewById(R.id.progress_indicator)!!
+        progressIndicator.isIndeterminate = true
         val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
         return try {
-            val response: HttpResponse = client.get(url) {
-                onDownload(progressIndicator)
-            }
+            val response: HttpResponse = client.get(url)
+                
             if (response.status.value in 200..299) {
                 val release: GitHubRelease = response.body()
 
@@ -115,26 +114,6 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
         } else {
             val networkInfo = connectivityManager.activeNetworkInfo ?: return false
             networkInfo.isConnected
-        }
-    }
-
-    private fun onDownload(progressIndicator: LinearProgressIndicator): HttpRequestBuilder.() -> Unit = {
-        val totalBytes = 0L
-        val totalContentLength = 0L
-        onResponse { response ->
-            response.contentLength()?.let { totalContentLength = it }
-            response.receivePipeline.intercept(HttpReceivePipeline.After) { payload ->
-                payload as ByteReadChannel
-                while (!payload.isClosedForRead) {
-                    val bytesRead = payload.readRemaining().read { buffer ->
-                        totalBytes += buffer.remaining()
-                        val progress = (totalBytes.toDouble() / totalContentLength * 100).toInt()
-                        progressIndicator.progress = progress
-                        buffer.remaining()
-                    }
-                }
-                payload
-            }
         }
     }
 }

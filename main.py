@@ -653,7 +653,7 @@ class DownloadWorker(QThread):
             self.finished.emit()
 
 if __name__ == "__main__":
-    version = 'f71cf9f'
+    version = 'beed11a'
     app = QApplication(sys.argv)
     qtui = QtUi()
     qtui.show()

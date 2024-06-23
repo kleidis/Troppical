@@ -1,3 +1,6 @@
+import java.io.BufferedReader
+import java.io.InputStreamReader
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -77,13 +80,14 @@ dependencies {
 fun getVersionName(): String {
     var tag = "1.0"
     try {
-        val process = Runtime.getRuntime().exec("git describe --tags --abbrev=0")
-        tag = process.inputStream.bufferedReader().readText().trim()
+        val process = Runtime.getRuntime().exec(arrayOf("bash", "-c", "gh release list --limit 1 --json tagName --jq '.[0].tagName'"))
+        val reader = BufferedReader(InputStreamReader(process.inputStream))
+        tag = reader.readLine().trim()
         if (tag.startsWith("v")) {
             tag = tag.substring(1)
         }
     } catch (e: Exception) {
-        println("Failed to get latest Git tag: ${e.message}")
+        println("Failed to get latest GitHub release tag: ${e.message}")
     }
     return tag
 }

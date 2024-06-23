@@ -78,6 +78,7 @@ jobs:
           path: upload_url.txt
           
   Windows-build:
+    needs: [create-release]
     runs-on: windows-latest
     permissions:
       contents: write
@@ -117,6 +118,7 @@ jobs:
           name: init-troppical-windows
           path: ${{ github.workspace }}/dist/init_troppical.exe
   Android-build:
+    needs: [create-release]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

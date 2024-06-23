@@ -3,7 +3,6 @@ name: troppical-build
 on:
   push:
     branches: [ "*" ]
-    tags: [ "v*" ]
   workflow_dispatch:
 
 jobs:
@@ -16,23 +15,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      
-      - name: Get short SHA
-        id: sha
-        run: echo "::set-output name=short::$(git rev-parse --short ${{ github.sha }})"
 
-      - name: Bump version
-        if: github.ref == 'refs/heads/master' && ${{ github.event.head_commit.modified }} contains 'main.py'
-        run: |
-          $NEW_VERSION="${{ steps.sha.outputs.short }}"
-          # Update the version in main.py
-          (Get-Content main.py) -replace 'version = .*', "version = '$NEW_VERSION'" | Set-Content main.py
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add main.py
-          git commit -m "Update version to $NEW_VERSION"
-          git push origin HEAD:master --force --verbose
-        shell: pwsh
       - name: Cache pip
         uses: actions/cache@v3
         with:
@@ -119,9 +102,31 @@ jobs:
           curl -L -o troppical-android.zip https://nightly.link/kleidis/Troppical/workflows/build/master/troppical-android.zip
           unzip troppical-android.zip -d extracted/troppical-android
 
-      - name: Get short SHA
-        id: sha
-        run: echo "::set-output name=short::$(git rev-parse --short ${{ github.sha }})"
+      - name: Get Previous Tag
+        id: get_previous_tag
+        run: |
+          previous_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "::set-output name=previous_tag::$previous_tag"
+
+      - name: Determine New Tag
+        id: determine_new_tag
+        run: |
+          previous_tag=${{ steps.get_previous_tag.outputs.previous_tag }}
+          IFS='.' read -r -a version_parts <<< "$previous_tag"
+
+          major=${version_parts[0]}
+          minor=${version_parts[1]}
+          patch=${version_parts[2]}
+
+          if [ "$patch" -ge 12 ]; then
+            minor=$((minor + 1))
+            patch=0
+          else
+            patch=$((patch + 1))
+          fi
+
+          new_tag="$major.$minor.$patch"
+          echo "::set-output name=new_tag::$new_tag"
   
       - name: Delete Previous Releases
         run: |
@@ -142,8 +147,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD }}
         with:
-          tag_name: ${{ steps.sha.outputs.short }}
-          release_name: Troppical ${{ steps.sha.outputs.short }}
+          tag_name: ${{ steps.determine_new_tag.outputs.new_tag }}
+          release_name: Troppical ${{ steps.determine_new_tag.outputs.new_tag }}
           draft: false
           prerelease: false
 

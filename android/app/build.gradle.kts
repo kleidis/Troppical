@@ -12,8 +12,8 @@ android {
         applicationId = "io.github.troppical"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = getVersionCode()
+        versionName = getVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -72,4 +72,30 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+}
+
+fun getVersionName(): String {
+    var tag = "1.0"
+    try {
+        val process = Runtime.getRuntime().exec("git describe --tags --abbrev=0")
+        tag = process.inputStream.bufferedReader().readText().trim()
+        if (tag.startsWith("v")) {
+            tag = tag.substring(1)
+        }
+    } catch (e: Exception) {
+        println("Failed to get latest Git tag: ${e.message}")
+    }
+    return tag
+}
+
+fun getVersionCode(): Int {
+    var versionCode = 1
+    val tag = getVersionName()
+    if (tag.isNotEmpty() && tag[0].isDigit()) {
+        versionCode = tag[0].toString().toInt()
+    }
+    if (versionCode == 0) {
+        versionCode = 1 // return dummy version code if the version code isn't positive
+    }
+    return versionCode
 }

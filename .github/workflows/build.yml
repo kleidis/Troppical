@@ -105,8 +105,10 @@ jobs:
       - name: Get Previous Tag
         id: get_previous_tag
         run: |
-          previous_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          previous_tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
           echo "::set-output name=previous_tag::$previous_tag"
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
 
       - name: Determine New Tag
         id: determine_new_tag

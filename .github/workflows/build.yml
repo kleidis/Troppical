@@ -143,6 +143,7 @@ jobs:
           ANDROID_KEYSTORE_FILE: ks.jks
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
         
 
       - name: Upload Android Artifacts

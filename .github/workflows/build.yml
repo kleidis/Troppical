@@ -68,8 +68,14 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Set UPLOAD_URL variable
-        run: echo "UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
+      - name: Save Upload URL
+        run: echo "${{ steps.create_release.outputs.upload_url }}" > upload_url.txt
+
+      - name: Upload upload_URL Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: upload-url
+          path: upload_url.txt
           
   Windows-build:
     runs-on: windows-latest
@@ -167,9 +173,21 @@ jobs:
           curl -L -o troppical-android.zip https://nightly.link/kleidis/Troppical/workflows/build/master/troppical-android.zip
           unzip troppical-android.zip -d extracted/troppical-android
 
+      - name: Download Upload URL Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: upload-url
+          path: .
+
+      - name: Read Upload URL
+        id: read_upload_url
+        run: |
+          upload_url=$(cat upload_url.txt)
+          echo "::set-output name=upload_url::$upload_url"
+
       - name: Upload Release Asset init_troppical
         run: |
-          upload_url="${{ env.UPLOAD_URL }}"
+          upload_url="${{ steps.read_upload_url.outputs.upload_url }}"
           file_path="./extracted/init_troppical/init_troppical.exe"
           file_name="init_troppical.exe"
           mime_type="application/octet-stream"
@@ -182,7 +200,7 @@ jobs:
             
       - name: Upload Release Asset troppical-android
         run: |
-          upload_url="${{ env.UPLOAD_URL }}"
+          upload_url="${{ steps.read_upload_url.outputs.upload_url }}"
           file_path="./extracted/troppical-android/app-release.apk"
           file_name="app-release.apk"
           mime_type="application/vnd.android.package-archive"

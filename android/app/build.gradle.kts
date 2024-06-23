@@ -79,8 +79,9 @@ dependencies {
 
 fun getVersionName(): String {
     var tag = "1.0"
+    val githubToken = System.getenv("GITHUB_TOKEN") ?: ""
     try {
-        val process = Runtime.getRuntime().exec(arrayOf("bash", "-c", "gh release list --limit 1 --json tagName --jq '.[0].tagName'"))
+        val process = Runtime.getRuntime().exec(arrayOf("bash", "-c", "GH_TOKEN=$githubToken gh release list --limit 1 --json tagName --jq '.[0].tagName'"))
         val reader = BufferedReader(InputStreamReader(process.inputStream))
         tag = reader.readLine().trim()
         if (tag.startsWith("v")) {

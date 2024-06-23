@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 import requests
 import json
@@ -652,8 +653,17 @@ class DownloadWorker(QThread):
             QMessageBox.critical(QtUi, "Error",("Error doing download."))
             self.finished.emit()
 
+    def get_latest_git_tag():
+        try:
+            # Get the latest git tag
+            latest_tag = subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"]).strip().decode('utf-8')
+            return latest_tag
+        except subprocess.CalledProcessError:
+            return "unknown"
+
 if __name__ == "__main__":
-    version = 'beed11a'
+    version = get_latest_git_tag()
+    print(f"Version: {version}")
     app = QApplication(sys.argv)
     qtui = QtUi()
     qtui.show()

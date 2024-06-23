@@ -6,6 +6,68 @@ on:
   workflow_dispatch:
 
 jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Previous Tag
+        id: get_previous_tag
+        run: |
+          previous_tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
+          echo "::set-output name=previous_tag::$previous_tag"
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+
+      - name: Determine New Tag
+        id: determine_new_tag
+        run: |
+          previous_tag=${{ steps.get_previous_tag.outputs.previous_tag }}
+          IFS='.' read -r -a version_parts <<< "$previous_tag"
+
+          major=${version_parts[0]}
+          minor=${version_parts[1]}
+          patch=${version_parts[2]}
+
+          if [ "$patch" -ge 12 ]; then
+            minor=$((minor + 1))
+            patch=0
+          else
+            patch=$((patch + 1))
+          fi
+
+          new_tag="$major.$minor.$patch"
+          echo "::set-output name=new_tag::$new_tag"
+
+      - name: Delete Previous Releases
+        run: |
+          for release in $(gh release list --limit 100 --json tagName --jq '.[].tagName'); do
+            gh release delete $release --yes
+          done
+          for tag in $(git tag); do
+            git push --delete origin $tag
+            git tag -d $tag
+          done
+        shell: /usr/bin/bash -e {0}
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+        with:
+          tag_name: ${{ steps.determine_new_tag.outputs.new_tag }}
+          release_name: Troppical ${{ steps.determine_new_tag.outputs.new_tag }}
+          draft: false
+          prerelease: false
+          
   Windows-build:
     runs-on: windows-latest
     permissions:
@@ -80,8 +142,8 @@ jobs:
           name: troppical-android
           path: ./android/app/build/outputs/apk/release/app-release.apk
   
-  Automated-Release:
-    needs: [Windows-build, Android-build]
+  upload-release-artifacts:
+    needs: [Windows-build, Android-build, create-release]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -102,64 +164,12 @@ jobs:
           curl -L -o troppical-android.zip https://nightly.link/kleidis/Troppical/workflows/build/master/troppical-android.zip
           unzip troppical-android.zip -d extracted/troppical-android
 
-      - name: Get Previous Tag
-        id: get_previous_tag
-        run: |
-          previous_tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
-          echo "::set-output name=previous_tag::$previous_tag"
-        env:
-          GITHUB_TOKEN: ${{ secrets.BUILD }}
-
-      - name: Determine New Tag
-        id: determine_new_tag
-        run: |
-          previous_tag=${{ steps.get_previous_tag.outputs.previous_tag }}
-          IFS='.' read -r -a version_parts <<< "$previous_tag"
-
-          major=${version_parts[0]}
-          minor=${version_parts[1]}
-          patch=${version_parts[2]}
-
-          if [ "$patch" -ge 12 ]; then
-            minor=$((minor + 1))
-            patch=0
-          else
-            patch=$((patch + 1))
-          fi
-
-          new_tag="$major.$minor.$patch"
-          echo "::set-output name=new_tag::$new_tag"
-  
-      - name: Delete Previous Releases
-        run: |
-          for release in $(gh release list --limit 100 --json tagName --jq '.[].tagName'); do
-            gh release delete $release --yes
-          done
-          for tag in $(git tag); do
-            git push --delete origin $tag
-            git tag -d $tag
-          done
-        shell: /usr/bin/bash -e {0}
-        env:
-          GITHUB_TOKEN: ${{ secrets.BUILD }}
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.BUILD }}
-        with:
-          tag_name: ${{ steps.determine_new_tag.outputs.new_tag }}
-          release_name: Troppical ${{ steps.determine_new_tag.outputs.new_tag }}
-          draft: false
-          prerelease: false
-
       - name: Upload Release Asset init_troppical
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: ./extracted/init_troppical/init_troppical.exe
           asset_name: init_troppical.exe
           asset_content_type: application/octet-stream
@@ -169,7 +179,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: ./extracted/troppical-android/app-release.apk
           asset_name: app-release.apk
           asset_content_type: application/vnd.android.package-archive        

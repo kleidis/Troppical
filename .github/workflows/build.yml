@@ -173,13 +173,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: init-troppical-windows
-          path: extracted/init_troppical
+          path: .
 
       - name: Download troppical-android
         uses: actions/download-artifact@v4
         with:
           name: troppical-android
-          path: extracted/troppical-android
+          path: .
 
       - name: Unzip downloaded builds
         run: |

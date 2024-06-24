@@ -68,6 +68,12 @@ jobs:
          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
          echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ${{ github.workspace }}/android/app/ks.jks
+
+      - name: Get Previous Tag
+        id: get_is_pr
+        run: |
+          is_pr=${{ github.event_name == 'pull_request' }}
+          echo "::set-output name=is_pr::$is_pr"
       
       - name: Build with Gradle
         run: |
@@ -80,6 +86,7 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
           GITHUB_TOKEN: ${{ secrets.BUILD }}
+          IS_PR: ${{ steps.get_is_pr.outputs.is_pr }}
         
 
       - name: Upload Android Artifacts

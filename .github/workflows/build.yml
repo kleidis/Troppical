@@ -162,12 +162,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup directories
-        run: |
-          mkdir -p extracted/init_troppical
-          mkdir -p extracted/troppical-android
+        uses: actions/checkout@v4        
 
       - name: Download init-troppical-windows
         uses: actions/download-artifact@v4
@@ -181,8 +176,16 @@ jobs:
           name: troppical-android
           path: .
 
+      - name: Verify downloaded artifacts
+        run: |
+          ls -l
+          ls -l init-troppical-windows
+          ls -l troppical-android
+
       - name: Unzip downloaded builds
         run: |
+          mkdir -p extracted/init_troppical
+          mkdir -p extracted/troppical-android
           unzip troppical-android.zip -d extracted/troppical-android
           unzip init-troppical-windows.zip -d extracted/init_troppical
 

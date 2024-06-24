@@ -69,7 +69,7 @@ jobs:
         run: |
          echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ${{ github.workspace }}/android/app/ks.jks
 
-      - name: Get Previous Tag
+      - name: Check isPr
         id: get_is_pr
         run: |
           is_pr=${{ github.event_name == 'pull_request' }}

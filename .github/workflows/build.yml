@@ -164,17 +164,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download init_troppical-windows
+      - name: Setup directories
         run: |
           mkdir -p extracted/init_troppical
-          curl -L -o init-troppical-windows.zip https://nightly.link/kleidis/Troppical/workflows/build/master/init-troppical-windows.zip
-          unzip init-troppical-windows.zip -d extracted/init_troppical
+          mkdir -p extracted/troppical-android
+
+      - name: Download init-troppical-windows
+        uses: actions/download-artifact@v4
+        with:
+          name: init-troppical-windows
+          path: extracted/init_troppical
 
       - name: Download troppical-android
+        uses: actions/download-artifact@v4
+        with:
+          name: troppical-android
+          path: extracted/troppical-android
+
+      - name: Unzip downloaded builds
         run: |
-          mkdir -p extracted/troppical-android
-          curl -L -o troppical-android.zip https://nightly.link/kleidis/Troppical/workflows/build/master/troppical-android.zip
           unzip troppical-android.zip -d extracted/troppical-android
+          unzip init-troppical-windows.zip -d extracted/init_troppical
 
       - name: Download Upload URL Artifact
         uses: actions/download-artifact@v4

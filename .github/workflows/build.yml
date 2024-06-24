@@ -1,4 +1,4 @@
-name: troppical-build
+name: troppical-release-build
 
 on:
   push:
@@ -78,6 +78,7 @@ jobs:
           path: upload_url.txt
           
   Windows-build:
+    needs: [create-release]
     runs-on: windows-latest
     permissions:
       contents: write

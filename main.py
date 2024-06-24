@@ -654,12 +654,21 @@ class DownloadWorker(QThread):
             self.finished.emit()
 
     def get_latest_git_tag():
-        try:
-            # Get the latest git tag
-            latest_tag = subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"]).strip().decode('utf-8')
-            return latest_tag
-        except subprocess.CalledProcessError:
-            return "unknown"
+    tag = "1.0"
+    github_token = os.getenv("GITHUB_TOKEN", "")
+    try:
+        command = f"GH_TOKEN={github_token} gh release list --limit 1 --json tagName --jq '.[0].tagName'"
+        process = subprocess.Popen(['bash', '-c', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = process.communicate()
+        if process.returncode == 0:
+            tag = out.decode('utf-8').strip()
+            if tag.startswith("v"):
+                tag = tag[1:]
+        else:
+            print(f"Failed to get latest GitHub release tag: {err.decode('utf-8')}")
+    except Exception as e:
+        print(f"Failed to get latest GitHub release tag: {e}")
+    return tag
 
 if __name__ == "__main__":
     version = get_latest_git_tag()

@@ -106,6 +106,9 @@ jobs:
         run: |
           pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed main.py
           pyinstaller --clean --onefile --icon=icon.ico --windowed init_troppical.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }} 
+          
       - name: Upload troppical
         uses: actions/upload-artifact@v4
         with:

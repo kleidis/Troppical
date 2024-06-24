@@ -653,25 +653,25 @@ class DownloadWorker(QThread):
             QMessageBox.critical(QtUi, "Error",("Error doing download."))
             self.finished.emit()
 
-    def get_latest_git_tag():
-    tag = "1.0"
-    github_token = os.getenv("GITHUB_TOKEN", "")
-    try:
-        command = f"GH_TOKEN={github_token} gh release list --limit 1 --json tagName --jq '.[0].tagName'"
-        process = subprocess.Popen(['bash', '-c', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = process.communicate()
-        if process.returncode == 0:
-            tag = out.decode('utf-8').strip()
-            if tag.startswith("v"):
-                tag = tag[1:]
-        else:
-            print(f"Failed to get latest GitHub release tag: {err.decode('utf-8')}")
-    except Exception as e:
-        print(f"Failed to get latest GitHub release tag: {e}")
-    return tag
+    def get_latest_git_tag(self):
+        tag = "1.0"
+        github_token = os.getenv("GITHUB_TOKEN", "")
+        try:
+            command = f"GH_TOKEN={github_token} gh release list --limit 1 --json tagName --jq '.[0].tagName'"
+            process = subprocess.Popen(['bash', '-c', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = process.communicate()
+            if process.returncode == 0:
+                tag = out.decode('utf-8').strip()
+                if tag.startswith("v"):
+                    tag = tag[1:]
+            else:
+                print(f"Failed to get latest GitHub release tag: {err.decode('utf-8')}")
+        except Exception as e:
+            print(f"Failed to get latest GitHub release tag: {e}")
+        return tag
 
 if __name__ == "__main__":
-    version = get_latest_git_tag()
+    version = download_worker.get_latest_git_tag()
     print(f"Version: {version}")
     app = QApplication(sys.argv)
     qtui = QtUi()

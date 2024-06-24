@@ -162,32 +162,24 @@ jobs:
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4        
+        uses: actions/checkout@v4  
+
+      - name: Setup build directories
+        run: |
+          mkdir -p extracted/
+          mkdir -p extracted/
 
       - name: Download init-troppical-windows
         uses: actions/download-artifact@v4
         with:
           name: init-troppical-windows
-          path: .
+          path: ./extracted/
 
       - name: Download troppical-android
         uses: actions/download-artifact@v4
         with:
           name: troppical-android
-          path: .
-
-      - name: Verify downloaded artifacts
-        run: |
-          ls -l
-          ls -l init-troppical-windows
-          ls -l troppical-android
-
-      - name: Unzip downloaded builds
-        run: |
-          mkdir -p extracted/init_troppical
-          mkdir -p extracted/troppical-android
-          unzip troppical-android.zip -d extracted/troppical-android
-          unzip init-troppical-windows.zip -d extracted/init_troppical
+          path: ./extracted/
 
       - name: Download Upload URL Artifact
         uses: actions/download-artifact@v4
@@ -207,7 +199,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BUILD }}
         with:
           upload_url: ${{ steps.read_upload_url.outputs.upload_url }}
-          asset_path: ./extracted/init_troppical/init_troppical.exe
+          asset_path: ./extracted/init_troppical.exe
           asset_name: init_troppical.exe
           asset_content_type: application/octet-stream
 
@@ -217,6 +209,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BUILD }}
         with:
           upload_url: ${{ steps.read_upload_url.outputs.upload_url }}
-          asset_path: ./extracted/troppical-android/app-release.apk
+          asset_path: ./extracted/app-release.apk
           asset_name: app-release.apk
           asset_content_type: application/vnd.android.package-archive

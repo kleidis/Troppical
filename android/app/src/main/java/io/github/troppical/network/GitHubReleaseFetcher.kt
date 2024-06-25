@@ -63,10 +63,18 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
             if (response.status.value in 200..299) {
                 val release: GitHubRelease = response.body()
 
-                val directLink = if (artifactName != "null.apk") {
-                    release.assets.firstOrNull { it.name.contains(artifactName) }?.browserDownloadUrl
+                var directLink: String? = null
+                if (artifactName != "null.apk") {
+                    directLink = release.assets.firstOrNull { it.name.contains(artifactName) }?.browserDownloadUrl
                 } else {
-                    release.assets.firstOrNull { it.name.endsWith(".apk", ignoreCase = true) }?.browserDownloadUrl
+                    val apkAssets = release.assets.filter { it.name.endsWith(".apk", ignoreCase = true) }
+                    if (apkAssets.size == 1) {
+                        directLink = apkAssets.first().browserDownloadUrl
+                    } else if (apkAssets.size > 1) {
+                        showApkSelectionDialog(apkAssets) { selectedLink ->
+                            directLink = selectedLink
+                        }
+                    }
                 }
                 val tagName = release.tagName
 
@@ -83,6 +91,17 @@ class GitHubReleaseFetcher(private val owner: String, private val repo: String, 
         } finally {
             progressDialog.dismiss()
         }
+    }
+
+    private fun showApkSelectionDialog(apkAssets: List<Asset>, onAssetSelected: (String?) -> Unit) {
+        val assetNames = apkAssets.map { it.name }.toTypedArray()
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.select_variant)
+            .setItems(assetNames) { _, which ->
+                onAssetSelected(apkAssets[which].browserDownloadUrl)
+            }
+            .setCancelable(false)
+            .show()
     }
 
     fun close() {

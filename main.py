@@ -3,9 +3,9 @@ import subprocess
 import sys
 import requests
 import json
-from PyQt6.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QCheckBox, QStackedLayout, QHBoxLayout, QGroupBox, QComboBox, QProgressBar, QLineEdit, QMessageBox, QFileDialog, QVBoxLayout, QInputDialog, QTreeWidget, QTreeWidgetItem
+from PyQt6.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QCheckBox, QStackedLayout, QHBoxLayout, QGroupBox, QComboBox, QProgressBar, QLineEdit, QMessageBox, QFileDialog, QInputDialog, QTreeWidget, QTreeWidgetItem
 from PyQt6.QtGui import QPixmap, QIcon, QImage
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QByteArray, QFile, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QByteArray, QFile, pyqtSlot
 from zipfile import ZipFile 
 import shutil
 import tempfile
@@ -669,23 +669,6 @@ class DownloadWorker(QThread):
         except Exception as e:
             QMessageBox.critical(QtUi, "Error",("Error doing download."))
             self.finished.emit()
-
-    def get_latest_git_tag(self):
-        tag = "1.0"
-        github_token = os.getenv("GITHUB_TOKEN", "")
-        try:
-            command = f"GH_TOKEN={github_token} gh release list --limit 1 --json tagName --jq '.[0].tagName'"
-            process = subprocess.Popen(['bash', '-c', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            out, err = process.communicate()
-            if process.returncode == 0:
-                tag = out.decode('utf-8').strip()
-                if tag.startswith("v"):
-                    tag = tag[1:]
-            else:
-                print(f"Failed to get latest GitHub release tag: {err.decode('utf-8')}")
-        except Exception as e:
-            print(f"Failed to get latest GitHub release tag: {e}")
-        return tag
 
 if __name__ == "__main__":
     version = get_latest_git_tag()

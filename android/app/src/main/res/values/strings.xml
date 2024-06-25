@@ -10,4 +10,5 @@
     <string name="network_error_desc">Unable to connect to the internet. Please check your network connection and try again.</string>
     <string name="server_error_title">Server Error</string>
     <string name="server_error_desc">An error occurred while communicating with the server. Please try again later.</string>
+    <string name="select_variant">Select Variant</string>
 </resources>

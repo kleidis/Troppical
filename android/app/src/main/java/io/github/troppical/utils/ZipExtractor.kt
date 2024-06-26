@@ -23,32 +23,34 @@ class ZipExtractor(
 
         try {
             FileInputStream(zipFilePath).use { fis ->
-                val totalSize = fis.available()
-                var extractedSize = 0
+                BufferedInputStream(fis).use { bis ->
+                    ZipInputStream(bis).use { zipIn ->
+                        val totalSize = zipFilePath.length()
+                        var extractedSize = 0
+                        var entry: ZipEntry? = zipIn.nextEntry
 
-                ZipInputStream(fis).use { zipIn ->
-                    var entry: ZipEntry? = zipIn.nextEntry
-                    while (entry != null) {
-                        val filePath = File(destDirectory, entry.name)
-                        if (!entry.isDirectory) {
-                            // Extract the file
-                            val fileSize = extractFile(zipIn, filePath)
-                            // Check if it's an APK file
-                            if (filePath.extension.equals("apk", ignoreCase = true)) {
-                                apkFilePath = filePath
+                        while (entry != null) {
+                            val filePath = File(destDirectory, entry.name)
+                            if (!entry.isDirectory) {
+                                // Extract the file
+                                val fileSize = extractFile(zipIn, filePath)
+                                // Check if it's an APK file
+                                if (filePath.extension.equals("apk", ignoreCase = true)) {
+                                    apkFilePath = filePath
+                                }
+                                extractedSize += fileSize
+                                val progress = (extractedSize.toDouble() / totalSize * 100).toInt()
+                                progressCallback(progress)
+                            } else {
+                                // Create the directory
+                                filePath.mkdirs()
                             }
-                            extractedSize += fileSize
-                            val progress = (extractedSize.toDouble() / totalSize * 100).toInt()
-                            progressCallback(progress)
-                        } else {
-                            // Create the directory
-                            filePath.mkdirs()
+                            zipIn.closeEntry()
+                            entry = zipIn.nextEntry
                         }
-                        zipIn.closeEntry()
-                        entry = zipIn.nextEntry
+                        isExtractionDone = true
+                        onComplete(true, apkFilePath)
                     }
-                    isExtractionDone = true
-                    onComplete(true, apkFilePath)
                 }
             }
         } catch (e: IOException) {

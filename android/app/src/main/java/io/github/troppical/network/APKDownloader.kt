@@ -1,6 +1,9 @@
 package io.github.troppical.network
 
 import android.content.Context
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.ResponseBody
 import com.google.android.gms.net.CronetProviderInstaller
 import org.chromium.net.CronetEngine
 import org.chromium.net.UrlRequest

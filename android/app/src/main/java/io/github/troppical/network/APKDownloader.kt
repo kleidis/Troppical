@@ -3,14 +3,36 @@ package io.github.troppical.network
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.ResponseBody
+import org.chromium.net.CronetEngine
+import com.google.net.cronet.okhttp.CronetCallFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
 class APKDownloader(private val url: String, private val outputFile: File) {
 
+    private var useCronet: Boolean = false
+
+    fun setUseCronet(enable: Boolean) {
+        useCronet = enable
+    }
+
+    private fun getClient(): OkHttpClient {
+        return if (useCronet) {
+            val cronetEngine = CronetEngine.Builder(context)
+                .build()
+            val callFactory = CronetCallFactory.newBuilder(cronetEngine).build()
+
+            OkHttpClient.Builder()
+                .callFactory(callFactory)
+                .build()
+        } else {
+            OkHttpClient()
+        }
+    }
+
     fun download(onProgress: (Int) -> Unit, onComplete: (Boolean) -> Unit) {
-        val client = OkHttpClient()
+        val client = getClient()
         val request = Request.Builder().url(url).build()
 
         client.newCall(request).enqueue(object : okhttp3.Callback {

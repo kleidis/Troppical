@@ -133,6 +133,7 @@ class EmulatorAboutDialog(context: Context, private val activity: Activity, priv
 
                             progressDialogExtract.show()
                             val progressIndicatorExtract = progressDialogExtract.findViewById<LinearProgressIndicator>(R.id.progress_indicator)!!
+                            progressIndicatorExtract.isIndeterminate = true
 
                             val zipExtractor = ZipExtractor(
                                 zipFilePath = outputFile, 

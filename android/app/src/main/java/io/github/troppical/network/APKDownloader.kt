@@ -9,7 +9,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-class APKDownloader(private val url: String, private val outputFile: File) {
+class APKDownloader(private val context: Context, private val url: String, private val outputFile: File) {
 
     private var useCronet: Boolean = false
 

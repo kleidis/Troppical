@@ -5,6 +5,19 @@
   <strong>Troppical</strong>
 </h1>
 
+# Discontinued Project 
+
+This project no linger is being developed   due to a couple reasons 
+
+- Lack of time and skill on my end
+
+i don't have the skill to develop this project , the code is a total mess and i lack the skills to actually improve it and time to improve it as well 
+
+- Nintendo DMCA against the remaining Switch Emulators on GitHub 
+
+Feel free to fork this repo and continue on the idea because i really think the idea of this app is a good one, I just can't take the app to where i envisioned it to go to features wise
+
+
 # What is this?
 
 Troppical is a simple app that lets you manage your emulators with an easy installation and updating process.

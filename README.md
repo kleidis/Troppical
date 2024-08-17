@@ -5,18 +5,10 @@
   <strong>Troppical</strong>
 </h1>
 
-# Discontinued Project 
+# Project on hold
 
-This project no linger is being developed   due to a couple reasons 
-
-- Lack of time and skill on my end
-
-i don't have the skill to develop this project , the code is a total mess and i lack the skills to actually improve it and time to improve it as well 
-
-- Nintendo DMCA against the remaining Switch Emulators on GitHub 
-
-Feel free to fork this repo and continue on the idea because i really think the idea of this app is a good one, I just can't take the app to where i envisioned it to go to features wise
-
+> [!WARNING]
+> I'm currently re-writing and alao expanding the scope of this Pyrhon project but I'm doing so at at slow rate. Until than the project is put on hold.
 
 # What is this?
 

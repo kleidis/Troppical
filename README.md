@@ -5,42 +5,33 @@
   <strong>Troppical</strong>
 </h1>
 
-# Project on hold
-
 > [!WARNING]
-> I'm currently re-writing and alao expanding the scope of this Pyrhon project but I'm doing so at at slow rate. Until than the project is put on hold.
+> I'm currently re-writing and also expanding the scope of this Pyrhon project but I'm doing so at at slow rate. Until than the project is put on hold. Currently working on cleaning up the codebase and making it work again becuase it is currently not working well
 
-# What is this?
+# About
 
-Troppical is a simple app that lets you manage your emulators with an easy installation and updating process.
-
-**We have a wide range of emulators ranging from newer consoles like the Switch to retro ones like the SNES**
+Troppical is a simple Windows program that lets you manage your emulators with an easy installation and updating process.
 
 If you'd like an emulator to be added, feel free to open a feature request issue. **Keep in mind that:**
 
 - The emulator needs to not have a built-in way to update itself, there is no point in adding emulators that already have updaters
 - The emulator needs to be distributed on GitHub
 
-# Downloading
-
-Get `init_troppical.exe` for Windows or `app-release.apk` for Android from [Releases](https://github.com/kleidis/Troppical/releases)
-
 # Usage
+> Most of this information might change in the future
 
- To use this app, open init_troppical.exe if you're on Windows or `Troppical` from your app drawer if you;re on Android, select the emulator you want to install and follow the setup options.
- - For Androdi you will need to give the app install permissions in order for Troppical to work 
+Till the project gets more features added to it, you can downlaod the "legacy" or basic version from Releases page
 **You can have multiple emulators installed at the same time**
 
-**NOTES for the Windows version:**
+> [!WARNING]
+> Windows Defender might detect this application as a trojan/malware. This is not true at all, you can look at the source code and determine that it is not a valid claim,  the app isn't that complex.**
+> Please don't open an issue for this since there is nothing I can do apart from signing the app which I won't do
 
-- **Windows Defender might detect this application as a trojan/malware. This is not true at all, you can look at the source code and determine that it is not a valid claim,  the app isn't that complex.**
-**Please don't open an issue for this since there is nothing I can do apart from signing the app which I won't do**
+~~- `init_troppical.exe` is a portable executable so feel free to run it from any directory or drive~~
 
-- `init_troppical.exe` is a portable executable so feel free to run it from any directory or drive
+~~- Although Troppical is portable that doesn't mean the emulators are. For now, there is no way to move an emulator directory once it is installed. If you do so, Troppical will just install updates on the directory that you initially chose to install the respective emulator on. The Uninstall button will error out and prompt you to reinstall as well~~
 
-- Although Troppical is portable that doesn't mean the emulators are. For now, there is no way to move an emulator directory once it is installed. If you do so, Troppical will just install updates on the directory that you initially chose to install the respective emulator on. The Uninstall button will error out and prompt you to reinstall as well
-
-# Screenshot
+# Screenshot (Outdated)
 ![Screenshot 2024-06-07 120452](https://github.com/kleidis/Troppical/assets/167202775/0e6d0c83-7132-414e-80dd-55dbc4ca9b29)
 
 
@@ -62,18 +53,16 @@ Get `init_troppical.exe` for Windows or `app-release.apk` for Android from [Rele
 
 `git clone https://github.com/kleidis/Troppical.git && cd Troppical`
 
-### Generate image data using base64:
-
-`python image-base64data-generator.py`
-
 ### Compile:
 
-- For main.py
+> [!WARNING]
+> Subject to change in the future. We might switch away from pyinstaller and remove the init script entirely
 
+- For main.py
 `pyinstaller --clean --onefile --icon=icon.ico --windowed main.py`
 
-- For init_troppical.py (This is just a script that downloads the latest compiled `main.py` exe from Github Actions and runs it)
 
+- For init_troppical.py (This is just a script that downloads the latest compiled `main.py` exe from Github Actions and runs it)
 `pyinstaller --clean --onefile --icon=icon.ico --windowed init_troppical.py.py`
 
 

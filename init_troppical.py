@@ -1,3 +1,5 @@
+# Depacrated. Will be remvoed if possible
+
 import sys
 import os
 import requests
@@ -49,7 +51,7 @@ def download_and_launch():
 
         # Clean up the temporary files and directory
         os.unlink(temp_zip.name)
-        shutil.rmtree(temp_dir) 
+        shutil.rmtree(temp_dir)
 
         return True
     else:

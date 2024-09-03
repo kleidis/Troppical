@@ -8,7 +8,7 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
-jobs:        
+jobs:
   Windows-build:
     runs-on: windows-latest
     permissions:
@@ -38,8 +38,8 @@ jobs:
           pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed main.py
           pyinstaller --clean --onefile --icon=icon.ico --windowed init_troppical.py
         env:
-          GITHUB_TOKEN: ${{ secrets.BUILD }} 
-          
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+
       - name: Upload troppical
         uses: actions/upload-artifact@v4
         with:
@@ -51,47 +51,4 @@ jobs:
         with:
           name: init-troppical-windows
           path: ${{ github.workspace }}/dist/init_troppical.exe
-          
-  Android-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
 
-      - name: Decode and save keystore
-        env:
-         ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-        run: |
-         echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ${{ github.workspace }}/android/app/ks.jks
-
-      - name: Check isPr
-        id: get_is_pr
-        run: |
-          is_pr=${{ github.event_name == 'pull_request' }}
-          echo "::set-output name=is_pr::$is_pr"
-      
-      - name: Build with Gradle
-        run: |
-          cd android/
-          chmod +x gradlew
-          ./gradlew assembleRelease
-          cd ../..
-        env:
-          ANDROID_KEYSTORE_FILE: ks.jks
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
-          GITHUB_TOKEN: ${{ secrets.BUILD }}
-          IS_PR: ${{ steps.get_is_pr.outputs.is_pr }}
-        
-
-      - name: Upload Android Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: troppical-android
-          path: ./android/app/build/outputs/apk/release/app-release.apk
-  

@@ -1,3 +1,5 @@
+# Unused (Will be completely overwritten)
+
 name: troppical-release-build
 
 on:
@@ -74,7 +76,7 @@ jobs:
         with:
           name: upload-url
           path: upload_url.txt
-          
+
   Windows-build:
     needs: [create-release]
     runs-on: windows-latest
@@ -105,8 +107,8 @@ jobs:
           pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed main.py
           pyinstaller --clean --onefile --icon=icon.ico --windowed init_troppical.py
         env:
-          GITHUB_TOKEN: ${{ secrets.BUILD }} 
-          
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+
       - name: Upload troppical
         uses: actions/upload-artifact@v4
         with:
@@ -135,7 +137,7 @@ jobs:
          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
          echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ${{ github.workspace }}/android/app/ks.jks
-      
+
       - name: Build with Gradle
         run: |
           cd android/
@@ -147,14 +149,14 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
           GITHUB_TOKEN: ${{ secrets.BUILD }}
-        
+
 
       - name: Upload Android Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: troppical-android
           path: ./android/app/build/outputs/apk/release/app-release.apk
-  
+
   upload-release-artifacts:
     needs: [Windows-build, Android-build, create-release]
     runs-on: ubuntu-latest
@@ -163,7 +165,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  
+        uses: actions/checkout@v4
 
       - name: Setup build directories
         run: |

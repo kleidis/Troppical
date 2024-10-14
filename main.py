@@ -1,21 +1,21 @@
-import os
-import subprocess
-import sys
-import requests
-import json
-from PyQt6.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QCheckBox, QStackedLayout, QHBoxLayout, QGroupBox, QComboBox, QProgressBar, QLineEdit, QMessageBox, QFileDialog, QInputDialog, QTreeWidget, QTreeWidgetItem
-from PyQt6.QtGui import QPixmap, QIcon, QImage
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QByteArray, QFile, pyqtSlot
-from zipfile import ZipFile 
-import shutil
-import tempfile
-from icons import styledark_rc
-import win32com.client
-import winreg
-from stylesheet import Style
-from pathlib import Path
+from imports import *
+from ui_init import *
 
-def get_latest_git_tag():
+class Online:
+    def init (self):
+        self.troppical_database = self.fetch_data()
+
+    def fetch_data(self):
+        url = "https://raw.githubusercontent.com/kleidis/test/main/troppical-data.json"
+        response = requests.get(url)
+        if response.status_code == 200:
+            all_data = response.json()
+            self.troppical_database = [item for item in all_data if item.get('emulator_platform') != 'android']
+            return self.troppical_database
+        else:
+            print("Failed to fetch data:", response.status_code)
+
+    def get_latest_git_tag():
         tag = "1.0"
         github_token = os.getenv("GITHUB_TOKEN", "")
         try:
@@ -32,264 +32,19 @@ def get_latest_git_tag():
             print(f"Failed to get latest GitHub release tag: {e}")
         return tag
 
-class QtUi(QMainWindow, Style):
-    def __init__(self):
-        super().__init__()
-        self.logic = Logic()
-        self.logic.fetch_google_sheet_data()
-        # Show a message box indicating that Troppical is starting
-        self.loading_message_box = QMessageBox(self)
-        self.loading_message_box.setIcon(QMessageBox.Icon.Information)
-        self.loading_message_box.setText("Troppical is starting.... If you get a notifcation that Troppical is not responding, ignore it.")
-        self.loading_message_box.setWindowModality(Qt.WindowModality.ApplicationModal)
-        close_button = self.loading_message_box.addButton(QMessageBox.StandardButton.Close)
-        close_button.hide()
-        self.loading_message_box.show()
-        QApplication.processEvents()
-        self.ui()  # Init UI
-        self.load_stylesheet()
-
-    # Logo Header
-    def Header(self):
-        # Header Layout
-        self.headerLayout = QVBoxLayout()
-        self.headerLayout.setContentsMargins(0, 20, 0, 0)
-        # Icon Widget
-        iconLabel = QLabel()
-        icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
-        icon = QIcon(icon_path)
-        pixmap = icon.pixmap(180, 180)  # Specify the size directly
-        iconLabel.setPixmap(pixmap)
-        # Text Widget
-        label = QLabel("<b><font size='10'>Troppical</font></b>")
-        # Set Widgets
-        self.headerLayout.addWidget(iconLabel, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.headerLayout.addWidget(label, alignment=Qt.AlignmentFlag.AlignCenter)
-        return self.headerLayout
-    
-    # Widgets
-    def ui(self):
-        # Init Window
-        self.setWindowTitle(f'Troppical - {version}')  # Window name with version        
-        self.setCentralWidget(QWidget(self))  # Set a central widget
-        self.layout = QStackedLayout(self.centralWidget())  # Set the layout on the central widget
-        self.setMaximumSize(1000, 720)  # Set the maximum window size to 1280x720
-        self.setMinimumSize(1000, 720)  # Set the minimum window size to 800x600
-        # Set the window icon
-        icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
-        self.setWindowIcon(QIcon(icon_path))
-        self.selection_page()
-
-
-    # Emulator Select Page
-    def selection_page(self):
-        self.emulatorSelectPage = QWidget()
-        emulatorSelectLayout = QVBoxLayout()
-        emulatorSelectGroup = QGroupBox("Select your emulator from the list")
-        emulatorSelectGroupLayout = QVBoxLayout()
-
-        # Create a QTreeWidget
-        self.emulatorTreeWidget = QTreeWidget()
-        self.emulatorTreeWidget.setHeaderHidden(True)
-        self.emulatorTreeWidget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-        
-        emulatorSelectGroupLayout.addWidget(self.emulatorTreeWidget)
-
-        # Keep track of emulator systems
-        system_items = {}
-
-        for troppical_api_data in self.logic.troppical_api:
-            emulator_system = troppical_api_data['emulator_system']
-            emulator_name = troppical_api_data['emulator_name']
-            emulator_desc = troppical_api_data.get('emulator_desc', '')
-
-            # Fetch and decode the logo
-            logo_url = troppical_api_data['emulator_logo']
-            response = requests.get(logo_url)
-            if response.status_code == 200:
-                image_bytes = response.content
-                qimage = QImage.fromData(QByteArray(image_bytes))
-                pixmap = QPixmap.fromImage(qimage).scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-                icon = QIcon(pixmap)
-                print(logo_url)
-            else:
-                QMessageBox.critical(self, "Failed to fetch logo", f"Failed to fetch logo for {emulator_name}. Status code: {response.status_code}")
-                icon = QIcon()
-
-            # Check if the emulator system already has a tree item, if not create one
-            if emulator_system not in system_items:
-                system_item = QTreeWidgetItem(self.emulatorTreeWidget)
-                system_item.setText(0, emulator_system)
-                system_item.setExpanded(True)  # Uncollapse the category by default
-                system_items[emulator_system] = system_item
-            else:
-                system_item = system_items[emulator_system]
-
-            # Add the emulator to the appropriate tree item
-            emulator_item = QTreeWidgetItem(system_item)
-            emulator_item.setText(0, emulator_name)
-            emulator_item.setIcon(0, icon)
-            emulator_item.setToolTip(0, emulator_desc) 
-
-        # Sort the systems and emulators alphabetically
-        self.emulatorTreeWidget.sortItems(0, Qt.SortOrder.AscendingOrder)
-        for i in range(self.emulatorTreeWidget.topLevelItemCount()):
-            system_item = self.emulatorTreeWidget.topLevelItem(i)
-            system_item.sortChildren(0, Qt.SortOrder.AscendingOrder)
-
-        # Set layout for the group and add to the main layout
-        emulatorSelectGroup.setLayout(emulatorSelectGroupLayout)
-        emulatorSelectLayout.addWidget(emulatorSelectGroup)
-        self.emulatorSelectPage.setLayout(emulatorSelectLayout)  # Set the layout for the emulator selection page
-        self.layout.addWidget(self.emulatorSelectPage)
-
-        # Next button to confirm selection
-        self.nextButton = QPushButton("Next")
-        self.nextButton.clicked.connect(self.logic.set_emulator)
-        emulatorSelectLayout.addWidget(self.nextButton)
-        # Welcome page
-        self.welcomePage = QWidget()
-        ## Layout and gorup
-        welcomerLayout = QVBoxLayout()
-        welcomerGroup = QGroupBox("")
-        welcomerGroupLayout = QVBoxLayout()
-        buttonsLayout = QHBoxLayout()
-        welcomerGroup.setLayout(welcomerGroupLayout)
-        self.welcomePage.setLayout(welcomerLayout) # Set the welcomepage layout
-        ## Widgets
-        self.welcomerLabel = QLabel()
-        self.welcomerLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.installButton = QPushButton('Install')
-        self.installButton.clicked.connect(self.logic.qt_button_click)
-        self.updateButton = QPushButton('Check for Updates')
-        self.updateButton.clicked.connect(self.logic.qt_button_click)
-        self.uninstallButton = QPushButton('Uninstall')
-        self.uninstallButton.clicked.connect(self.logic.qt_button_click)
-        self.backButton = QPushButton("Back")
-        self.backButton.setFixedSize(80, 30) 
-        self.backButton.clicked.connect(self.logic.qt_button_click)
-        ## Add widgets / layouts
-        welcomerLayout.addLayout(self.Header()) 
-        welcomerLayout.addWidget(welcomerGroup)
-        welcomerGroupLayout.addWidget(self.welcomerLabel)
-        buttonsLayout.addWidget(self.installButton)
-        buttonsLayout.addWidget(self.updateButton)
-        buttonsLayout.addWidget(self.uninstallButton)
-        welcomerLayout.addLayout(buttonsLayout)
-        welcomerLayout.insertWidget(0, self.backButton)
-        ## Add the welcome page to the layout
-        self.layout.addWidget(self.welcomePage)
-
-        # Install page
-        self.installPage = QWidget()
-        ## Layout and gorup
-        installLayout = QVBoxLayout()
-        checkboxLayout = QVBoxLayout()
-        checkboxGroup = QGroupBox("Do you want to create shortcuts?") # Checkboxes
-        checkboxGroup.setLayout(checkboxLayout) # Set the layout of Checkboxes
-        pathSelectorLayout = QHBoxLayout() # Browse widget layout
-        self.installPage.setLayout(installLayout) # Set the installpage layout
-        ## Widgets
-        InstalOpt = QLabel('<b>Installation Options')
-        InstalOpt.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.installationSourceComboBox = QComboBox() # Dropdown menu
-        self.desktopShortcutCheckbox = QCheckBox("Create a desktop shortcut") # Checkboxes
-        self.startMenuShortcutCheckbox = QCheckBox("Create a start menu shortcut")
-        self.installationPathLineEdit = QLineEdit()  # Browse for installation path widget
-        self.browseButton = QPushButton("Browse")
-        self.browseButton.clicked.connect(self.logic.InstallPath)
-        self.install_emu_button = QPushButton('Install') # Install button
-        self.install_emu_button.clicked.connect(self.logic.qt_button_click)
-        ## Add widgets / layouts
-        installLayout.addLayout(self.Header()) ### Icon self.header
-        installLayout.addWidget(InstalOpt) ### Instalation Option Label
-        installLayout.addWidget(self.installationSourceComboBox) ## Install Sorce Widget
-        pathSelectorLayout.addWidget(self.installationPathLineEdit) ## Browse Widget
-        pathSelectorLayout.addWidget(self.browseButton)
-        installLayout.addLayout(pathSelectorLayout)
-        checkboxLayout.addWidget(self.desktopShortcutCheckbox) # Checkboxes
-        checkboxLayout.addWidget(self.startMenuShortcutCheckbox)
-        installLayout.addWidget(checkboxGroup)
-        installLayout.addWidget(self.install_emu_button)
-        ## Add the install page to the layout
-        self.layout.addWidget(self.installPage)
-
-        # Progress bar page
-        self.progressBarPage = QWidget()
-        ## Layout and groups
-        progressBarLayout = QVBoxLayout()
-        self.progressBarPage.setLayout(progressBarLayout)
-        ## Widgets
-        self.downloadProgressBar = QProgressBar()
-        self.downloadProgressBar.setRange(0, 100)  # Progress bar Widgets
-        self.extractionProgressBar = QProgressBar()
-        self.extractionProgressBar.setRange(0, 100)    
-        self.labeldown = QLabel("Downloading: ")
-        self.labelext = QLabel("Extracting: ")
-        ## Add widgets / layouts
-        progressBarLayout.addLayout(self.Header())  # Add the icon self.header
-        progressBarLayout.addWidget(self.labeldown)
-        progressBarLayout.addWidget(self.downloadProgressBar)
-        progressBarLayout.addWidget(self.labelext)
-        progressBarLayout.addWidget(self.extractionProgressBar)
-        # Add the progress bar page to the layout
-        self.layout.addWidget(self.progressBarPage)
-
-        # Finish page
-        self.finishPage = QWidget()
-        ## Layout and groups
-        finishLayout = QVBoxLayout()
-        self.finishPage.setLayout(finishLayout)
-        ## Widgets
-        finishLabel = QLabel("<b>Installation Complete!")
-        finishLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Center the text horizontally
-        finishButton = QPushButton("Finish")
-        finishButton.clicked.connect(self.close)
-        installAnotherButton = QPushButton("Install another emulator")
-        installAnotherButton.clicked.connect(lambda: (
-            self.layout.setCurrentIndex(0),
-            self.downloadProgressBar.setValue(0),
-            self.extractionProgressBar.setValue(0),
-            setattr(self.logic, 'install_mode', None),
-            setattr(self.logic, 'selection', None)
-        ))        
-        ## Add widgets / layouts
-        finishLayout.addLayout(self.Header())  # Add the icon self.header
-        finishLayout.addWidget(finishLabel)
-        # Create a horizontal layout for the buttons
-        buttonLayout = QHBoxLayout()
-        buttonLayout.addWidget(finishButton)
-        buttonLayout.addWidget(installAnotherButton)
-        finishLayout.addLayout(buttonLayout)
-        # Add the progress bar page to the layout
-        self.layout.addWidget(self.finishPage)  
-
-        self.loading_message_box.close()
-
-    def load_stylesheet(app):
-            app.setStyleSheet(Style.dark_stylesheet)
-            
 class Logic:
     def __init__(self):
-        self.regvalue = None  
+        self.regvalue = None
         self.install_mode = None
         self.emulator = None
-   
-    def fetch_google_sheet_data(self):
-        url = "https://script.googleusercontent.com/macros/echo?user_content_key=Hw-G9S_OHELhOUAsT-oQr8ux2HPMIpva3U1w0Su7P1ZYrr1ngXyqlN6LBhfev1taFoRtJ07w_KDhWVbMaBaeJ3c86H4e0k8Xm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnL69XsVZDOhipZMwrhs3JioNozSVnp4Chm6SveAF_nlUSMgTaOh-zk0bQ5F9LtyaiRZKic-heYuYVV866SySaVfv-0TkTPKcCtz9Jw9Md8uu&lib=MmjrdpKGbUxdyxLDAqWkoFhoZjK-0W8qS"
-        response = requests.get(url)
-        if response.status_code == 200:
-            all_data = response.json()
-            self.troppical_api = [item for item in all_data if item.get('emulator_platform') != 'android']
-            return self.troppical_api
-        else:
-            print("Failed to fetch data:", response.status_code)
 
-    # Set which emulator to use for the installer depeanding on the selected emulator 
+    # Set which emulator to use for the installer depeanding on the selected emulator
     def set_emulator(self):
-        selected_item = qtui.emulatorTreeWidget.currentItem()
+        selected_item =  MainWindow.instances().selection_page.emulatorTreeWidget.currentItem()
+        print (selected_item)
         if not selected_item or not selected_item.parent():
-            QMessageBox.warning(qtui, "Selection Error", "Please select an emulator.")
+            QMessageBox.warning(SelectionPage.window, "Selection Error", "Please select an emulator.")
+            print ("Please select an emulator.")
             return
 
         emulator_name = selected_item.text(0)
@@ -321,15 +76,15 @@ class Logic:
 
     # Disable buttons depanding on if it the program is already installed
     def disable_qt_buttons_if_installed(self):
-        regvalue = self.checkreg() 
+        regvalue = self.checkreg()
         if regvalue is None:
-            qtui.installButton.setEnabled(True) 
+            qtui.installButton.setEnabled(True)
             qtui.updateButton.setEnabled(False)
-            qtui.uninstallButton.setEnabled(False)                    
+            qtui.uninstallButton.setEnabled(False)
         else:
-            qtui.installButton.setEnabled(False) 
+            qtui.installButton.setEnabled(False)
             qtui.updateButton.setEnabled(True)
-            qtui.uninstallButton.setEnabled(True)               
+            qtui.uninstallButton.setEnabled(True)
 
     # Button clinking function
     def qt_button_click(self):
@@ -351,7 +106,7 @@ class Logic:
             if current_index > 0:
                 qtui.layout.setCurrentIndex(current_index - 1)
         return self.install_mode
-    
+
     # Select installation path function
     def InstallPath(self):
         self.Install_Dir = qtui.installationPathLineEdit.text()
@@ -361,23 +116,23 @@ class Logic:
         # Set Emulator name to the selected directory path
             self.Install_Dir = os.path.join(selectedDirectory, self.emulator)
             qtui.installationPathLineEdit.setText(self.Install_Dir)
-        return self.Install_Dir     
+        return self.Install_Dir
 
-    # Add the various version to the selection combobox 
+    # Add the various version to the selection combobox
     def Add_releases_to_combobox(self):
         print (self.releases_url)
         response = requests.get(self.releases_url)
-        self.releases = response.json()[:5] 
+        self.releases = response.json()[:5]
 
         # Clear the combo box before adding new items
         qtui.installationSourceComboBox.clear()
 
         # Remove or add items based on the emulator
-        for release in self.releases: 
+        for release in self.releases:
             qtui.installationSourceComboBox.addItem(release['tag_name'])
-        
-    # Update button function    
-    def emulator_updates(self): 
+
+    # Update button function
+    def emulator_updates(self):
         self.checkreg() # Initialise the reg value function
         installed_emulator = self.updatevalue
         response = requests.get(self.releases_url + "/latest")
@@ -405,7 +160,7 @@ class Logic:
                 pass
         else:
             QMessageBox.information(qtui, "No Update Found", f"You are up to date with the latest version of {self.emulator}", QMessageBox.StandardButton.Ok)
-    
+
     # Preparing which file to downlaod
     def Prepare_Download(self):
         print (self.install_mode)
@@ -413,7 +168,7 @@ class Logic:
         if reg_key is not None:
             UpdateChannelValue = reg_key[1]
         else:
-            UpdateChannelValue = None  
+            UpdateChannelValue = None
 
         self.selection = qtui.installationSourceComboBox.currentText()
 
@@ -469,7 +224,7 @@ class Logic:
                 self.createreg()
             else:
                 QMessageBox.critical(qtui, "Error", f"No suitable Windows download found for {self.emulator} in the latest release. Please try another release or check for updates.")
-    # Download function    
+    # Download function
     def Download_Emulator(self):
         temp_file = tempfile.NamedTemporaryFile(delete=False).name
         if self.install_mode == "Install":
@@ -491,7 +246,7 @@ class Logic:
     def on_download_finished(self):
         self.extract_and_install(self.download_worker.dest, self.installationPath)
 
-    # Extract and install function 
+    # Extract and install function
     def extract_and_install(self, temp_file, extract_to):
         extract_to = self.installationPath
         # Rename the temporary file to have a .zip extension and create a temporary extraction folder
@@ -530,24 +285,24 @@ class Logic:
                 shutil.copytree(src_item_path, dest_item_path, dirs_exist_ok=True)
             else:
                 shutil.copy2(src_item_path, dest_item_path)
-       
+
         # Mark the installation as complete
         self.installation_complete()
 
     # Install is complete
     def installation_complete(self):
         qtui.extractionProgressBar.setValue(100)
-        
+
         # Fetch the executable path from the troppical_api data
         for troppical_api_data in self.troppical_api:
             if troppical_api_data['emulator_name'] == self.emulator:
                 exe_name = troppical_api_data.get('exe_path', '')
-                executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), exe_name))   
+                executable_path = os.path.normpath(os.path.join(qtui.installationPathLineEdit.text(), exe_name))
                 print (executable_path)
         if executable_path is None:
             QMessageBox.critical(qtui, "Error", f"Executable path not found for emulator: {self.emulator}")
             return
-        
+
         if qtui.desktopShortcutCheckbox.isChecked():
             self.define_shortcut(executable_path, 'desktop')
         if qtui.startMenuShortcutCheckbox.isChecked():
@@ -564,12 +319,12 @@ class Logic:
             self.asset_version, regtype = winreg.QueryValueEx(self.registry_key, 'Asset_version')
             winreg.CloseKey(self.registry_key)
             return self.regvalue, self.updatevalue, self.asset_version
-        except FileNotFoundError:         
+        except FileNotFoundError:
             pass
-    # Function to create the reg values            
-    def createreg (self):   
+    # Function to create the reg values
+    def createreg (self):
         winreg.CreateKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")
-        self.registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}", 0, 
+        self.registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}", 0,
                                         winreg.KEY_WRITE)
         if self.install_mode == "Install":
             winreg.SetValueEx(self.registry_key, 'Install_Dir', 0, winreg.REG_SZ, qtui.installationPathLineEdit.text())
@@ -577,13 +332,13 @@ class Logic:
         winreg.SetValueEx(self.registry_key, 'Version', 0, winreg.REG_SZ, self.selection)
         winreg.CloseKey(self.registry_key)
 
-    # Function to create the shortcuts 
+    # Function to create the shortcuts
     def define_shortcut(self, target, location_type):
         if location_type == 'desktop':
             path = os.path.join(os.environ['USERPROFILE'], 'Desktop')
         elif location_type == 'start_menu':
             path = os.path.join(os.environ['APPDATA'], 'Microsoft', 'Windows', 'Start Menu', 'Programs')
-        
+
         filename = f'{self.emulator}.lnk'
         shortcut_path = os.path.join(path, filename)
 
@@ -604,7 +359,7 @@ class Logic:
         except Exception as e:
             QMessageBox.critical(qtui, "Error", f"Failed to create shortcut: {e}")
 
-    # Uninstall function 
+    # Uninstall function
     def uninstall(self):
         self.checkreg()
         print (self.regvalue)
@@ -628,16 +383,16 @@ class Logic:
                     winreg.DeleteKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")
                     QMessageBox.information(qtui, "Uninstall", f"{self.emulator} has been successfully uninstalled.")
                     self.emulator = None
-                    qtui.layout.setCurrentIndex(0)   
+                    qtui.layout.setCurrentIndex(0)
                 else:
                     QMessageBox.critical(qtui, "Error", "The directory might have been moved or deleted. Please reinstall the program.")
                     winreg.DeleteKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")
-                    qtui.updateButton.setEnabled(False)   
-                    qtui.uninstallButton.setEnabled(False)    
-                    qtui.installButton.setEnabled(True) 
+                    qtui.updateButton.setEnabled(False)
+                    qtui.uninstallButton.setEnabled(False)
+                    qtui.installButton.setEnabled(True)
         else:
             QMessageBox.critical(qtui, "Error",("Failed to read the registry key. Try and reinstall again!"))
-            qtui.layout.setCurrentIndex(1)        
+            qtui.layout.setCurrentIndex(1)
 
 # Download Worker class to download the files
 class DownloadWorker(QThread):
@@ -671,9 +426,8 @@ class DownloadWorker(QThread):
             self.finished.emit()
 
 if __name__ == "__main__":
-    version = get_latest_git_tag()
+    version = Online.get_latest_git_tag()
     app = QApplication(sys.argv)
-    qtui = QtUi()
-    qtui.show()
-    self = Logic()
+    ui_window = MainWindow()
+    ui_window.show()
     sys.exit(app.exec())

@@ -1,58 +1,46 @@
-from imports import *
-from ui_init import *
+from PyQt6.QtWidgets import QApplication, QMessageBox, QFileDialog, QInputDialog
+from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
+import requests
+import os
+import subprocess
+import sys
+from zipfile import ZipFile
+import shutil
+import tempfile
+from icons import styledark_rc
+import win32com.client
+import winreg
+from pathlib import Path
+from init_instances import inst
 
-class Online:
-    def init (self):
-        self.troppical_database = self.fetch_data()
-
-    def fetch_data(self):
-        url = "https://raw.githubusercontent.com/kleidis/test/main/troppical-data.json"
-        response = requests.get(url)
-        if response.status_code == 200:
-            all_data = response.json()
-            self.troppical_database = [item for item in all_data if item.get('emulator_platform') != 'android']
-            return self.troppical_database
-        else:
-            print("Failed to fetch data:", response.status_code)
-
-    def get_latest_git_tag():
-        tag = "1.0"
-        github_token = os.getenv("GITHUB_TOKEN", "")
-        try:
-            command = f"GH_TOKEN={github_token} gh release list --limit 1 --json tagName --jq '.[0].tagName'"
-            process = subprocess.Popen(['bash', '-c', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            out, err = process.communicate()
-            if process.returncode == 0:
-                tag = out.decode('utf-8').strip()
-                if tag.startswith("v"):
-                    tag = tag[1:]
-            else:
-                print(f"Failed to get latest GitHub release tag: {err.decode('utf-8')}")
-        except Exception as e:
-            print(f"Failed to get latest GitHub release tag: {e}")
-        return tag
-
-class Logic:
+class Main():
     def __init__(self):
         self.regvalue = None
         self.install_mode = None
         self.emulator = None
 
+    def initialize_app(self):
+        version = inst.online.get_latest_git_tag()
+        app = QApplication(sys.argv)
+        ui_main = inst.ui
+        ui_main.show()
+        sys.exit(app.exec())
+
     # Set which emulator to use for the installer depeanding on the selected emulator
-    def set_emulator(self):
-        selected_item =  MainWindow.instances().selection_page.emulatorTreeWidget.currentItem()
-        print (selected_item)
+    def set_emulator(self, selection_page):
+        selected_item = selection_page.emulatorTreeWidget.currentItem()
+        print(selected_item)
         if not selected_item or not selected_item.parent():
-            QMessageBox.warning(SelectionPage.window, "Selection Error", "Please select an emulator.")
-            print ("Please select an emulator.")
+            QMessageBox.warning(selection_page.window, "Selection Error", "Please select an emulator.")
+            print("Please select an emulator.")
             return
 
         emulator_name = selected_item.text(0)
         if self.emulator != emulator_name:
             # Clear previous emulator settings
-            qtui.labeldown.setText("Downloading: ")
-            qtui.labelext.setText("Extracting: ")
-            qtui.welcomerLabel.setText("")
+            inst.progress_bar_page_instance.labeldown.setText("Downloading: ")
+            inst.ui.labelext.setText("Extracting: ")
+            inst.ui.welcomerLabel.setText("")
 
             # Set new emulator
             self.emulator = emulator_name
@@ -64,48 +52,27 @@ class Logic:
         # Update UI components with new emulator settings
         reg_result = self.checkreg()
         installed_emulator = "Not Installed" if reg_result is None else reg_result[1]
-        qtui.installationPathLineEdit.setText(os.path.join(os.environ['LOCALAPPDATA'], self.emulator))
-        qtui.labeldown.setText("Downloading: " + self.emulator)
-        qtui.labelext.setText("Extracting: " + self.emulator)
-        qtui.welcomerLabel.setText(f'<big>Your currently selected emulator is <b>{self.emulator}</b> and current version is <b>{installed_emulator}</b>.</big>')
+        inst.ui.installationPathLineEdit.setText(os.path.join(os.environ['LOCALAPPDATA'], self.emulator))
+        inst.ui.labeldown.setText("Downloading: " + self.emulator)
+        inst.ui.labelext.setText("Extracting: " + self.emulator)
+        inst.ui.welcomerLabel.setText(f'<big>Your currently selected emulator is <b>{self.emulator}</b> and current version is <b>{installed_emulator}</b>.</big>')
 
-        print (self.emulator)
+        print(self.emulator)
         self.checkreg()
         self.disable_qt_buttons_if_installed()
-        qtui.layout.setCurrentIndex(1)
+        inst.ui.layout.setCurrentIndex(1)
 
     # Disable buttons depanding on if it the program is already installed
     def disable_qt_buttons_if_installed(self):
         regvalue = self.checkreg()
         if regvalue is None:
-            qtui.installButton.setEnabled(True)
-            qtui.updateButton.setEnabled(False)
-            qtui.uninstallButton.setEnabled(False)
+            inst.ui.installButton.setEnabled(True)
+            inst.ui.updateButton.setEnabled(False)
+            inst.ui.uninstallButton.setEnabled(False)
         else:
-            qtui.installButton.setEnabled(False)
-            qtui.updateButton.setEnabled(True)
-            qtui.uninstallButton.setEnabled(True)
-
-    # Button clinking function
-    def qt_button_click(self):
-        button = qtui.sender()
-        if button is qtui.installButton:
-            self.install_mode = "Install"
-            qtui.layout.setCurrentIndex(2)
-            self.Add_releases_to_combobox()
-        elif button is qtui.updateButton:
-            self.emulator_updates()
-        elif button is qtui.uninstallButton:
-            self.install_mode = "Uninstall" # Unused for now
-            self.uninstall()
-        if button is qtui.install_emu_button:
-            qtui.layout.setCurrentIndex(3)
-            self.Prepare_Download()
-        if button is qtui.backButton:
-            current_index = qtui.layout.currentIndex()
-            if current_index > 0:
-                qtui.layout.setCurrentIndex(current_index - 1)
-        return self.install_mode
+            inst.ui.installButton.setEnabled(False)
+            inst.ui.updateButton.setEnabled(True)
+            inst.ui.uninstallButton.setEnabled(True)
 
     # Select installation path function
     def InstallPath(self):
@@ -394,40 +361,6 @@ class Logic:
             QMessageBox.critical(qtui, "Error",("Failed to read the registry key. Try and reinstall again!"))
             qtui.layout.setCurrentIndex(1)
 
-# Download Worker class to download the files
-class DownloadWorker(QThread):
-    progress = pyqtSignal(int)
-
-    def __init__(self, url, dest):
-        super().__init__()
-        self.url = url
-        self.dest = dest
-
-
-    @pyqtSlot()
-    def do_download(self):
-        try:
-            response = requests.get(self.url, stream=True)
-            total_size = int(response.headers.get('content-length', 0))
-            if total_size == 0:
-                print("The content-length of the response is zero.")
-                return
-
-            downloaded_size = 0
-            with open(self.dest, 'wb') as file:
-                for data in response.iter_content(1024):
-                    downloaded_size += len(data)
-                    file.write(data)
-                    progress_percentage = (downloaded_size / total_size) * 100
-                    self.progress.emit(int(progress_percentage))
-            self.finished.emit()
-        except Exception as e:
-            QMessageBox.critical(QtUi, "Error",("Error doing download."))
-            self.finished.emit()
-
 if __name__ == "__main__":
-    version = Online.get_latest_git_tag()
-    app = QApplication(sys.argv)
-    ui_window = MainWindow()
-    ui_window.show()
-    sys.exit(app.exec())
+    main = Main()
+    main.initialize_app()

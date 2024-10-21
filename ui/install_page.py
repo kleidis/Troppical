@@ -1,7 +1,7 @@
- # Install page
-from imports import *
-from main import Logic as main
-from header import Header
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QGroupBox, QComboBox, QCheckBox, QLineEdit
+from PyQt6.QtCore import Qt
+from init_instances import inst
+from ui.header import Header
 
 class InstallPage(QWidget):
     def __init__(self):
@@ -23,10 +23,8 @@ class InstallPage(QWidget):
         self.startMenuShortcutCheckbox = QCheckBox("Create a start menu shortcut")
         self.installationPathLineEdit = QLineEdit()  # Browse for installation path widget
         self.browseButton = QPushButton("Browse")
-        self.browseButton.clicked.connect(main.InstallPath)
-        self.install_emu_button = QPushButton('Install') # Install button
-        self.install_emu_button.clicked.connect(main.qt_button_click)
-        ## Add widgets / layouts
+        self.browseButton.clicked.connect(inst.main.InstallPath)
+        self.install_emu_button = QPushButton('Install') # Install button        ## Add widgets / layouts
         installLayout.addLayout(self.header) ### Icon self.header
         installLayout.addWidget(InstalOpt) ### Instalation Option Label
         installLayout.addWidget(self.installationSourceComboBox) ## Install Sorce Widget

@@ -1,5 +1,5 @@
-from imports import *
-from header import Header
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QProgressBar, QLabel
+from ui.header import Header
 
  # Progress bar page
 class ProgressBarPage(QWidget):

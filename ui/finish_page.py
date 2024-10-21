@@ -1,7 +1,7 @@
-
-from imports import *
-from main import Logic as main
-from header import Header
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
+from PyQt6.QtCore import Qt
+from main import Main as main
+from ui.header import Header
 
 # Finish page
 class FinishPage(QWidget):

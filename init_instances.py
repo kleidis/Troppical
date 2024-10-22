@@ -2,6 +2,7 @@
 class inst:
     _main = None #main.py
     _online = None #network_functions.py
+    _download = None #download_worker.py
     _ui = None #ui_main.py
     _secondary_thread = None #ui_main.py
     _wel = None #welcome.py
@@ -24,6 +25,13 @@ class inst:
             from network_functions import Online  # Import Online from network_functions
             self._online = Online()
         return self._online
+
+    @property
+    def download(self):
+        if self._download is None:
+            from network_functions import DownloadWorker  # Import DownloadWorker only when needed
+            self._download = DownloadWorker()
+        return self._download
 
     @property
     def ui(self):

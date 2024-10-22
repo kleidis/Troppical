@@ -8,7 +8,8 @@ from PyQt6.QtCore import QByteArray, Qt
 
 class Online():
     def __init__(self):
-        self.troppical_database = self.fetch_data()
+        self.troppical_database = self.fetch_data() # Fetch the data from troppical_dataabse JSON
+        self.emulator_database = None  # Cache for filtered emulator data
 
     def fetch_data(self):
         url = "https://raw.githubusercontent.com/kleidis/test/main/troppical-data.json"
@@ -49,6 +50,9 @@ class Online():
         return tag
 
     def filter_emulator_data(self):
+        if self.emulator_database is not None:
+            return self.emulator_database
+
         emulator_data = {}
         for troppical_api_data in self.troppical_database:
             emulator_name = troppical_api_data['emulator_name']
@@ -70,6 +74,7 @@ class Online():
                 icon = QIcon()  # Default icon if fetching fails
 
             emulator_data[emulator_name] = {
+                'name': emulator_name,
                 'system': emulator_system,
                 'description': emulator_desc,
                 'owner': emulator_owner,
@@ -77,6 +82,8 @@ class Online():
                 'exe_path': exe_path,
                 'icon': icon
             }
+
+        self.emulator_database = emulator_data  # Store the data for later use throughout the codebase
         return emulator_data
 
 

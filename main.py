@@ -15,9 +15,9 @@ from init_instances import inst
 
 class Main():
     def __init__(self):
-        self.regvalue = None
-        self.install_mode = None
-        self.emulator = None
+        # Init variables
+        self.regvalue = None # If the emualtor is not installed to the registry
+        self.emulator = None # Keep track of the selected emulator
 
     def initialize_app(self):
         version = inst.online.get_latest_git_tag()
@@ -29,10 +29,8 @@ class Main():
     # Set which emulator to use for the installer depeanding on the selected emulator
     def set_emulator(self, selection_page):
         selected_item = selection_page.emulatorTreeWidget.currentItem()
-        print(selected_item)
         if not selected_item or not selected_item.parent():
             QMessageBox.warning(selection_page.window, "Selection Error", "Please select an emulator.")
-            print("Please select an emulator.")
             return
 
         emulator_name = selected_item.text(0)
@@ -45,9 +43,12 @@ class Main():
             # Set new emulator
             self.emulator = emulator_name
 
-        for selected_emulator in self.troppical_api:
-            if selected_emulator['emulator_name'] == self.emulator:
-                self.releases_url = f"https://api.github.com/repos/{selected_emulator['emulator_owner']}/{selected_emulator['emulator_repo']}/releases"
+            # Use cached emulator data
+            emulator_data = inst.online.emulator_database
+
+            for selected_emulator in emulator_data.values():
+                if selected_emulator['name'] == self.emulator:
+                    self.releases_url = f"https://api.github.com/repos/{selected_emulator['owner']}/{selected_emulator['repo']}/releases"
 
         # Update UI components with new emulator settings
         reg_result = self.checkreg()

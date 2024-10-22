@@ -27,22 +27,14 @@ class SelectionPage(QWidget):
 
         # Next button to confirm selection
         self.nextButton = QPushButton("Next")
-        self.nextButton.clicked.connect(lambda: inst.main_instance.set_emulator(self))
+        self.nextButton.clicked.connect(lambda: inst.main.set_emulator(self))
         emulatorSelectLayout.addWidget(self.nextButton)
 
-        # Show initializing message
-        self.initializing_msg = QMessageBox(self)
-        self.initializing_msg.setWindowTitle("Troppical API")
-        self.initializing_msg.setText("Getting emulator data...")
-        self.initializing_msg.setStandardButtons(QMessageBox.StandardButton.NoButton)
-        self.initializing_msg.show()
+        inst.ui.initialize_emulator_database()
 
-        # Start the secondary thread with the task and callback
-        inst.ui.start_secondary_thread(inst.online.filter_emulator_data, self.populate_emulator_tree)
-
-    def populate_emulator_tree(self, emulator_data):
+    def populate_emulator_tree(self,):
         # Iterate over each emulator item and add it to the tree
-        for emulator_name, data in emulator_data.items():
+        for emulator_name, data in inst.online.emulator_database.items():
             emulator_system = data['system']
             emulator_desc = data['description']
             icon = data['icon']
@@ -70,7 +62,7 @@ class SelectionPage(QWidget):
             emulator_item.setToolTip(0, emulator_desc)
 
             # Close the initializing message
-            self.initializing_msg.hide()
+            inst.ui.initializing_msg.hide()
 
         # Sort the systems and emulators alphabetically
         self.emulatorTreeWidget.sortItems(0, Qt.SortOrder.AscendingOrder)

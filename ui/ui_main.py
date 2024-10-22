@@ -104,6 +104,21 @@ class MainWindow(QMainWindow):
         if current_index > 0:
             self.layout.setCurrentIndex(current_index - 1)
 
+    def initialize_emulator_database(self):
+        # Check if the message box is already shown
+        if hasattr(self, 'initializing_msg') and self.initializing_msg.isVisible():
+            return
+
+        # Show initializing message
+        self.initializing_msg = QMessageBox(self)
+        self.initializing_msg.setWindowTitle("Troppical API")
+        self.initializing_msg.setText("Getting emulator data...")
+        self.initializing_msg.setStandardButtons(QMessageBox.StandardButton.NoButton)
+        self.initializing_msg.show()
+
+        # Start the secondary thread with the task and callback
+        self.start_secondary_thread(inst.online.filter_emulator_data, lambda: inst.sel.populate_emulator_tree())
+
     def start_secondary_thread(self, task, callback, *args, **kwargs):
         if self.shared_thread is not None:
             self.shared_thread.quit()

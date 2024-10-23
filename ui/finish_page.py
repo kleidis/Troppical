@@ -1,13 +1,11 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
 from PyQt6.QtCore import Qt
-from main import Main as main
-from ui.header import Header
+from init_instances import inst
 
 # Finish page
 class FinishPage(QWidget):
         def __init__(self):
             super().__init__()
-            self.Header = Header.header(self)
             self.finishPage = QWidget()
             ## Layout and groups
             finishLayout = QVBoxLayout()
@@ -18,7 +16,7 @@ class FinishPage(QWidget):
             self.finishButton = QPushButton("Finish")
             self.installAnotherButton = QPushButton("Install another emulator")
             ## Add widgets / layouts
-            finishLayout.addLayout(self.Header)  # Add the icon self.header
+            finishLayout.addLayout(inst.header.header())
             finishLayout.addWidget(finishLabel)
             # Create a horizontal layout for the buttons
             buttonLayout = QHBoxLayout()

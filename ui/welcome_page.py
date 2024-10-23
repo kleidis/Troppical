@@ -13,9 +13,7 @@ class WelcomePage(QWidget):
         welcomeLayout = QVBoxLayout()
         self.welcomePage.setLayout(welcomeLayout)
 
-        # Add header
-        #    self.Header = Header().header()  # Initialize the header
-        #    welcomeLayout.addLayout(self.Header)
+        welcomeLayout.addLayout(inst.header.header())
 
         # Welcome label
         welcomeLabel = QLabel("<b><font size='12'>Welcome to Troppical Installer!</font></b>")

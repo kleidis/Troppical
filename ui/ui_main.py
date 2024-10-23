@@ -26,6 +26,7 @@ class MainWindow(QMainWindow):
 
     def connect_buttons(self):
         # Connect buttons to the qt_button_click method
+        inst.header.header()
         inst.wel.manageButton.clicked.connect(self.qt_button_click)
         inst.sel.nextButton.clicked.connect(self.qt_button_click)
         inst.act.installButton.clicked.connect(self.qt_button_click)

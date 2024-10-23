@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import QVBoxLayout, QLabel
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QImage
+from PyQt6.QtCore import Qt, QByteArray
+from init_instances import inst
 class Header():
     def header(self):
         # Header Layout
@@ -7,10 +9,9 @@ class Header():
         self.headerLayout.setContentsMargins(0, 20, 0, 0)
         # Icon Widget
         iconLabel = QLabel()
-    #      icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
-        #   icon = QIcon(icon_path)
-        #   pixmap = icon.pixmap(180, 180)  # Specify the size directly
-        #   iconLabel.setPixmap(pixmap)
+        icon = inst.online.fetch_and_process_main_icon()
+        pixmap = icon.pixmap(180, 180)  # Specify the size directly
+        iconLabel.setPixmap(pixmap)  # Set the pixmap to the label
         # Text Widget
         label = QLabel("<b><font size='10'>Troppical</font></b>")
         # Set Widgets

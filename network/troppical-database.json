@@ -1,7 +1,7 @@
 [
   {
     "emulator_name": "Lime3DS",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/lime3ds.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/lime3ds.png",
     "emulator_desc": "A Nintendo 3DS emulator based on Citra",
     "emulator_owner": "Lime3DS",
     "emulator_repo": "Lime3DS",
@@ -15,7 +15,7 @@
   },
   {
     "emulator_name": "Panda3DS",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/c75381e731c6e72c0fc5964af0d2dbf12b938c1a/assets/placeholder.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/placeholder.png",
     "emulator_desc": "Panda3DS is a HLE 3DS emulator",
     "emulator_owner": "wheremyfoodat",
     "emulator_repo": "Panda3DS",
@@ -29,7 +29,7 @@
   },
   {
     "emulator_name": "PabloMK7's Citra",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/citra.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/citra.png",
     "emulator_desc": "A Nintendo 3DS Emulator",
     "emulator_owner": "PabloMK7",
     "emulator_repo": "citra",
@@ -43,7 +43,7 @@
   },
   {
     "emulator_name": "Mandarine",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/mandarine.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/mandarine.png",
     "emulator_desc": "A Citra fork with extra options for more performance",
     "emulator_owner": "mandarine3ds",
     "emulator_repo": "mandarine",
@@ -57,7 +57,7 @@
   },
   {
     "emulator_name": "SkyEmu",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/skyemu.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/skyemu.png",
     "emulator_desc": "Game Boy Advance, Game Boy, Game Boy Color, and DS Emulator",
     "emulator_owner": "skylersaleh",
     "emulator_repo": "SkyEmu",
@@ -71,7 +71,7 @@
   },
   {
     "emulator_name": "DeSmuME",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/desmume.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/desmume.png",
     "emulator_desc": "DeSmuME is a Nintendo DS emulator",
     "emulator_owner": "TASEmulators",
     "emulator_repo": "desmume",
@@ -85,7 +85,7 @@
   },
   {
     "emulator_name": "MelonDS",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/melonds.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/melonds.png",
     "emulator_desc": "A DS emulator, sorta",
     "emulator_owner": "melonDS-emu",
     "emulator_repo": "melonDS",
@@ -99,7 +99,7 @@
   },
   {
     "emulator_name": "Simple64",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/simple64.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/simple64.png",
     "emulator_desc": "Accurate N64 Emulator",
     "emulator_owner": "simple64",
     "emulator_repo": "simple64",
@@ -113,7 +113,7 @@
   },
   {
     "emulator_name": "NooDS",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/noods.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/noods.png",
     "emulator_desc": "A (hopefully!) speedy DS emulator",
     "emulator_owner": "Hydr8gon",
     "emulator_repo": "NooDS",
@@ -127,7 +127,7 @@
   },
   {
     "emulator_name": "bsnes",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/bnes.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/bnes.png",
     "emulator_desc": "bsnes is a Super Nintendo (SNES) emulator focused on performance, features, and ease of use.",
     "emulator_owner": "bsnes-emu",
     "emulator_repo": "bsnes",
@@ -141,7 +141,7 @@
   },
   {
     "emulator_name": "snes9x",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/snes9x.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/snes9x.png",
     "emulator_desc": "Snes9x - Portable Super Nintendo Entertainment System (TM) emulator",
     "emulator_owner": "snes9xgit",
     "emulator_repo": "snes9x",
@@ -155,7 +155,7 @@
   },
   {
     "emulator_name": "Sameboy",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/sameboy.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/sameboy.png",
     "emulator_desc": "Game Boy and Game Boy Color emulator written in C",
     "emulator_owner": "LIJI32",
     "emulator_repo": "SameBoy",
@@ -169,7 +169,7 @@
   },
   {
     "emulator_name": "Gearboy",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/placeholder.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/placeholder.png",
     "emulator_desc": "Game Boy / Gameboy Color emulator for macOS, Windows, Linux, BSD and RetroArch",
     "emulator_owner": "drhelius",
     "emulator_repo": "Gearboy",
@@ -183,7 +183,7 @@
   },
   {
     "emulator_name": "visualboyadvance-m",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/visualboy.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/visualboy.png",
     "emulator_desc": "The continuing development of the legendary VBA gameboy advance emulator.",
     "emulator_owner": "visualboyadvance-m",
     "emulator_repo": "visualboyadvance-m",
@@ -197,7 +197,7 @@
   },
   {
     "emulator_name": "Vita3K",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/vita3k.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/vita3k.png",
     "emulator_desc": "Experimental PlayStation Vita emulator",
     "emulator_owner": "Vita3K",
     "emulator_repo": "Vita3K",
@@ -211,7 +211,7 @@
   },
   {
     "emulator_name": "Xenia Canary",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/xenia.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/xenia.png",
     "emulator_desc": "Xenia is an experimental emulator for the Xbox 360",
     "emulator_owner": "xenia-canary",
     "emulator_repo": "xenia-canary",
@@ -225,7 +225,7 @@
   },
   {
     "emulator_name": "Xemu",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/xemu.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/xemu.png",
     "emulator_desc": "Original Xbox Emulator for Windows, macOS, and Linux (Active Development)",
     "emulator_owner": "xemu-project",
     "emulator_repo": "xemu",
@@ -239,7 +239,7 @@
   },
   {
     "emulator_name": "shadPS4",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/shadps4.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/shadps4.png",
     "emulator_desc": "PS4 emulator for Windows and Linux",
     "emulator_owner": "shadps4-emu",
     "emulator_repo": "shadPS4",
@@ -253,7 +253,7 @@
   },
   {
     "emulator_name": "NanoBoyAdvance",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/test/301ce8034ff2de64fa9940fcd1a05a34dd7600b9/assets/nanoboyadvance.png",
+    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/nanoboyadvance.png",
     "emulator_desc": "A cycle-accurate Nintendo Game Boy Advance emulator.",
     "emulator_owner": "nba-emu",
     "emulator_repo": "NanoBoyAdvance",

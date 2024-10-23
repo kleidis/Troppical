@@ -22,7 +22,7 @@ class Main():
         self.download_worker = None
 
     def initialize_app(self):
-        version = inst.online.get_latest_git_tag()
+        version = "Refactor"
         app = QApplication(sys.argv)
         ui_main = inst.ui
         ui_main.show()

@@ -86,8 +86,7 @@ class Online():
         self.emulator_database = emulator_data  # Store the data for later use throughout the codebase
         return emulator_data
 
-
-# Download Worker class to download the files
+# Worker thread used for downlaoding emulators
 class DownloadWorker(QObject):
     progress = pyqtSignal(int)
     finished = pyqtSignal()

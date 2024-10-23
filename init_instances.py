@@ -22,13 +22,13 @@ class inst:
     @property
     def online(self):
         if self._online is None:
-            from network_functions import Online  # Import Online from network_functions
+            from network.network_functions import Online  # Import Online from network_functions
             self._online = Online()
         return self._online
 
     @property
     def download(self):
-        from network_functions import DownloadWorker
+        from network.network_functions import DownloadWorker
         return DownloadWorker()  # Always return a new instance to reset the thread
 
     @property

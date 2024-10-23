@@ -2,12 +2,12 @@
 class inst:
     _main = None #main.py
     _online = None #network_functions.py
-    _download = None #download_worker.py
+    _download = None #network_functions.py
     _ui = None #ui_main.py
     _secondary_thread = None #ui_main.py
     _wel = None #welcome.py
     _sel = None #selection_page.py
-    _act = None #welcome_page.py
+    _act = None #act_page.py
     _install = None #install_page.py
     _bar = None #progress_bar.py
     _finish = None #finish_page.py
@@ -28,10 +28,8 @@ class inst:
 
     @property
     def download(self):
-        if self._download is None:
-            from network_functions import DownloadWorker  # Import DownloadWorker only when needed
-            self._download = DownloadWorker()
-        return self._download
+        from network_functions import DownloadWorker
+        return DownloadWorker()  # Always return a new instance to reset the thread
 
     @property
     def ui(self):
@@ -50,8 +48,8 @@ class inst:
     @property
     def wel(self):
         if self._wel is None:
-            from ui.welcome import InitPage  # Import InitPage only when needed
-            self._wel = InitPage()
+            from ui.welcome_page import WelcomePage  # Import WelcomePage only when needed
+            self._wel = WelcomePage()
         return self._wel
 
     @property
@@ -64,8 +62,8 @@ class inst:
     @property
     def act(self):
         if self._act is None:
-            from ui.welcome_page import WelcomePage  # Import WelcomePage only when needed
-            self._act = WelcomePage()
+            from ui.act_page import ActPage  # Import WelcomePage only when needed
+            self._act = ActPage()
         return self._act
 
     @property

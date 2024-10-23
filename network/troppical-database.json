@@ -9,7 +9,8 @@
     "emulator_platform": "multi",
     "emulator_package": "io.github.lime3ds.android",
     "emulator_system": "3DS",
-    "exe_path": "lime3ds-gui.exe"
+    "exe_path": "lime3ds.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "Panda3DS",
@@ -21,7 +22,8 @@
     "emulator_platform": "multi",
     "emulator_package": "com.panda3ds.pandroid",
     "emulator_system": "3DS",
-    "exe_path": "Alber.exe"
+    "exe_path": "Alber.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "PabloMK7's Citra",
@@ -33,7 +35,8 @@
     "emulator_platform": "multi",
     "emulator_package": "org.citra.citra_emu",
     "emulator_system": "3DS",
-    "exe_path": "citra-qt.exe"
+    "exe_path": "citra-qt.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "Mandarine",
@@ -45,7 +48,8 @@
     "emulator_platform": "multi",
     "emulator_package": "org.gamerytb.citra.canary",
     "emulator_system": "3DS",
-    "exe_path": "mandarine-qt.exe"
+    "exe_path": "mandarine.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "SkyEmu",
@@ -57,7 +61,8 @@
     "emulator_platform": "multi",
     "emulator_package": "com.sky.SkyEmu",
     "emulator_system": "Gameboy",
-    "exe_path": "SkyEmu.exe"
+    "exe_path": "SkyEmu.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "DeSmuME",
@@ -69,7 +74,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "DS",
-    "exe_path": "DeSmuME_0.9.13_x64.exe"
+    "exe_path": "DeSmuME_0.9.13_x64.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "MelonDS",
@@ -81,7 +87,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "DS",
-    "exe_path": "melonDS.exe"
+    "exe_path": "melonDS.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "Simple64",
@@ -93,7 +100,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "N64",
-    "exe_path": "simple64-gui.exe"
+    "exe_path": "simple64-gui.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "NooDS",
@@ -105,7 +113,8 @@
     "emulator_platform": "multi",
     "emulator_package": "com.hydra.noods",
     "emulator_system": "DS",
-    "exe_path": "noods.exe"
+    "exe_path": "noods.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "bsnes",
@@ -117,7 +126,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "SNES",
-    "exe_path": "bsnes.exe"
+    "exe_path": "bsnes.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "snes9x",
@@ -129,7 +139,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "SNES",
-    "exe_path": "snes9x-x64.exe"
+    "exe_path": "snes9x-x64.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "Sameboy",
@@ -141,7 +152,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "Gameboy",
-    "exe_path": "sameboy.exe"
+    "exe_path": "sameboy.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "Gearboy",
@@ -153,7 +165,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "Gameboy",
-    "exe_path": "Gearboy.exe"
+    "exe_path": "Gearboy.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "visualboyadvance-m",
@@ -165,7 +178,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "Gameboy",
-    "exe_path": "visualboyadvance-m.exe"
+    "exe_path": "visualboyadvance-m.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "Vita3K",
@@ -177,7 +191,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "PSVita",
-    "exe_path": "Vita3K.exe"
+    "exe_path": "Vita3K.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "Xenia Canary",
@@ -189,7 +204,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "Xbox-360",
-    "exe_path": "xenia_canary.exe"
+    "exe_path": "xenia_canary.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "Xemu",
@@ -201,7 +217,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "Xbox",
-    "exe_path": "xemu.exe"
+    "exe_path": "xemu.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "shadPS4",
@@ -213,7 +230,8 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "PS4",
-    "exe_path": "shadps4.exe"
+    "exe_path": "shadps4.exe",
+    "has_in_app_updater": false
   },
   {
     "emulator_name": "NanoBoyAdvance",
@@ -225,6 +243,7 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "GBA",
-    "exe_path": "NanoBoyAdvance.exe"
+    "exe_path": "NanoBoyAdvance.exe",
+    "has_in_app_updater": false
   }
 ]

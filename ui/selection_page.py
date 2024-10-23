@@ -27,10 +27,8 @@ class SelectionPage(QWidget):
 
         # Next button to confirm selection
         self.nextButton = QPushButton("Next")
-        self.nextButton.clicked.connect(lambda: inst.main.set_emulator(self))
         emulatorSelectLayout.addWidget(self.nextButton)
 
-        inst.ui.initialize_emulator_database()
 
     def populate_emulator_tree(self,):
         # Iterate over each emulator item and add it to the tree

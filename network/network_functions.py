@@ -7,13 +7,14 @@ from PyQt6.QtGui import QIcon, QImage, QPixmap
 from PyQt6.QtCore import QByteArray, Qt
 
 class Online():
+    database_url = "https://raw.githubusercontent.com/kleidis/test/main/troppical-data.json"
+
     def __init__(self):
         self.troppical_database = self.fetch_data() # Fetch the data from troppical_dataabse JSON
         self.emulator_database = None  # Cache for filtered emulator data
 
     def fetch_data(self):
-        url = "https://raw.githubusercontent.com/kleidis/test/main/troppical-data.json"
-        response = requests.get(url)
+        response = requests.get(self.database_url)
         if response.status_code == 200:
             all_data = response.json()
             self.troppical_database = [item for item in all_data if item.get('emulator_platform') != 'android']
@@ -29,9 +30,10 @@ class Online():
             if response.status_code == 200:
                 self.logos[item['emulator_name']] = response.content
             else:
-                print(f"Failed to fetch logo for {item['emulator_name']}: {response.status_code}")
+                QMessageBox.critical(None, "Error", f"Failed to fetch logo for {item['emulator_name']}: {response.status_code}")
         return self.logos
 
+    # TODO: Improve tihs  function, currently it's not used
     def get_latest_git_tag(self):
         tag = "1.0"
         github_token = os.getenv("GITHUB_TOKEN", "")
@@ -53,38 +55,29 @@ class Online():
         if self.emulator_database is not None:
             return self.emulator_database
 
-        emulator_data = {}
-        for troppical_api_data in self.troppical_database:
-            emulator_name = troppical_api_data['emulator_name']
-            emulator_system = troppical_api_data['emulator_system']
-            emulator_desc = troppical_api_data['emulator_desc']
-            emulator_owner = troppical_api_data['emulator_owner']
-            emulator_repo = troppical_api_data['emulator_repo']
-            exe_path = troppical_api_data['exe_path']
-            logo_url = troppical_api_data['emulator_logo']
-
-            # Fetch the logo
+        def fetch_icon(logo_url):
             response = requests.get(logo_url)
             if response.status_code == 200:
                 image_bytes = response.content
                 qimage = QImage.fromData(QByteArray(image_bytes))
                 pixmap = QPixmap.fromImage(qimage).scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-                icon = QIcon(pixmap)
-            else:
-                icon = QIcon()  # Default icon if fetching fails
+                return QIcon(pixmap)
+            return QIcon()  # Default icon if fetching fails
 
-            emulator_data[emulator_name] = {
-                'name': emulator_name,
-                'system': emulator_system,
-                'description': emulator_desc,
-                'owner': emulator_owner,
-                'repo': emulator_repo,
-                'exe_path': exe_path,
-                'icon': icon
+        self.emulator_database = {
+            item['emulator_name']: {
+                'name': item['emulator_name'],
+                'system': item['emulator_system'],
+                'description': item['emulator_desc'],
+                'owner': item['emulator_owner'],
+                'repo': item['emulator_repo'],
+                'exe_path': item['exe_path'],
+                'icon': fetch_icon(item['emulator_logo'])
             }
+            for item in self.troppical_database
+        }
 
-        self.emulator_database = emulator_data  # Store the data for later use throughout the codebase
-        return emulator_data
+        return self.emulator_database
 
 # Worker thread used for downlaoding emulators
 class DownloadWorker(QObject):

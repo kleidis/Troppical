@@ -12,3 +12,5 @@ citra_util.spec
 troppical.spec
 .old
 *.spec
+/network/__pycache__
+/ui/__pycache__

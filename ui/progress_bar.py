@@ -1,11 +1,9 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QProgressBar, QLabel
-from ui.header import Header
-
+from init_instances import inst
  # Progress bar page
 class ProgressBarPage(QWidget):
     def __init__(self):
         super().__init__()
-        self.Header = Header.header(self)
         self.progressBarPage = QWidget()
         ## Layout and groups
         progressBarLayout = QVBoxLayout()
@@ -18,7 +16,7 @@ class ProgressBarPage(QWidget):
         self.labeldown = QLabel("Downloading: ")
         self.labelext = QLabel("Extracting: ")
         ## Add widgets / layouts
-        progressBarLayout.addLayout(self.Header)  # Add the icon self.header
+        progressBarLayout.addLayout(inst.header.header())
         progressBarLayout.addWidget(self.labeldown)
         progressBarLayout.addWidget(self.downloadProgressBar)
         progressBarLayout.addWidget(self.labelext)

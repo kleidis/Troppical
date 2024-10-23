@@ -22,6 +22,21 @@ class Online():
         else:
             raise Exception(f"Failed to fetch data: {response.status_code}")
 
+    # Fetch and process the main icon of Troppical. Only used by the UI header
+    def fetch_and_process_main_icon(self):
+        self.main_logo_url = "https://raw.githubusercontent.com/kleidis/Troppical/refs/heads/master/icons/assets/Troppical.svg"
+
+        response = requests.get(self.main_logo_url)
+        if response.status_code == 200:
+            image_bytes = response.content
+            qimage = QImage.fromData(QByteArray(image_bytes))
+            pixmap = QPixmap.fromImage(qimage).scaled(180, 180, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            return QIcon(pixmap)
+        else:
+            QMessageBox.critical(None, "Error", f"Failed to fetch icon: {response.status_code}")
+            return QIcon()
+
+
     def fetch_logos(self):
         self.logos = {}
         for item in self.troppical_database:

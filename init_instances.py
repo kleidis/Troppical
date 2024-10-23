@@ -5,6 +5,7 @@ class inst:
     _download = None #network_functions.py
     _ui = None #ui_main.py
     _secondary_thread = None #ui_main.py
+    _header = None #header.py
     _wel = None #welcome.py
     _sel = None #selection_page.py
     _act = None #act_page.py
@@ -44,6 +45,13 @@ class inst:
             from ui.ui_main import Worker  # Import Worker only when needed
             self._secondary_thread = Worker()
         return self._secondary_thread
+
+    @property
+    def header(self):
+        if self._header is None:
+            from ui.header import Header  # Import Header only when needed
+            self._header = Header()
+        return self._header
 
     @property
     def wel(self):

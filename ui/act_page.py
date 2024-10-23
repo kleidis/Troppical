@@ -1,12 +1,9 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QLabel, QPushButton, QHBoxLayout
 from PyQt6.QtCore import Qt
 from init_instances import inst
-from ui.header import Header
-
 class ActPage(QWidget,):
     def __init__(self):
         super().__init__()
-        self.header = Header.header(self)
         # Act page
         self.actPage = QWidget()
         ## Layout and gorup
@@ -25,7 +22,7 @@ class ActPage(QWidget,):
         self.backButton = QPushButton("Back")
         self.backButton.setFixedSize(80, 30)
         ## Add widgets / layouts
-        actLayout.addLayout(self.header)
+        actLayout.addLayout(inst.header.header())
         actLayout.addWidget(actGroup)
         actGroupLayout.addWidget(self.actLabel)
         buttonsLayout.addWidget(self.installButton)

@@ -2,7 +2,7 @@ import requests
 import os
 import subprocess
 from PyQt6.QtWidgets import QMessageBox
-from PyQt6.QtCore import pyqtSignal, pyqtSlot, QThread
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, QThread
 from PyQt6.QtGui import QIcon, QImage, QPixmap
 from PyQt6.QtCore import QByteArray, Qt
 
@@ -88,17 +88,20 @@ class Online():
 
 
 # Download Worker class to download the files
-class DownloadWorker(QThread):
+class DownloadWorker(QObject):
     progress = pyqtSignal(int)
+    finished = pyqtSignal()
 
-    def __init__(self, url, dest):
+    def __init__(self):
         super().__init__()
+        self.url = None
+        self.dest = None
+
+    def set_task(self, url, dest):
         self.url = url
         self.dest = dest
 
-
-    @pyqtSlot()
-    def do_download(self):
+    def run(self):
         try:
             response = requests.get(self.url, stream=True)
             total_size = int(response.headers.get('content-length', 0))
@@ -115,5 +118,5 @@ class DownloadWorker(QThread):
                     self.progress.emit(int(progress_percentage))
             self.finished.emit()
         except Exception as e:
-            QMessageBox.critical(self, "Error",("Error doing download."))
+            QMessageBox.critical(None, "Error", "Error during download.")
             self.finished.emit()

@@ -82,14 +82,11 @@ class Main():
 
     # Add the various version to the selection combobox
     def Add_releases_to_combobox(self):
-        print (self.releases_url)
-        response = requests.get(self.releases_url)
-        self.releases = response.json()[:5]
+        self.releases = inst.online.fetch_releases()
 
         # Clear the combo box before adding new items
         inst.install.installationSourceComboBox.clear()
 
-        # Remove or add items based on the emulator
         for release in self.releases:
             inst.install.installationSourceComboBox.addItem(release['tag_name'])
 

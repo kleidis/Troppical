@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, QThread
 from PyQt6.QtGui import QIcon, QImage, QPixmap
 from PyQt6.QtCore import QByteArray, Qt
+from init_instances import inst
 
 class Online():
     database_url = "https://raw.githubusercontent.com/kleidis/Troppical/refs/heads/master/network/troppical-database.json"
@@ -93,6 +94,14 @@ class Online():
         }
 
         return self.emulator_database
+
+    def fetch_releases(self):
+        releases_url = inst.main.releases_url
+        response = requests.get(releases_url)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(f"Failed to fetch releases: {response.status_code}")
 
 # Worker thread used for downlaoding emulators
 class DownloadWorker(QObject):

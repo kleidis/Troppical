@@ -1,6 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
 from PyQt6.QtCore import Qt
-from ui.header import Header
 from init_instances import inst
 
 # Welcome page
@@ -16,7 +15,7 @@ class WelcomePage(QWidget):
         welcomeLayout.addLayout(inst.header.header())
 
         # Welcome label
-        welcomeLabel = QLabel("<b><font size='12'>Welcome to Troppical Installer!</font></b>")
+        welcomeLabel = QLabel("<b><font size='12'>Welcome to Troppical!</font></b>")
         welcomeLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Center the text horizontally
         welcomeLayout.addWidget(welcomeLabel)
 
@@ -25,11 +24,11 @@ class WelcomePage(QWidget):
 
         # Manage button
         self.manageButton = QPushButton("Manage")
-        self.manageButton.setFixedSize(200, 100)  # Set size for large rectangular shape
+        self.manageButton.setFixedSize(400, 200)  # Set size for huge rectangular shape
 
         # Configure button
         self.configureButton = QPushButton("Configure")
-        self.configureButton.setFixedSize(200, 100)  # Set size for large rectangular shape
+        self.configureButton.setFixedSize(400, 200)  # Set size for huge rectangular shape
         self.configureButton.setToolTip("WIP: Coming soon!")
         self.configureButton.setEnabled(False)  # Set the button to be grayed out
 

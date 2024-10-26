@@ -4,7 +4,6 @@ from PyQt6.QtCore import Qt
 from init_instances import inst
 
 # Emulator Select Page
-
 class SelectionPage(QWidget):
     def __init__(self):
         super().__init__()
@@ -32,32 +31,31 @@ class SelectionPage(QWidget):
 
     def populate_emulator_tree(self,):
         # Iterate over each emulator item and add it to the tree
-        for emulator_name, data in inst.online.emulator_database.items():
-            emulator_system = data['system']
-            emulator_desc = data['description']
+        for emulatorName, data in inst.online.emulator_database.items():
+            emulatorSystem = data['system']
+            emulatorDesc = data['description']
             icon = data['icon']
-            print(f"Fetching data for {emulator_name}")
 
             # Check if the emulator system already has a tree item, if not create one
-            system_item = None
+            systemItem = None
             for i in range(self.emulatorTreeWidget.topLevelItemCount()):
                 item = self.emulatorTreeWidget.topLevelItem(i)
-                if item.text(0) == emulator_system:
-                    system_item = item
+                if item.text(0) == emulatorSystem:
+                    systemItem = item
                     break
 
-            if not system_item:
-                system_item = QTreeWidgetItem(self.emulatorTreeWidget)
-                system_item.setText(0, emulator_system)
-                system_item.setExpanded(True)
+            if not systemItem:
+                systemItem = QTreeWidgetItem(self.emulatorTreeWidget)
+                systemItem.setText(0, emulatorSystem)
+                systemItem.setExpanded(True)
                 # Make the system item unselectable
-                system_item.setFlags(system_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+                systemItem.setFlags(systemItem.flags() & ~Qt.ItemFlag.ItemIsSelectable)
 
             # Add the emulator to the appropriate tree item
-            emulator_item = QTreeWidgetItem(system_item)
-            emulator_item.setText(0, emulator_name)
-            emulator_item.setIcon(0, icon)
-            emulator_item.setToolTip(0, emulator_desc)
+            emulatorItem = QTreeWidgetItem(systemItem)
+            emulatorItem.setText(0, emulatorName)
+            emulatorItem.setIcon(0, icon)
+            emulatorItem.setToolTip(0, emulatorDesc)
 
             # Close the initializing message
             inst.ui.initializing_msg.hide()
@@ -65,16 +63,5 @@ class SelectionPage(QWidget):
         # Sort the systems and emulators alphabetically
         self.emulatorTreeWidget.sortItems(0, Qt.SortOrder.AscendingOrder)
         for i in range(self.emulatorTreeWidget.topLevelItemCount()):
-            system_item = self.emulatorTreeWidget.topLevelItem(i)
-            system_item.sortChildren(0, Qt.SortOrder.AscendingOrder)
-
-
-
-    def get_selected_emulator(self):
-        selected_item = self.emulatorTreeWidget.currentItem()
-        print(selected_item)
-        if not selected_item or not selected_item.parent():
-            QMessageBox.warning(self, "Selection Error", "Please select an emulator.")
-            print("Please select an emulator.")
-            return None
-        return selected_item
+            systemItem = self.emulatorTreeWidget.topLevelItem(i)
+            systemItem.sortChildren(0, Qt.SortOrder.AscendingOrder)

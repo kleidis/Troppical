@@ -70,13 +70,14 @@ class Main():
 
     # Select installation path function
     def InstallPath(self):
-        self.Install_Dir = inst.install.installationPathLineEdit.text()
-        selectedDirectory = QFileDialog.getExistingDirectory(inst.install, "Select Installation Directory", inst.install.installationPathLineEdit.text())
-        # Check if a directory was selected
-        if selectedDirectory:
-        # Set Emulator name to the selected directory path
-            self.Install_Dir = os.path.join(selectedDirectory, self.emulator)
+        current_path = inst.install.installationPathLineEdit.text()
+        selected_directory = QFileDialog.getExistingDirectory(inst.install, "Select Installation Directory", current_path)
+
+        if selected_directory:
+            install_dir = os.path.join(selected_directory, self.emulator)
+            self.Install_Dir = os.path.normpath(install_dir)
             inst.install.installationPathLineEdit.setText(self.Install_Dir)
+
         return self.Install_Dir
 
     # Add the various version to the selection combobox
@@ -363,3 +364,4 @@ class Main():
 if __name__ == "__main__":
     main = Main()
     main.initialize_app()
+

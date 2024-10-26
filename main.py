@@ -33,7 +33,7 @@ class Main():
         selected_item = inst.sel.emulatorTreeWidget.currentItem()
         if not selected_item or not selected_item.parent():
             QMessageBox.warning(inst.ui, "Selection Error", "Please select an emulator.")
-            return
+            return False
 
         emulator_name = selected_item.text(0)
         if self.emulator != emulator_name:
@@ -63,6 +63,7 @@ class Main():
         print(self.emulator)
         self.checkreg()
         self.disable_qt_buttons_if_installed()
+        return True
 
     # Disable buttons depanding on if it the program is already installed
     def disable_qt_buttons_if_installed(self):
@@ -376,3 +377,4 @@ class Main():
 if __name__ == "__main__":
     main = Main()
     main.initialize_app()
+

@@ -97,8 +97,8 @@ class MainWindow(QMainWindow):
             self.emulator_database_initialized = True
         inst.ui.qt_index_switcher(1)
     def handle_select(self):
-        inst.main.set_emulator()
-        inst.ui.qt_index_switcher(2)
+        if inst.main.set_emulator():
+            inst.ui.qt_index_switcher(2)
     def handle_install(self):
         inst.main.install_mode = "Install"
         inst.ui.qt_index_switcher(3)

@@ -153,6 +153,19 @@ class MainWindow(QMainWindow):
         self.shared_thread.started.connect(worker.run)
         self.shared_thread.start()
 
+    # Disable buttons depanding on if it the program is already installed
+    def disable_qt_buttons_if_installed(self):
+        installation_status = inst.main.checkreg()
+
+        if installation_status is None:
+            inst.act.installButton.setEnabled(True)
+            inst.act.updateButton.setEnabled(False)
+            inst.act.uninstallButton.setEnabled(False)
+        else:
+            inst.act.installButton.setEnabled(False)
+            inst.act.updateButton.setEnabled(True)
+            inst.act.uninstallButton.setEnabled(True)
+
 class Worker(QObject):
     finished = pyqtSignal(dict)
 

@@ -7,7 +7,7 @@ from PyQt6.QtGui import QIcon, QImage, QPixmap
 from PyQt6.QtCore import QByteArray, Qt
 
 class Online():
-    database_url = "https://raw.githubusercontent.com/kleidis/test/main/troppical-data.json"
+    database_url = "https://raw.githubusercontent.com/kleidis/Troppical/refs/heads/master/network/troppical-database.json"
 
     def __init__(self):
         self.troppical_database = self.fetch_data() # Fetch the data from troppical_dataabse JSON

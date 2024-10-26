@@ -155,7 +155,7 @@ class MainWindow(QMainWindow):
 
     # Disable buttons depanding on if it the program is already installed
     def disable_qt_buttons_if_installed(self):
-        installation_status = inst.main.checkreg()
+        installation_status = inst.main.update_reg_result()
 
         if installation_status is None:
             inst.act.installButton.setEnabled(True)

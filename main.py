@@ -16,10 +16,10 @@ from init_instances import inst
 class Main():
     def __init__(self):
         # Init variables
-        self.regvalue = None # If the emualtor is not installed to the registry
-        self.emulator = None # Keep track of the selected emulator
+        self.emulator = None  # Keep track of the selected emulator
         self.download_thread = None
         self.download_worker = None
+        self.reg_result = None
 
     def initialize_app(self):
         version = "Refactor"
@@ -27,6 +27,10 @@ class Main():
         ui_main = inst.ui
         ui_main.show()
         sys.exit(app.exec())
+
+    def update_reg_result(self):
+        self.reg_result = self.checkreg()
+        return self.reg_result
 
     # Set which emulator to use for the installer depeanding on the selected emulator
     def set_emulator(self):
@@ -42,28 +46,27 @@ class Main():
             inst.bar.labelext.setText("Extracting: ")
             inst.act.actLabel.setText("")
 
-            # Set new emulator
             self.emulator = emulator_name
 
-            # Use cached emulator data
             emulator_data = inst.online.emulator_database
 
-            for selected_emulator in emulator_data.values():
-                if selected_emulator['name'] == self.emulator:
-                    self.releases_url = f"https://api.github.com/repos/{selected_emulator['owner']}/{selected_emulator['repo']}/releases"
+            # Construct the releases URL
+            selected_emulator = next((em for em in emulator_data.values() if em['name'] == self.emulator), None)
+            if selected_emulator:
+                owner = selected_emulator['owner']
+                repo = selected_emulator['repo']
+                self.releases_url = f"https://api.github.com/repos/{owner}/{repo}/releases"
 
-        # Update UI components with new emulator settings
-        reg_result = self.checkreg()
-        installed_emulator = "Not Installed" if reg_result is None else reg_result[1]
+        installed_emulator = "Not Installed" if self.reg_result is None else self.reg_result[1]
         inst.install.installationPathLineEdit.setText(os.path.join(os.environ['LOCALAPPDATA'], self.emulator))
-        inst.bar.labeldown.setText("Downloading: " + self.emulator)
-        inst.bar.labelext.setText("Extracting: " + self.emulator)
-        inst.act.actLabel.setText(f'<big>Your currently selected emulator is <b>{self.emulator}</b> and current version is <b>{installed_emulator}</b>.</big>')
+        inst.bar.labeldown.setText(f"Downloading: {self.emulator}")
+        inst.bar.labelext.setText(f"Extracting: {self.emulator}")
+        inst.act.actLabel.setText(
+            f'<big>Your currently selected emulator is <b>{self.emulator}</b> and current version is <b>{installed_emulator}</b>.</big>'
+        )
 
-        print(self.emulator)
-        self.checkreg()
         inst.ui.disable_qt_buttons_if_installed()
-        return True
+        return True # To avoid the function from switching index even on non-select item
 
     # Select installation path function
     def InstallPath(self):
@@ -91,7 +94,6 @@ class Main():
 
     # Update button function
     def emulator_updates(self):
-        self.checkreg() # Initialise the reg value function
         installed_emulator = self.updatevalue
         response = requests.get(self.releases_url + "/latest")
         latest_release = response.json()
@@ -122,9 +124,8 @@ class Main():
     # Preparing which file to downlaod
     def Prepare_Download(self):
         print (self.install_mode)
-        reg_key = self.checkreg()
-        if reg_key is not None:
-            UpdateChannelValue = reg_key[1]
+        if self.reg_result is not None:
+            UpdateChannelValue = self.reg_result[1]
         else:
             UpdateChannelValue = None
 
@@ -135,7 +136,7 @@ class Main():
         if self.install_mode == "Install":
             self.installationPath = inst.install.installationPathLineEdit.text()
         elif self.install_mode == "Update":
-            self.installationPath = self.regvalue
+            self.installationPath = self.reg_result[0]
         os.makedirs(self.installationPath, exist_ok=True)
 
         if self.install_mode == "Install":
@@ -154,7 +155,7 @@ class Main():
                             self.target_download = self.selected_asset['browser_download_url']
                             self.url = self.target_download  # url for the download thread
                             self.start_download_thread(self.url, temp_file)
-                            self.createreg()
+                            self.update_reg()
                         else:
                             sys.exit("No release selected. Exiting.")
                     elif len(windows_assets) == 1:
@@ -163,7 +164,7 @@ class Main():
                         print(self.target_download)
                         self.url = self.target_download  # url for the download thread
                         self.start_download_thread(self.url, temp_file)
-                        self.createreg()
+                        self.update_reg()
                     else:
                         QMessageBox.critical(inst.ui, "Error", f"No suitable Windows download found for {self.emulator} {self.selection}. Please try another release.")
                         inst.ui.qt_index_switcher(3)
@@ -190,7 +191,7 @@ class Main():
                 self.start_download_thread(self.url, temp_file)
 
                 self.selection = latest_release['tag_name']
-                self.createreg()
+                self.update_reg()
             else:
                 QMessageBox.critical(inst.ui, "Error", f"No suitable Windows download found for {self.emulator} in the latest release. Please try another release or check for updates.")
     # Download function
@@ -275,22 +276,21 @@ class Main():
             self.define_shortcut(executable_path, 'desktop')
         if inst.install.startMenuShortcutCheckbox.isChecked():
             self.define_shortcut(executable_path, 'start_menu')
-        self.checkreg()
         inst.ui.qt_index_switcher(5)
 
     # Function to check the reg values
     def checkreg(self):
         try:
             self.registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}", 0, winreg.KEY_READ)
-            self.regvalue, regtype = winreg.QueryValueEx(self.registry_key, 'Install_Dir')
+            self.instValue, regtype = winreg.QueryValueEx(self.registry_key, 'Install_Dir')
             self.updatevalue, regtype = winreg.QueryValueEx(self.registry_key, 'Version')
             self.asset_version, regtype = winreg.QueryValueEx(self.registry_key, 'Asset_version')
             winreg.CloseKey(self.registry_key)
-            return self.regvalue, self.updatevalue, self.asset_version
+            return self.instValue, self.updatevalue, self.asset_version
         except FileNotFoundError:
             pass
     # Function to create the reg values
-    def createreg (self):
+    def update_reg (self):
         winreg.CreateKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")
         self.registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}", 0,
                                         winreg.KEY_WRITE)
@@ -329,14 +329,12 @@ class Main():
 
     # Uninstall function
     def uninstall(self):
-        self.checkreg()
-        print (self.regvalue)
-        if self.regvalue is not None:
+        if self.reg_result[0] is not None:
             # Paths to the shortcuts
             desktopshortcut = os.path.join(os.environ['USERPROFILE'], 'Desktop', f'{self.emulator}.lnk')
             startmenushortcut = os.path.join(os.environ['APPDATA'], 'Microsoft', 'Windows', 'Start Menu', 'Programs', f'{self.emulator}.lnk')
 
-            reply = QMessageBox.question(inst.ui, "Uninstall", f"Are you sure you want to uninstall {self.emulator} located on {self.regvalue}?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            reply = QMessageBox.question(inst.ui, "Uninstall", f"Are you sure you want to uninstall {self.emulator} located on {self.instValue}?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.No:
                 return
             else:
@@ -345,7 +343,7 @@ class Main():
                     os.remove(desktopshortcut)
                 if os.path.exists(startmenushortcut):
                     os.remove(startmenushortcut)
-                dirpath = Path(self.regvalue)
+                dirpath = Path(self.instValue)
                 if dirpath.exists() and dirpath.is_dir():
                     shutil.rmtree(dirpath)
                     winreg.DeleteKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")

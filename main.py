@@ -62,20 +62,8 @@ class Main():
 
         print(self.emulator)
         self.checkreg()
-        self.disable_qt_buttons_if_installed()
+        inst.ui.disable_qt_buttons_if_installed()
         return True
-
-    # Disable buttons depanding on if it the program is already installed
-    def disable_qt_buttons_if_installed(self):
-        regvalue = self.checkreg()
-        if regvalue is None:
-            inst.act.installButton.setEnabled(True)
-            inst.act.updateButton.setEnabled(False)
-            inst.act.uninstallButton.setEnabled(False)
-        else:
-            inst.act.installButton.setEnabled(False)
-            inst.act.updateButton.setEnabled(True)
-            inst.act.uninstallButton.setEnabled(True)
 
     # Select installation path function
     def InstallPath(self):
@@ -377,4 +365,3 @@ class Main():
 if __name__ == "__main__":
     main = Main()
     main.initialize_app()
-

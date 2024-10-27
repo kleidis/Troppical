@@ -76,7 +76,7 @@ class MainWindow(QMainWindow):
             inst.wel.manageButton: self.handle_manage,
             inst.sel.nextButton: self.handle_select,
             inst.act.installButton: self.handle_install,
-            inst.act.updateButton: inst.main.emulator_updates,
+            inst.act.updateButton: inst.main.emulator_updater,
             inst.act.uninstallButton: self.handle_uninstall,
             inst.install.install_emu_button: self.handle_install_emu,
             inst.finish.finishButton: self.handle_finish,

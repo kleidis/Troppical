@@ -95,13 +95,15 @@ class Online():
 
         return self.emulator_database
 
-    def fetch_releases(self):
+    def fetch_releases(self, latest=False):
         releases_url = inst.main.releases_url
-        response = requests.get(releases_url)
+        url = releases_url + "/latest" if latest else releases_url
+        response = requests.get(url)
         if response.status_code == 200:
             return response.json()
         else:
             raise Exception(f"Failed to fetch releases: {response.status_code}")
+
 
 # Worker thread used for downlaoding emulators
 class DownloadWorker(QObject):
@@ -136,3 +138,4 @@ class DownloadWorker(QObject):
         except Exception as e:
             QMessageBox.critical(None, "Error", "Error during download.")
             self.finished.emit()
+

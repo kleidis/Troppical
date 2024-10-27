@@ -90,15 +90,14 @@ class Main():
         for release in self.releases:
             inst.install.installationSourceComboBox.addItem(release['tag_name'])
 
-    # Update button function
-    def emulator_updates(self):
-        installed_emulator = self.updatevalue
-        response = requests.get(self.releases_url + "/latest")
-        latest_release = response.json()
+    # Updater function
+    def emulator_updater(self):
+        installed_emulator = self.reg_result[1]
+        latest_release = inst.online.fetch_releases(latest=True)
         latest_tag = latest_release['tag_name']
 
         # Check for specific emulators that use a rolling-release
-        if self.emulator in ['Vita3K', 'NooDS']:
+        if self.emulator in ['Vita3K', 'NooDS']: # TODOL Add this type to json database
             reply = QMessageBox.question(inst.ui, "Rolling-Release Emulator Detected", f"{self.emulator} uses rolling-releases instead of numbered releases. This means that the latest version may not be the one you have installed (We cannot detect the version). Would you like to proceed with the download anyway?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 self.install_mode = "Update"
@@ -108,6 +107,7 @@ class Main():
             else:
                 pass
 
+        # TODO: Improve tag comparing
         if latest_tag > installed_emulator:
             reply = QMessageBox.question(inst.ui, "Update Found", "Would you like to update " + self.emulator + " to " +  latest_tag + "?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:

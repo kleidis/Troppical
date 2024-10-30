@@ -215,46 +215,94 @@ class Main():
 
     # Extract and install function
     def extract_and_install(self, temp_file, extract_to):
-        extract_to = self.installationPath
-        # Rename the temporary file to have a .zip extension and create a temporary extraction folder
         zip_file_path = f"{temp_file}.zip"
-        os.rename(temp_file, zip_file_path)
-        self.temp_extract_folder = tempfile.mkdtemp()
 
-        with ZipFile(zip_file_path, 'r') as emu_zip:
-            emu_zip.extractall(self.temp_extract_folder)
-            # Check for nested zip files and extract them
-            nested_zips = [f for f in emu_zip.namelist() if f.endswith('.zip')]
-            for nested_zip in nested_zips:
-                nested_zip_path = os.path.join(self.temp_extract_folder, nested_zip)
-                with ZipFile(nested_zip_path, 'r') as nested_zip_file:
-                    nested_zip_file.extractall(self.temp_extract_folder)
-                os.remove(nested_zip_path)
-        os.remove(zip_file_path)
+        # Handle multiple asset versions
+        if self.install_mode == "Update" and self.reg_result is not None:
+            current_asset = self.reg_result[2]
+            new_asset = self.target_download.split('/')[-1]
 
-        self.move_files(extract_to)
+            if current_asset != new_asset:
+                reply = QMessageBox.question(
+                    inst.ui,
+                    "Multiple Asset Versions Detected",
+                    f"The version you're installing might be different from the currently installed version. "
+                    "Would you like to delete all existing emulator [program files] files before Update (Yes RECOMMENDED)  or just replace them (No)?\n\n",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
+
+                if reply == QMessageBox.StandardButton.Yes:
+                    try:
+                        if os.path.exists(extract_to):
+                            shutil.rmtree(extract_to)
+                    except Exception as e:
+                        QMessageBox.critical(inst.ui, "Error", f"Failed to delete existing installation: {str(e)}")
+                        return
+
+        try:
+            os.rename(temp_file, zip_file_path)
+            self.temp_extract_folder = tempfile.mkdtemp()
+
+            try:
+                with ZipFile(zip_file_path, 'r') as emu_zip:
+                    # Extract all files first
+                    emu_zip.extractall(self.temp_extract_folder)
+
+                    # Handle nested zips
+                    for nested_zip in [f for f in emu_zip.namelist() if f.endswith('.zip')]:
+                        nested_path = os.path.join(self.temp_extract_folder, nested_zip)
+                        with ZipFile(nested_path, 'r') as nested:
+                            nested.extractall(self.temp_extract_folder)
+                        os.remove(nested_path)
+            except Exception as e:
+                QMessageBox.critical(inst.ui, "Extraction Error", f"Failed to extract files: {str(e)}")
+                return
+            finally:
+                os.remove(zip_file_path)
+            self.move_files(self.installationPath)
+        except Exception as e:
+            QMessageBox.critical(inst.ui, "File Error", f"Failed to process downloaded file: {str(e)}")
+            return
 
     def move_files(self, extract_to):
-        # Find the first directory containing an executable
-        for root, dirs, files in os.walk(self.temp_extract_folder):
-            if any(file.endswith('.exe') for file in files):
-                src_path = root
-                break
-        else:
-            src_path = self.temp_extract_folder  # Fallback if no .exe is found
+        try:
+            # Find executable directory
+            exe_root = next(
+                (root for root, _, files in os.walk(self.temp_extract_folder)
+                if any(file.endswith('.exe') for file in files)),
+                self.temp_extract_folder
+            )
 
-        dest_path = extract_to
-        os.makedirs(dest_path, exist_ok=True)
-        for item in os.listdir(src_path):
-            src_item_path = os.path.join(src_path, item)
-            dest_item_path = os.path.join(dest_path, item)
-            if os.path.isdir(src_item_path):
-                shutil.copytree(src_item_path, dest_item_path, dirs_exist_ok=True)
-            else:
-                shutil.copy2(src_item_path, dest_item_path)
+            os.makedirs(extract_to, exist_ok=True)
 
-        # Mark the installation as complete
-        self.installation_complete()
+            try:
+                items = os.listdir(exe_root)
+                for idx, item in enumerate(items):
+                    try:
+                        src = os.path.join(exe_root, item)
+                        dest = os.path.join(extract_to, item)
+
+                        if os.path.isdir(src):
+                            shutil.copytree(src, dest, dirs_exist_ok=True)
+                        else:
+                            shutil.copy2(src, dest)
+
+                        # Update extraction progress
+                        progress = int((idx + 1) / len(items) * 100)
+                        inst.bar.extractionProgressBar.setValue(progress)
+                    except Exception as e:
+                        QMessageBox.warning(inst.ui, "Copy Warning", f"Failed to copy {item}: {str(e)}")
+                        continue
+            except Exception as e:
+                QMessageBox.critical(inst.ui, "Installation Error", f"Failed to install files: {str(e)}")
+                return
+            finally:
+                shutil.rmtree(self.temp_extract_folder, ignore_errors=True)
+
+            self.installation_complete()
+        except Exception as e:
+            QMessageBox.critical(inst.ui, "Installation Error", f"Failed to complete installation: {str(e)}")
+            return
 
     # Install is complete
     def installation_complete(self):

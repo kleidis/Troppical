@@ -14,3 +14,4 @@ troppical.spec
 *.spec
 /network/__pycache__
 /ui/__pycache__
+/utils

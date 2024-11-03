@@ -123,71 +123,47 @@ class Main():
 
     # Preparing which file to downlaod
     def Prepare_Download(self):
-        reg_result = self.update_reg_result()
-        if reg_result is not None:
-            UpdateChannelValue = reg_result[1]
-        else:
-            UpdateChannelValue = None
-
         self.selection = inst.install.installationSourceComboBox.currentText()
-
-        # Determine the installation path
+        reg_result = self.update_reg_result()
         temp_file = tempfile.NamedTemporaryFile(delete=False).name
+
         if self.install_mode == "Install":
             self.installationPath = inst.install.installationPathLineEdit.text()
+            windows_assets = inst.online.fetch_github_release(self.selection)
         elif self.install_mode == "Update":
             self.installationPath = reg_result[0]
-        os.makedirs(self.installationPath, exist_ok=True)
+            windows_assets = inst.online.fetch_github_release("latest")
 
-        if self.install_mode == "Install":
-            response = requests.get(self.releases_url)
-            releases = response.json()
-            for release in releases:
-                if release['tag_name'] == self.selection:
-                    windows_assets = [asset for asset in release['assets'] if ('_win' in asset['name'].lower() or 'win' in asset['name'].lower() or 'xenia' in asset['name'].lower()) and asset['name'].endswith('.zip') and not asset['name'].endswith('.7z')]
-                    if len(windows_assets) > 1:
-                        options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
-                        choice, ok = QInputDialog.getItem(inst.ui, "Select Version", "Multiple Windows versions found. Please select one:\n" + options, [asset['name'] for asset in windows_assets], 0, False)
-                        if ok:
-                            self.selected_asset = next(asset for asset in windows_assets if asset['name'] == choice)
-                            self.selected_asset_name = self.selected_asset['name']
-                            self.target_download = self.selected_asset['browser_download_url']
-                            self.url = self.target_download  # url for the download thread
-                            self.start_download_thread(self.url, temp_file)
-                        else:
-                            sys.exit("No release selected. Exiting.")
-                    elif len(windows_assets) == 1:
-                        self.selected_asset_name = windows_assets[0]['name']
-                        self.target_download = windows_assets[0]['browser_download_url']
-                        self.url = self.target_download  # url for the download thread
-                        self.start_download_thread(self.url, temp_file)
-                    else:
-                        QMessageBox.critical(inst.ui, "Error", f"No suitable Windows download found for {self.emulator} {self.selection}. Please try another release.")
-                        inst.ui.qt_index_switcher(3)
-        elif self.install_mode == "Update":
-            response = requests.get(self.releases_url + "/latest")
-            latest_release = response.json()
-            windows_assets = [asset for asset in latest_release['assets'] if ('_win' in asset['name'].lower() or 'win' in asset['name'].lower()) and asset['name'].endswith('.zip') and not asset['name'].endswith('.7z')]
-            if windows_assets:
-                if len(windows_assets) > 1:
-                    options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
-                    choice, ok = QInputDialog.getItem(inst.ui, "Select Version", "Multiple Windows versions found. Please select one:\n" + options, [asset['name'] for asset in windows_assets], 0, False)
-                    if ok:
-                        latest_asset = next(asset for asset in windows_assets if asset['name'] == choice)
-                    else:
-                        sys.exit("No release selected. Exiting.")
-                else:
-                    latest_asset = windows_assets[0]
+        if not windows_assets:
+            QMessageBox.critical(inst.ui, "Error", f"No suitable Windows download found for {self.emulator}. Please try another release.")
+            inst.ui.qt_index_switcher(3)
+            return
 
-                self.target_download = latest_asset['browser_download_url']
-                self.url = self.target_download  # url for the download thread
-
-                # Ensure the download worker is a fresh instance
-                self.start_download_thread(self.url, temp_file)
-
-                self.selection = latest_release['tag_name']
+        if len(windows_assets) > 1:
+            options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windows_assets)])
+            choice, ok = QInputDialog.getItem(
+                inst.ui,
+                "Select Version",
+                "Multiple Windows versions found. Please select one:\n" + options,
+                [asset['name'] for asset in windows_assets],
+                # Make the selection non-editable
+                0,
+                False
+            )
+            if ok:
+                selected_asset = next(asset for asset in windows_assets if asset['name'] == choice)
             else:
-                QMessageBox.critical(inst.ui, "Error", f"No suitable Windows download found for {self.emulator} in the latest release. Please try another release or check for updates.")
+                QMessageBox.critical(inst.ui, "Error", "Please select an asset to download")
+                inst.ui.qt_index_switcher(3)
+                return
+        else:
+            selected_asset = windows_assets[0]
+
+        self.selected_asset_name = selected_asset['name']
+        self.target_download = selected_asset['browser_download_url']
+        self.url = self.target_download
+        self.start_download_thread(self.url, temp_file)
+
     # Download function
     def start_download_thread(self, url, dest):
         if self.download_thread is not None:

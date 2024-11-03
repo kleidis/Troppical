@@ -104,6 +104,40 @@ class Online():
         else:
             raise Exception(f"Failed to fetch releases: {response.status_code}")
 
+    def fetch_github_release(self, call_tag=None):
+        try:
+            if call_tag == "latest":
+                url = f"{inst.main.releases_url}/latest"
+                response = requests.get(url)
+                if response.status_code == 200:
+                    release = response.json()
+                    return self._filter_windows_assets(release)
+            else:
+                url = inst.main.releases_url
+                response = requests.get(url)
+                if response.status_code == 200:
+                    releases = response.json()
+                    if call_tag:
+                        # Find specific release by tag
+                        for release in releases:
+                            if release['tag_name'] == call_tag:
+                                return self._filter_windows_assets(release)
+                        return None
+                    return releases
+
+            raise Exception(f"Failed to fetch release: {response.status_code}")
+        except Exception as e:
+            QMessageBox.critical(None, "Error", f"Failed to fetch release information: {str(e)}")
+            return None
+
+    def _filter_windows_assets(self, release):
+        # TODO: Improve this function
+        return [
+            asset for asset in release['assets']
+            if ('_win' in asset['name'].lower() or 'win' in asset['name'].lower())
+            and asset['name'].endswith('.zip')
+            and not asset['name'].endswith('.7z')
+        ]
 
 # Worker thread used for downlaoding emulators
 class DownloadWorker(QObject):

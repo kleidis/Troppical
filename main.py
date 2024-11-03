@@ -212,40 +212,14 @@ class Main():
     # Extract and install function
     def extract_and_install(self, temp_file, extract_to):
         zip_file_path = f"{temp_file}.zip"
-        reg_result = self.update_reg_result()
-
-        # Handle multiple asset versions
-        if self.install_mode == "Update" and reg_result is not None:
-            current_asset = reg_result[2]
-            new_asset = self.target_download.split('/')[-1]
-
-            if current_asset != new_asset:
-                reply = QMessageBox.question(
-                    inst.ui,
-                    "Multiple Asset Versions Detected",
-                    f"The version you're installing might be different from the currently installed version. "
-                    "Would you like to delete all existing emulator [program files] files before Update (Yes RECOMMENDED)  or just replace them (No)?\n\n",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
-
-                if reply == QMessageBox.StandardButton.Yes:
-                    try:
-                        if os.path.exists(extract_to):
-                            shutil.rmtree(extract_to)
-                    except Exception as e:
-                        QMessageBox.critical(inst.ui, "Error", f"Failed to delete existing installation: {str(e)}")
-                        return
-
         try:
             os.rename(temp_file, zip_file_path)
             self.temp_extract_folder = tempfile.mkdtemp()
 
             try:
                 with ZipFile(zip_file_path, 'r') as emu_zip:
-                    # Extract all files first
                     emu_zip.extractall(self.temp_extract_folder)
 
-                    # Handle nested zips
                     for nested_zip in [f for f in emu_zip.namelist() if f.endswith('.zip')]:
                         nested_path = os.path.join(self.temp_extract_folder, nested_zip)
                         with ZipFile(nested_path, 'r') as nested:
@@ -263,7 +237,6 @@ class Main():
 
     def move_files(self, extract_to):
         try:
-            # Find executable directory
             exe_root = next(
                 (root for root, _, files in os.walk(self.temp_extract_folder)
                 if any(file.endswith('.exe') for file in files)),

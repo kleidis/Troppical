@@ -19,7 +19,6 @@ class Main():
         self.emulator = None  # Keep track of the selected emulator
         self.download_thread = None
         self.download_worker = None
-        self.reg_result = None
 
     def initialize_app(self):
         version = "Refactor"
@@ -29,11 +28,13 @@ class Main():
         sys.exit(app.exec())
 
     def update_reg_result(self):
-        self.reg_result = self.checkreg()
+        self.reg_result = self.check_reg()
         return self.reg_result
 
     # Set which emulator to use for the installer depeanding on the selected emulator
     def set_emulator(self):
+        install_reg = self.update_reg_result()
+
         selected_item = inst.sel.emulatorTreeWidget.currentItem()
         if not selected_item or not selected_item.parent():
             QMessageBox.warning(inst.ui, "Selection Error", "Please select an emulator.")
@@ -57,7 +58,7 @@ class Main():
                 repo = selected_emulator['repo']
                 self.releases_url = f"https://api.github.com/repos/{owner}/{repo}/releases"
 
-        installed_emulator = "Not Installed" if self.reg_result is None else self.reg_result[1]
+        installed_emulator = "Not Installed" if install_reg is None else install_reg[1]
         inst.install.installationPathLineEdit.setText(os.path.join(os.environ['LOCALAPPDATA'], self.emulator))
         inst.bar.labeldown.setText(f"Downloading: {self.emulator}")
         inst.bar.labelext.setText(f"Extracting: {self.emulator}")
@@ -92,7 +93,8 @@ class Main():
 
     # Updater function
     def emulator_updater(self):
-        installed_emulator = self.reg_result[1]
+        update_reg = self.update_reg_result()
+        installed_emulator = update_reg[1]
         latest_release = inst.online.fetch_releases(latest=True)
         latest_tag = latest_release['tag_name']
 
@@ -121,9 +123,9 @@ class Main():
 
     # Preparing which file to downlaod
     def Prepare_Download(self):
-        print (self.install_mode)
-        if self.reg_result is not None:
-            UpdateChannelValue = self.reg_result[1]
+        reg_result = self.update_reg_result()
+        if reg_result is not None:
+            UpdateChannelValue = reg_result[1]
         else:
             UpdateChannelValue = None
 
@@ -134,7 +136,7 @@ class Main():
         if self.install_mode == "Install":
             self.installationPath = inst.install.installationPathLineEdit.text()
         elif self.install_mode == "Update":
-            self.installationPath = self.reg_result[0]
+            self.installationPath = reg_result[0]
         os.makedirs(self.installationPath, exist_ok=True)
 
         if self.install_mode == "Install":
@@ -149,20 +151,16 @@ class Main():
                         if ok:
                             self.selected_asset = next(asset for asset in windows_assets if asset['name'] == choice)
                             self.selected_asset_name = self.selected_asset['name']
-                            print(self.selected_asset_name)
                             self.target_download = self.selected_asset['browser_download_url']
                             self.url = self.target_download  # url for the download thread
                             self.start_download_thread(self.url, temp_file)
-                            self.update_reg()
                         else:
                             sys.exit("No release selected. Exiting.")
                     elif len(windows_assets) == 1:
                         self.selected_asset_name = windows_assets[0]['name']
                         self.target_download = windows_assets[0]['browser_download_url']
-                        print(self.target_download)
                         self.url = self.target_download  # url for the download thread
                         self.start_download_thread(self.url, temp_file)
-                        self.update_reg()
                     else:
                         QMessageBox.critical(inst.ui, "Error", f"No suitable Windows download found for {self.emulator} {self.selection}. Please try another release.")
                         inst.ui.qt_index_switcher(3)
@@ -183,13 +181,11 @@ class Main():
 
                 self.target_download = latest_asset['browser_download_url']
                 self.url = self.target_download  # url for the download thread
-                print(f"Starting download for: {self.url}")
 
                 # Ensure the download worker is a fresh instance
                 self.start_download_thread(self.url, temp_file)
 
                 self.selection = latest_release['tag_name']
-                self.update_reg()
             else:
                 QMessageBox.critical(inst.ui, "Error", f"No suitable Windows download found for {self.emulator} in the latest release. Please try another release or check for updates.")
     # Download function
@@ -216,10 +212,11 @@ class Main():
     # Extract and install function
     def extract_and_install(self, temp_file, extract_to):
         zip_file_path = f"{temp_file}.zip"
+        reg_result = self.update_reg_result()
 
         # Handle multiple asset versions
-        if self.install_mode == "Update" and self.reg_result is not None:
-            current_asset = self.reg_result[2]
+        if self.install_mode == "Update" and reg_result is not None:
+            current_asset = reg_result[2]
             new_asset = self.target_download.split('/')[-1]
 
             if current_asset != new_asset:
@@ -306,13 +303,15 @@ class Main():
 
     # Install is complete
     def installation_complete(self):
+        self.create_reg() # Create the registry values
+
+        installPath = self.update_reg_result()[0]
         inst.bar.extractionProgressBar.setValue(100)
 
         # Fetch the executable path from the troppical_api data
         emulator_data = inst.online.emulator_database.get(self.emulator, {})
         exe_name = emulator_data.get('exe_path', '')
-        executable_path = os.path.normpath(os.path.join(inst.install.installationPathLineEdit.text(), exe_name))
-        print(executable_path)
+        executable_path = os.path.normpath(os.path.join(installPath, exe_name))
 
         if not exe_name:
             QMessageBox.critical(inst.ui, "Error", f"Executable path not found for emulator: {self.emulator}")
@@ -325,7 +324,7 @@ class Main():
         inst.ui.qt_index_switcher(5)
 
     # Function to check the reg values
-    def checkreg(self):
+    def check_reg(self):
         try:
             self.registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}", 0, winreg.KEY_READ)
             self.instValue, regtype = winreg.QueryValueEx(self.registry_key, 'Install_Dir')
@@ -336,7 +335,7 @@ class Main():
         except FileNotFoundError:
             pass
     # Function to create the reg values
-    def update_reg (self):
+    def create_reg (self):
         winreg.CreateKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}")
         self.registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\{self.emulator}", 0,
                                         winreg.KEY_WRITE)
@@ -375,7 +374,8 @@ class Main():
 
     # Uninstall function
     def uninstall(self):
-        if self.reg_result[0] is not None:
+        uninstall_reg = self.update_reg_result()
+        if uninstall_reg[0] is not None:
             # Paths to the shortcuts
             desktopshortcut = os.path.join(os.environ['USERPROFILE'], 'Desktop', f'{self.emulator}.lnk')
             startmenushortcut = os.path.join(os.environ['APPDATA'], 'Microsoft', 'Windows', 'Start Menu', 'Programs', f'{self.emulator}.lnk')

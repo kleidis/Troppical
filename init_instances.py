@@ -95,7 +95,6 @@ class inst:
             self._finish = FinishPage()
         return self._finish
 
-# Create a single instance of the inst class
 inst = inst()
 
 

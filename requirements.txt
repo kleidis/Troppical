@@ -2,3 +2,4 @@ PyQt6
 requests
 pywin32
 pyinstaller
+win32mica

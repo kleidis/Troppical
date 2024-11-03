@@ -3,8 +3,9 @@ import sys
 from PyQt6.QtWidgets import QMainWindow, QWidget, QStackedLayout, QMessageBox, QLabel
 from PyQt6.QtGui import QIcon
 from stylesheet import Style
-from PyQt6.QtCore import QObject, QThread, pyqtSignal
+from PyQt6.QtCore import QObject, QThread, pyqtSignal, Qt
 from init_instances import inst
+from utils.mica import apply_mica
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -61,7 +62,10 @@ class MainWindow(QMainWindow):
             self.layout.setCurrentIndex(index)
 
     def load_stylesheet(self):
+        if sys.getwindowsversion().build >= 22000:
+            apply_mica(self)
         self.setStyleSheet(Style.dark_stylesheet)
+
 
     def qt_button_click(self):
         button = self.sender()

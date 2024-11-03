@@ -31,7 +31,7 @@ class SelectionPage(QWidget):
 
     def populate_emulator_tree(self,):
         # Iterate over each emulator item and add it to the tree
-        for emulatorName, data in inst.online.emulator_database.items():
+        for emulatorName, data in inst.online.emulatorDatabase.items():
             emulatorSystem = data['system']
             emulatorDesc = data['description']
             icon = data['icon']
@@ -58,7 +58,7 @@ class SelectionPage(QWidget):
             emulatorItem.setToolTip(0, emulatorDesc)
 
             # Close the initializing message
-            inst.ui.initializing_msg.hide()
+            inst.ui.initializingMsg.hide()
 
         # Sort the systems and emulators alphabetically
         self.emulatorTreeWidget.sortItems(0, Qt.SortOrder.AscendingOrder)

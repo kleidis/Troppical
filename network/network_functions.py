@@ -2,35 +2,35 @@ import requests
 import os
 import subprocess
 from PyQt6.QtWidgets import QMessageBox
-from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, QThread
+from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtGui import QIcon, QImage, QPixmap
 from PyQt6.QtCore import QByteArray, Qt
 from init_instances import inst
 
 class Online():
-    database_url = "https://raw.githubusercontent.com/kleidis/Troppical/refs/heads/master/network/troppical-database.json"
+    databaseUrl = "https://raw.githubusercontent.com/kleidis/Troppical/refs/heads/master/network/troppical-database.json"
 
     def __init__(self):
-        self.troppical_database = self.fetch_data() # Fetch the data from troppical_dataabse JSON
-        self.emulator_database = None  # Cache for filtered emulator data
+        self.troppicalDatabase = self.fetch_data() # Fetch the data from troppical_dataabse JSON
+        self.emulatorDatabase = None  # Cache for filtered emulator data
 
     def fetch_data(self):
-        response = requests.get(self.database_url)
+        response = requests.get(self.databaseUrl)
         if response.status_code == 200:
-            all_data = response.json()
-            self.troppical_database = [item for item in all_data if item.get('emulator_platform') != 'android']
-            return self.troppical_database
+            allData = response.json()
+            self.troppicalDatabase = [item for item in allData if item.get('emulator_platform') != 'android']
+            return self.troppicalDatabase
         else:
             raise Exception(f"Failed to fetch data: {response.status_code}")
 
     # Fetch and process the main icon of Troppical. Only used by the UI header
     def fetch_and_process_main_icon(self):
-        self.main_logo_url = "https://raw.githubusercontent.com/kleidis/Troppical/refs/heads/master/icons/assets/Troppical.svg"
+        self.mainLogoUrl = "https://raw.githubusercontent.com/kleidis/Troppical/refs/heads/master/icons/assets/Troppical.svg"
 
-        response = requests.get(self.main_logo_url)
+        response = requests.get(self.mainLogoUrl)
         if response.status_code == 200:
-            image_bytes = response.content
-            qimage = QImage.fromData(QByteArray(image_bytes))
+            imageBytes = response.content
+            qimage = QImage.fromData(QByteArray(imageBytes))
             pixmap = QPixmap.fromImage(qimage).scaled(180, 180, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             return QIcon(pixmap)
         else:
@@ -40,9 +40,9 @@ class Online():
 
     def fetch_logos(self):
         self.logos = {}
-        for item in self.troppical_database:
-            logo_url = item['emulator_logo']
-            response = requests.get(logo_url)
+        for item in self.troppicalDatabase:
+            logoUrl = item['emulator_logo']
+            response = requests.get(logoUrl)
             if response.status_code == 200:
                 self.logos[item['emulator_name']] = response.content
             else:
@@ -52,9 +52,9 @@ class Online():
     # TODO: Improve tihs  function, currently it's not used
     def get_latest_git_tag(self):
         tag = "1.0"
-        github_token = os.getenv("GITHUB_TOKEN", "")
+        githubToken = os.getenv("GITHUB_TOKEN", "")
         try:
-            command = f"GH_TOKEN={github_token} gh release list --limit 1 --json tagName --jq '.[0].tagName'"
+            command = f"GH_TOKEN={githubToken} gh release list --limit 1 --json tagName --jq '.[0].tagName'"
             process = subprocess.Popen(['bash', '-c', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = process.communicate()
             if process.returncode == 0:
@@ -68,19 +68,19 @@ class Online():
         return tag
 
     def filter_emulator_data(self):
-        if self.emulator_database is not None:
-            return self.emulator_database
+        if self.emulatorDatabase is not None:
+            return self.emulatorDatabase
 
-        def fetch_icon(logo_url):
-            response = requests.get(logo_url)
+        def fetch_icon(logoUrl):
+            response = requests.get(logoUrl)
             if response.status_code == 200:
-                image_bytes = response.content
-                qimage = QImage.fromData(QByteArray(image_bytes))
+                imageBytes = response.content
+                qimage = QImage.fromData(QByteArray(imageBytes))
                 pixmap = QPixmap.fromImage(qimage).scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
                 return QIcon(pixmap)
             return QIcon()  # Default icon if fetching fails
 
-        self.emulator_database = {
+        self.emulatorDatabase = {
             item['emulator_name']: {
                 'name': item['emulator_name'],
                 'system': item['emulator_system'],
@@ -90,37 +90,37 @@ class Online():
                 'exe_path': item['exe_path'],
                 'icon': fetch_icon(item['emulator_logo'])
             }
-            for item in self.troppical_database
+            for item in self.troppicalDatabase
         }
 
-        return self.emulator_database
+        return self.emulatorDatabase
 
     def fetch_releases(self, latest=False):
-        releases_url = inst.main.releases_url
-        url = releases_url + "/latest" if latest else releases_url
+        releasesUrl = inst.main.releasesUrl
+        url = releasesUrl + "/latest" if latest else releasesUrl
         response = requests.get(url)
         if response.status_code == 200:
             return response.json()
         else:
             raise Exception(f"Failed to fetch releases: {response.status_code}")
 
-    def fetch_github_release(self, call_tag=None):
+    def fetch_github_release(self, callTag=None):
         try:
-            if call_tag == "latest":
-                url = f"{inst.main.releases_url}/latest"
+            if callTag == "latest":
+                url = f"{inst.main.releasesUrl}/latest"
                 response = requests.get(url)
                 if response.status_code == 200:
                     release = response.json()
                     return self._filter_windows_assets(release)
             else:
-                url = inst.main.releases_url
+                url = inst.main.releasesUrl
                 response = requests.get(url)
                 if response.status_code == 200:
                     releases = response.json()
-                    if call_tag:
+                    if callTag:
                         # Find specific release by tag
                         for release in releases:
-                            if release['tag_name'] == call_tag:
+                            if release['tag_name'] == callTag:
                                 return self._filter_windows_assets(release)
                         return None
                     return releases
@@ -156,18 +156,18 @@ class DownloadWorker(QObject):
     def run(self):
         try:
             response = requests.get(self.url, stream=True)
-            total_size = int(response.headers.get('content-length', 0))
-            if total_size == 0:
+            totalSize = int(response.headers.get('content-length', 0))
+            if totalSize == 0:
                 print("The content-length of the response is zero.")
                 return
 
-            downloaded_size = 0
+            downloadedSize = 0
             with open(self.dest, 'wb') as file:
                 for data in response.iter_content(1024):
-                    downloaded_size += len(data)
+                    downloadedSize += len(data)
                     file.write(data)
-                    progress_percentage = (downloaded_size / total_size) * 100
-                    self.progress.emit(int(progress_percentage))
+                    progressPercentage = (downloadedSize / totalSize) * 100
+                    self.progress.emit(int(progressPercentage))
             self.finished.emit()
         except Exception as e:
             QMessageBox.critical(None, "Error", "Error during download.")

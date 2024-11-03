@@ -1,31 +1,28 @@
-# Page imports
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QStackedLayout, QMessageBox, QLabel
+import os
+import sys
+from PyQt6.QtWidgets import QMainWindow, QWidget, QStackedLayout, QMessageBox, QLabel
+from PyQt6.QtGui import QIcon
 from stylesheet import Style
-import requests
-from PyQt6.QtGui import QIcon, QImage, QPixmap
-from PyQt6.QtCore import Qt, QByteArray, QObject, QThread, pyqtSignal
+from PyQt6.QtCore import QObject, QThread, pyqtSignal
 from init_instances import inst
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.shared_thread = None  # Thrad used for secondary function pirposes
+        self.sharedThread = None  # Thread used for secondary function purposes
 
-        self.setWindowTitle(f'Troppical - {"version"}')  # Window name with version
-        self.setCentralWidget(QWidget(self))  # Set a central widget
+        self.setWindowTitle(f'Troppical - {""}')  # Window name. TODO: Add version
+        self.setCentralWidget(QWidget(self))
         self.layout = QStackedLayout(self.centralWidget())  # Set the layout on the central widget
         self.setMaximumSize(1000, 720)  # Set the maximum window size to 1280x720
         self.setMinimumSize(1000, 720)  # Set the minimum window size to 800x600
-        # Set the window icon
-        #   icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
-        #   self.setWindowIcon(QIcon(icon_path))
+        icon = inst.online.fetch_and_process_main_icon()
+        self.setWindowIcon(icon)
         self.load_stylesheet()
         self.widget_2_layout()
         self.connect_buttons()
 
     def connect_buttons(self):
-        # Connect buttons to the qt_button_click method
         inst.header.header()
         inst.wel.manageButton.clicked.connect(self.qt_button_click)
         inst.sel.nextButton.clicked.connect(self.qt_button_click)
@@ -38,7 +35,6 @@ class MainWindow(QMainWindow):
         inst.finish.installAnotherButton.clicked.connect(self.qt_button_click)
 
     def widget_2_layout(self):
-        # Add actual pages instead of placeholders
         self.layout.addWidget(inst.wel.welcomePage)
         self.layout.addWidget(inst.sel.emulatorSelectPage)
         self.layout.addWidget(inst.act.actPage)
@@ -48,7 +44,7 @@ class MainWindow(QMainWindow):
 
     def qt_index_switcher(self, index):
         # Mapping of index to page attributes and instances
-        page_map = {
+        pageMap = {
             0: ('welcome_page', inst.wel, 'welcomePage'),
             1: ('selection_page', inst.sel, 'emulatorSelectPage'),
             2: ('act_page', inst.act, 'actPage'),
@@ -57,11 +53,10 @@ class MainWindow(QMainWindow):
             5: ('finish_page', inst.finish, 'finishPage')
         }
 
-        # Initialize and replace the widget for the given index
-        if index in page_map:
-            attr_name, instance, widget_name = page_map[index]
-            setattr(self, attr_name, instance)
-            widget = getattr(instance, widget_name)
+        if index in pageMap:
+            attrName, instance, widgetName = pageMap[index]
+            setattr(self, attrName, instance)
+            widget = getattr(instance, widgetName)
             self.layout.replaceWidget(self.layout.widget(index), widget)
             self.layout.setCurrentIndex(index)
 
@@ -72,7 +67,7 @@ class MainWindow(QMainWindow):
         button = self.sender()
 
         # Define a mapping of buttons to their actions
-        button_actions = {
+        buttonActions = {
             inst.wel.manageButton: self.handle_manage,
             inst.sel.nextButton: self.handle_select,
             inst.act.installButton: self.handle_install,
@@ -84,27 +79,26 @@ class MainWindow(QMainWindow):
             inst.act.backButton: self.handle_back,
         }
 
-        # Execute the corresponding action if the button is in the mapping
-        action = button_actions.get(button)
+        action = buttonActions.get(button)
         if isinstance(action, int):
             self.qt_index_switcher(action)
         elif callable(action):
             action()
 
     def handle_manage(self):
-        if not hasattr(self, 'emulator_database_initialized') or not self.emulator_database_initialized:
+        if not hasattr(self, 'emulatorDatabaseInitialized') or not self.emulatorDatabaseInitialized:
             self.initialize_emulator_database()
-            self.emulator_database_initialized = True
+            self.emulatorDatabaseInitialized = True
         inst.ui.qt_index_switcher(1)
     def handle_select(self):
         if inst.main.set_emulator():
             inst.ui.qt_index_switcher(2)
     def handle_install(self):
-        inst.main.install_mode = "Install"
+        inst.main.installMode = "Install"
         inst.ui.qt_index_switcher(3)
         inst.main.Add_releases_to_combobox()
     def handle_uninstall(self):
-        inst.main.install_mode = "Uninstall"  # Unused for now
+        inst.main.installMode = "Uninstall"  # Unused for now
         inst.main.uninstall()
     def handle_install_emu(self):
         inst.ui.qt_index_switcher(4)
@@ -115,49 +109,50 @@ class MainWindow(QMainWindow):
             self.layout.setCurrentIndex(0)
             inst.bar.downloadProgressBar.setValue(0)
             inst.bar.extractionProgressBar.setValue(0)
-            setattr(inst.main, 'install_mode', None)
+            setattr(inst.main, 'installMode', None)
             setattr(inst.main, 'selection', None)
+            inst.install.desktopShortcutCheckbox.setChecked(False)
+            inst.install.startMenuShortcutCheckbox.setChecked(False)
         elif button == inst.finish.finishButton:
             self.close()
-
     def handle_back(self):
-        current_index = self.layout.currentIndex()
-        if current_index > 0:
-            self.layout.setCurrentIndex(current_index - 1)
+        currentIndex = self.layout.currentIndex()
+        if currentIndex > 0:
+            self.layout.setCurrentIndex(currentIndex - 1)
 
     def initialize_emulator_database(self):
         # Check if the message box is already shown
-        if hasattr(self, 'initializing_msg') and self.initializing_msg.isVisible():
+        if hasattr(self, 'initializingMsg') and self.initializingMsg.isVisible():
             return
 
         # Show initializing message
-        self.initializing_msg = QMessageBox(self)
-        self.initializing_msg.setWindowTitle("Troppical API")
-        self.initializing_msg.setText("Getting emulator data...")
-        self.initializing_msg.setStandardButtons(QMessageBox.StandardButton.NoButton)
-        self.initializing_msg.show()
+        self.initializingMsg = QMessageBox(self)
+        self.initializingMsg.setWindowTitle("Troppical API")
+        self.initializingMsg.setText("Getting emulator data...")
+        self.initializingMsg.setStandardButtons(QMessageBox.StandardButton.NoButton)
+        self.initializingMsg.show()
 
         # Start the secondary thread with the task and callback
         self.start_secondary_thread(inst.online.filter_emulator_data, lambda: inst.sel.populate_emulator_tree())
 
     def start_secondary_thread(self, task, callback, *args, **kwargs):
-        if self.shared_thread is not None:
-            self.shared_thread.quit()
-            self.shared_thread.wait()
+        if self.sharedThread is not None:
+            self.sharedThread.quit()
+            self.sharedThread.wait()
 
-        self.shared_thread = QThread()
+        self.sharedThread = QThread()
         worker = inst.secondary_thread
         worker.set_task(task, *args, **kwargs)
-        worker.moveToThread(self.shared_thread)
+        worker.moveToThread(self.sharedThread)
         worker.finished.connect(callback)
-        self.shared_thread.started.connect(worker.run)
-        self.shared_thread.start()
+        self.sharedThread.started.connect(worker.run)
+        self.sharedThread.start()
 
     # Disable buttons depanding on if it the program is already installed
     def disable_qt_buttons_if_installed(self):
-        installation_status = inst.main.update_reg_result()
+        installationStatus = inst.main.update_reg_result()
 
-        if installation_status is None:
+        if installationStatus is None:
             inst.act.installButton.setEnabled(True)
             inst.act.updateButton.setEnabled(False)
             inst.act.uninstallButton.setEnabled(False)

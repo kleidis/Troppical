@@ -35,8 +35,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          pyinstaller --clean --onefile --icon=icon.ico --add-data "icon.ico;." --windowed main.py
-          pyinstaller --clean --onefile --icon=icon.ico --windowed init_troppical.py
+          pyinstaller --clean --onefile --icon=icons/assets/troppical.ico --add-data "icons/assets/troppical.ico;." --windowed main.py
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD }}
 

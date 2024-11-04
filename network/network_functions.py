@@ -6,6 +6,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtGui import QIcon, QImage, QPixmap
 from PyQt6.QtCore import QByteArray, Qt
 from init_instances import inst
+import sys
 
 class Online():
     databaseUrl = "https://raw.githubusercontent.com/kleidis/Troppical/refs/heads/master/network/troppical-database.json"
@@ -49,23 +50,29 @@ class Online():
                 QMessageBox.critical(None, "Error", f"Failed to fetch logo for {item['emulator_name']}: {response.status_code}")
         return self.logos
 
-    # TODO: Improve tihs  function, currently it's not used
     def get_latest_git_tag(self):
-        tag = "1.0"
-        githubToken = os.getenv("GITHUB_TOKEN", "")
+        current_tag = "Local Build"
+        home_url = "https://api.github.com/repos/kleidis/Troppical/releases/latest"
+        if getattr(sys, 'frozen', False):
+            try:
+                with open(os.path.join(os.path.dirname(sys.executable), 'version.txt'), 'r') as f:
+                    version = f.read().strip()
+                    if len(version) == 7 and version[2] == '.' and version.replace('.','').isdigit():
+                        current_tag = version
+            except:
+                pass
+
         try:
-            command = f"GH_TOKEN={githubToken} gh release list --limit 1 --json tagName --jq '.[0].tagName'"
-            process = subprocess.Popen(['bash', '-c', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            out, err = process.communicate()
-            if process.returncode == 0:
-                tag = out.decode('utf-8').strip()
-                if tag.startswith("v"):
-                    tag = tag[1:]
+            response = requests.get(home_url)
+            if response.status_code == 200:
+                latest_tag = response.json()["tag_name"]
+                if current_tag != "Local Build" and latest_tag > current_tag:
+                    return latest_tag
             else:
-                print(f"Failed to get latest GitHub release tag: {err.decode('utf-8')}")
+                print(f"Failed to get latest GitHub release tag: {response.status_code}")
         except Exception as e:
             print(f"Failed to get latest GitHub release tag: {e}")
-        return tag
+        return current_tag
 
     def filter_emulator_data(self):
         if self.emulatorDatabase is not None:

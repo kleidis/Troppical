@@ -1,0 +1,102 @@
+name: troppical-build
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Create Release'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  Windows-build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~\AppData\Local\pip\Cache
+            ~\AppData\Local\pyinstaller\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Set version
+        shell: bash
+        run: |
+          echo "VERSION=$(date +'%y.%m%d')" >> $GITHUB_ENV
+          echo "$(date +'%y.%m%d')" > version.txt
+
+      - name: Build
+        shell: bash
+        run: |
+          pyinstaller --clean --onefile --icon=icons/assets/troppical.ico \
+          --add-data "icons/assets/troppical.ico;." \
+          --add-data "version.txt;." \
+          --windowed main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: troppical-windows
+          path: |
+            ${{ github.workspace }}/dist/main.exe
+            ${{ github.workspace }}/version.txt
+
+  create-release:
+    needs: [Windows-build]
+    if: github.event.inputs.release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: troppical-windows
+          path: ./artifacts
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(cat ./artifacts/version.txt)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Troppical ${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/main.exe
+          asset_name: troppical.exe
+          asset_content_type: application/octet-stream
+

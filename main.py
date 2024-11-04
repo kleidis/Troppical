@@ -20,7 +20,6 @@ class Main():
         self.downloadWorker = None
 
     def initialize_app(self):
-        version = "Refactor"
         app = QApplication(sys.argv)
         uiMain = inst.ui
         uiMain.show()
@@ -379,4 +378,5 @@ if __name__ == "__main__":
             main.initialize_app()
     else:
         main.initialize_app()
+
 

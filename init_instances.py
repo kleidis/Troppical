@@ -12,6 +12,8 @@ class inst:
     _install = None #install_page.py
     _bar = None #progress_bar.py
     _finish = None #finish_page.py
+    _settings = None #settings_page.py
+    _config = None
 
     @property
     def main(self):
@@ -94,6 +96,20 @@ class inst:
             from ui.finish_page import FinishPage  # Import FinishPage only when needed
             self._finish = FinishPage()
         return self._finish
+
+    @property
+    def settings(self):
+        if self._settings is None:
+            from ui.settings_page import SettingsPage  # Import SettingsPage only when needed
+            self._settings = SettingsPage()
+        return self._settings
+
+    @property
+    def config(self):
+        if self._config is None:
+            from configure import Configure
+            self._config = Configure()
+        return self._config
 
 inst = inst()
 

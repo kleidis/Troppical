@@ -11,25 +11,25 @@ class Style:
         }
         /*PUSHBUTTON*/
         QPushButton {
-            background-color: rgba(50, 50, 52, 0.7);
-            border: 1px solid rgb(68, 68, 68);
-            border-radius: 7px;
+            background-color: #E81123;
+            border: none;
+            border-radius: 4px;
+            margin: 8px;
+            padding: 0 12px;
+            color: white;
             min-height: 38px;
             max-height: 38px;
         }
 
         QPushButton:hover {
-            background-color: rgba(100, 100, 100, 0.7);
-            border: 1px solid rgba(255, 255, 255, 10);
+            background-color: #F23B4A;
         }
 
-        QPushButton::pressed {
-            background-color: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 13);
-            color: rgba(255, 255, 255, 200);
+        QPushButton:pressed {
+            background-color: #C41019;
         }
 
-        QPushButton::disabled {
+        QPushButton:disabled {
             color: rgb(150, 150, 150);
             background-color: rgba(255, 255, 255, 0.13);
         }
@@ -38,8 +38,8 @@ class Style:
         }
         /*GROUPBOX*/
         QGroupBox {
-            border-radius: 5px;
-            border: 0px solid rgba(255, 255, 255, 13);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             margin-top: 36px;
             background-color: transparent;
         }
@@ -47,11 +47,12 @@ class Style:
         QGroupBox::title {
             subcontrol-origin: margin;
             subcontrol-position: top left;
-            background-color: rgba(255, 255, 255, 0.16);
+            background-color: rgba(255, 255, 255, 0.06);
             padding: 7px 15px;
             margin-left: 5px;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         QGroupBox::title::disabled {
@@ -59,23 +60,34 @@ class Style:
         }
         /*COMBOBOX*/
         QComboBox {
-            background-color: rgba(66, 66, 66, 0.7);
-            border: 1px solid rgb(68, 68, 68);
-            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
             padding-left: 10px;
             min-height: 38px;
             max-height: 38px;
         }
 
         QComboBox:hover {
-            background-color: rgba(120, 120, 120, 0.7);
-            border: 1px solid rgba(255, 255, 255, 10);
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         QComboBox::pressed {
-            background-color: rgba(66, 66, 66, 0.7);
-            border: 1px solid #0078D4;
-            color: rgba(255, 255, 255, 200);
+            background-color: rgba(255, 255, 255, 0.06);
+            border: 1px solid #E81123;
+            color: white;
+        }
+
+        QComboBox:focus {
+            border: 1px solid #E81123;
+        }
+
+        QComboBox QAbstractItemView {
+            background-color: rgba(45, 45, 45, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            selection-background-color: rgba(255, 255, 255, 0.06);
         }
 
         QComboBox::down-arrow {
@@ -112,21 +124,29 @@ class Style:
         }
 
         QCheckBox::indicator:hover {
-            background-color: rgba(255, 255, 255, 0.16);
+            border-color: #E81123;
+            background-color: rgba(232, 17, 35, 0.1);
         }
 
         QCheckBox::indicator:pressed {
-            background-color: rgba(255, 255, 255, 0.20);
-            border: 2px solid #434343;
+            border-color: #C41019;
+            background-color: rgba(232, 17, 35, 0.15);
         }
 
         QCheckBox::indicator:checked {
-            background-color: #0078D4;
-            border: 2px solid #0078D4;
+            border-color: #E81123;
+            background-color: #E81123;
             image: url(:/CheckBox/img dark/CheckBox.png);
         }
 
+        QCheckBox::indicator:checked:hover {
+            border-color: #F23B4A;
+            background-color: #F23B4A;
+        }
+
         QCheckBox::indicator:checked:pressed {
+            border-color: #C41019;
+            background-color: #C41019;
             image: url(:/CheckBox/img dark/CheckBoxPressed.png);
         }
 
@@ -140,15 +160,18 @@ class Style:
         }
         /*PROGRESSBAR*/
         QProgressBar {
-            background-color: qlineargradient(spread:reflect, x1:0.5, y1:0.5, x2:0.5, y2:1, stop:0.119403 rgba(255, 255, 255, 0.25), stop:0.273632 rgba(0, 0, 0, 0));
+            background-color: rgba(255, 255, 255, 0.06);
+            border: none;
             border-radius: 2px;
-            min-height: 4px;
-            max-height: 4px;
         }
 
         QProgressBar::chunk {
-            background-color: #0078D4;
+            background-color: #E81123;
             border-radius: 2px;
+        }
+
+        QProgressBar::chunk:hover {
+            background-color: #F23B4A;
         }
         /*MENU*/
         QMenu {
@@ -191,66 +214,56 @@ class Style:
         }
         /*LINEEDIT*/
         QLineEdit {
-            background-color: rgba(50, 50, 52, 0.7);
-            border: 1px solid rgb(68, 68, 68);
-            font-size: 16px;
-            font-family: "Segoe UI", serif;
-            font-weight: 500;
-            border-radius: 7px;
-            border-bottom: 1px solid rgba(255, 255, 255, 150);
-            padding-top: 0px;
-            padding-left: 5px;
+            background-color: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 5px 10px;
+            color: white;
+            font-size: 13px;
         }
 
         QLineEdit:hover {
-            background-color: rgba(120, 120, 120, 0.7);
-            border: 1px solid rgba(255, 255, 255, 10);
-            border-bottom: 1px solid rgba(255, 255, 255, 150);
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         QLineEdit:focus {
-            border-bottom: 2px solid #0078D4;
-            background-color: rgba(100, 100, 100, 0.7);
-            border-top: 1px solid rgba(255, 255, 255, 13);
-            border-left: 1px solid rgba(255, 255, 255, 13);
-            border-right: 1px solid rgba(255, 255, 255, 13);
+            background-color: rgba(255, 255, 255, 0.06);
+            border: 1px solid #E81123;
         }
 
-        QLineEdit:disabled {
-            color: rgb(150, 150, 150);
-            background-color: rgba(255, 255, 255, 0.13);
-            border: 1px solid rgba(255, 255, 255, 5);
+        QLineEdit::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
+
         /*TREEWIDGET*/
         QTreeWidget {
             background-color: transparent;
             color: white;
+            font-size: 13px;
         }
+
         QTreeView {
             background-color: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0px;
             outline: 0;
-            padding-right: 5px;
+            padding: 5px;
         }
 
         QTreeView::item {
-            padding: 7px;
-            margin-top: 3px;
+            padding: 6px 8px;
+            margin: 2px 0;
+            border-radius: 0px;
         }
 
         QTreeView::item:selected {
-            background-color: rgba(45, 45, 45, 0.7);
-            border-radius: 0px;
-            margin-bottom: 3px;
-            padding-left: 0px;
+            background-color: rgba(255, 255, 255, 0.06);
+            border: none;
         }
 
-        QTreeView::item:!selected:hover {
-            background-color: rgba(255, 255, 255, 0.06);
-            border-radius: 0px;
-            margin-bottom: 3px;
-            padding-left: 0px;
+        QTreeView::item:hover:!selected {
+            background-color: rgba(255, 255, 255, 0.03);
         }
 
         QTreeView::branch:has-children:!has-siblings:closed,
@@ -263,8 +276,13 @@ class Style:
             image: url(:/TreeView/img dark/TreeViewOpen.png);
         }
 
+        QTreeView::branch:has-children:!has-siblings,
+        QTreeView::branch:has-children:has-siblings {
+            padding-left: 4px;
+        }
+
         QTreeView:disabled {
-            color: rgb(150, 150, 150);
+            color: rgba(255, 255, 255, 0.3);
         }
         /*SCROLLVERTICAL*/
         QScrollBar:vertical {

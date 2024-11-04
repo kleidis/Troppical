@@ -5,8 +5,8 @@ def apply_mica(window):
     window.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
     hwnd = window.winId().__int__()
 
-    mode = MicaTheme.AUTO
-    style = MicaStyle.ALT
+    mode = MicaTheme.DARK
+    style = MicaStyle.DEFAULT
 
     # Enable extended composition
     ApplyMica(HWND=hwnd, Theme=mode, Style=style)

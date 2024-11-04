@@ -1,9 +1,9 @@
 import os
 import sys
-from PyQt6.QtWidgets import QMainWindow, QWidget, QStackedLayout, QMessageBox, QLabel
-from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QMainWindow, QWidget, QStackedLayout, QMessageBox
 from stylesheet import Style
-from PyQt6.QtCore import QObject, QThread, pyqtSignal, Qt
+from PyQt6.QtCore import QObject, QThread, pyqtSignal
+from PyQt6.QtGui import QFont
 from init_instances import inst
 from utils.mica import apply_mica
 
@@ -19,12 +19,17 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1000, 720)  # Set the minimum window size to 800x600
         icon = inst.online.fetch_and_process_main_icon()
         self.setWindowIcon(icon)
+
+        self.segoe_ui = QFont("Segoe UI", 10)
+        self.setFont(self.segoe_ui)
         self.load_stylesheet()
         self.widget_2_layout()
         self.connect_buttons()
+        self.init_settings()
 
     def connect_buttons(self):
         inst.header.header()
+        inst.wel.configureButton.clicked.connect(self.qt_button_click)
         inst.wel.manageButton.clicked.connect(self.qt_button_click)
         inst.sel.nextButton.clicked.connect(self.qt_button_click)
         inst.act.installButton.clicked.connect(self.qt_button_click)
@@ -34,6 +39,8 @@ class MainWindow(QMainWindow):
         inst.act.backButton.clicked.connect(self.qt_button_click)
         inst.finish.finishButton.clicked.connect(self.qt_button_click)
         inst.finish.installAnotherButton.clicked.connect(self.qt_button_click)
+        inst.wel.settingsButton.clicked.connect(self.qt_button_click)
+        inst.settings.applyButton.clicked.connect(self.qt_button_click)
 
     def widget_2_layout(self):
         self.layout.addWidget(inst.wel.welcomePage)
@@ -42,6 +49,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(inst.install.installPage)
         self.layout.addWidget(inst.bar.progressBarPage)
         self.layout.addWidget(inst.finish.finishPage)
+        self.layout.addWidget(inst.settings.settingsPage)
 
     def qt_index_switcher(self, index):
         # Mapping of index to page attributes and instances
@@ -51,7 +59,8 @@ class MainWindow(QMainWindow):
             2: ('act_page', inst.act, 'actPage'),
             3: ('install_page', inst.install, 'installPage'),
             4: ('progress_bar_page', inst.bar, 'progressBarPage'),
-            5: ('finish_page', inst.finish, 'finishPage')
+            5: ('finish_page', inst.finish, 'finishPage'),
+            6: ('settings_page', inst.settings, 'settingsPage')
         }
 
         if index in pageMap:
@@ -66,6 +75,23 @@ class MainWindow(QMainWindow):
             apply_mica(self)
         self.setStyleSheet(Style.dark_stylesheet)
 
+    def init_settings(self):
+        try:
+            inst.config.load_config()
+
+            settings_map = {
+                'launch_as_admin': inst.settings.launchAsAdminCheckbox,
+                'default_install_path': inst.settings.defaultInstallPath
+            }
+
+            for setting_key, ui_element in settings_map.items():
+                if hasattr(ui_element, 'setChecked'):  # For checkboxes
+                    ui_element.setChecked(inst.config.get_setting(setting_key))
+                elif hasattr(ui_element, 'setText'):  # For text inputs
+                    ui_element.setText(inst.config.get_setting(setting_key))
+        except Exception as e:
+            print(f"Error initializing settings: {e}")
+
 
     def qt_button_click(self):
         button = self.sender()
@@ -73,6 +99,7 @@ class MainWindow(QMainWindow):
         # Define a mapping of buttons to their actions
         buttonActions = {
             inst.wel.manageButton: self.handle_manage,
+            inst.wel.configureButton: self.handle_settings,
             inst.sel.nextButton: self.handle_select,
             inst.act.installButton: self.handle_install,
             inst.act.updateButton: inst.main.emulator_updater,
@@ -81,6 +108,8 @@ class MainWindow(QMainWindow):
             inst.finish.finishButton: self.handle_finish,
             inst.finish.installAnotherButton: self.handle_finish,
             inst.act.backButton: self.handle_back,
+            inst.wel.settingsButton: self.handle_settings,
+            inst.settings.applyButton: inst.config.handle_settings_button_apply,
         }
 
         action = buttonActions.get(button)
@@ -123,6 +152,8 @@ class MainWindow(QMainWindow):
         currentIndex = self.layout.currentIndex()
         if currentIndex > 0:
             self.layout.setCurrentIndex(currentIndex - 1)
+    def handle_settings(self):
+        inst.ui.qt_index_switcher(6)
 
     def initialize_emulator_database(self):
         # Check if the message box is already shown

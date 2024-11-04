@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QTreeWidget, QTreeWidgetItem, QPushButton, QMessageBox
-from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QPushButton, QHBoxLayout, QLineEdit, QLabel)
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 from init_instances import inst
 
 # Emulator Select Page
@@ -9,27 +9,63 @@ class SelectionPage(QWidget):
         super().__init__()
         self.emulatorSelectPage = QWidget()
         emulatorSelectLayout = QVBoxLayout()
-        emulatorSelectGroup = QGroupBox("Select your emulator from the list")
-        emulatorSelectGroupLayout = QVBoxLayout()
 
-        # Create a QTreeWidget
+        headerLayout = QHBoxLayout()
+
+        titleLabel = QLabel("Select your emulator from the list")
+        titleLabel.setFont(QFont("Segoe UI", 11))
+        headerLayout.addWidget(titleLabel)
+
+        # Add stretch to push search box to right
+        headerLayout.addStretch()
+
+        self.searchBar = QLineEdit()
+        self.searchBar.setPlaceholderText("Search emulators...")
+        self.searchBar.setFixedWidth(200)
+        self.searchBar.setFixedHeight(32)
+        self.searchBar.textChanged.connect(self.filter_emulators)
+        headerLayout.addWidget(self.searchBar)
+
+        emulatorSelectLayout.addLayout(headerLayout)
+
         self.emulatorTreeWidget = QTreeWidget()
         self.emulatorTreeWidget.setHeaderHidden(True)
         self.emulatorTreeWidget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        emulatorSelectLayout.addWidget(self.emulatorTreeWidget)
 
-        emulatorSelectGroupLayout.addWidget(self.emulatorTreeWidget)
+        bottomLayout = QHBoxLayout()
+        bottomLayout.addStretch()
 
-        # Set layout for the group and add to the main layout
-        emulatorSelectGroup.setLayout(emulatorSelectGroupLayout)
-        emulatorSelectLayout.addWidget(emulatorSelectGroup)
-        self.emulatorSelectPage.setLayout(emulatorSelectLayout)  # Set the layout for the emulator selection page
+        self.nextButton = QPushButton("Install")
+        self.nextButton.setFixedHeight(28)
+        self.nextButton.setMinimumWidth(80)
+        self.nextButton.setFont(QFont("Segoe UI", 11))
 
-        # Next button to confirm selection
-        self.nextButton = QPushButton("Next")
-        emulatorSelectLayout.addWidget(self.nextButton)
+        bottomLayout.addWidget(self.nextButton)
+        emulatorSelectLayout.addLayout(bottomLayout)
 
+        self.emulatorSelectPage.setLayout(emulatorSelectLayout)
 
-    def populate_emulator_tree(self,):
+    def filter_emulators(self, search_text):
+        search_text = search_text.lower()
+
+        for i in range(self.emulatorTreeWidget.topLevelItemCount()):
+            system_item = self.emulatorTreeWidget.topLevelItem(i)
+            system_visible = False
+
+            for j in range(system_item.childCount()):
+                emulator_item = system_item.child(j)
+                emulator_name = emulator_item.text(0).lower()
+
+                if search_text in emulator_name:
+                    emulator_item.setHidden(False)
+                    system_visible = True
+                else:
+                    emulator_item.setHidden(True)
+
+            system_item.setHidden(not system_visible)
+
+    def populate_emulator_tree(self):
         # Iterate over each emulator item and add it to the tree
         for emulatorName, data in inst.online.emulatorDatabase.items():
             emulatorSystem = data['system']

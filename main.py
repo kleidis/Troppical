@@ -9,6 +9,7 @@ from icons import styledark_rc
 import win32com.client
 import winreg
 from pathlib import Path
+import pyuac
 from init_instances import inst
 
 class Main():
@@ -57,7 +58,10 @@ class Main():
                 self.releasesUrl = f"https://api.github.com/repos/{owner}/{repo}/releases"
 
         installedEmulator = "Not Installed" if installReg is None else installReg[1]
-        inst.install.installationPathLineEdit.setText(os.path.join(os.environ['LOCALAPPDATA'], self.emulator))
+        default_path = os.path.normpath(inst.config.get_setting('default_install_path'))
+        inst.install.installationPathLineEdit.setText(
+            os.path.join(default_path, self.emulator)
+        )
         inst.bar.labeldown.setText(f"Downloading: {self.emulator}")
         inst.bar.labelext.setText(f"Extracting: {self.emulator}")
         inst.act.actLabel.setText(
@@ -68,15 +72,12 @@ class Main():
         return True # To avoid the function from switching index even on non-select item
 
     def InstallPath(self):
-        currentPath = inst.install.installationPathLineEdit.text()
         selectedDirectory = QFileDialog.getExistingDirectory(inst.install, "Select Installation Directory", currentPath)
 
         if selectedDirectory:
             installDir = os.path.join(selectedDirectory, self.emulator)
             self.installDir = os.path.normpath(installDir)
             inst.install.installationPathLineEdit.setText(self.installDir)
-
-        return self.installDir
 
     def Add_releases_to_combobox(self):
         self.releases = inst.online.fetch_releases()
@@ -158,7 +159,6 @@ class Main():
         self.url = self.targetDownload
         self.start_download_thread(self.url, tempFile)
 
-    # Download function
     def start_download_thread(self, url, dest):
         if self.downloadThread is not None:
             self.downloadThread.quit()
@@ -212,6 +212,10 @@ class Main():
                 self.tempExtractFolder
             )
 
+            if self.check_admin(extractTo):
+                shutil.rmtree(self.tempExtractFolder, ignore_errors=True)
+                sys.exit()
+
             os.makedirs(extractTo, exist_ok=True)
 
             try:
@@ -243,7 +247,6 @@ class Main():
             QMessageBox.critical(inst.ui, "Installation Error", f"Failed to complete installation: {str(e)}")
             return
 
-    # Install is complete
     def installation_complete(self):
         self.create_reg() # Create the registry values
 
@@ -263,6 +266,28 @@ class Main():
         if inst.install.startMenuShortcutCheckbox.isChecked():
             self.define_shortcut(executablePath, 'start_menu')
         inst.ui.qt_index_switcher(5)
+
+    def check_admin(self, path):
+        test_path = os.path.join(path, "test_admin")
+        if not os.path.exists(test_path):
+            try:
+                os.makedirs(test_path)
+            except PermissionError:
+                QMessageBox.critical(inst.ui, "Error", "You do not have the necessary permissions to uninstall from this directory. Please run the application as an administrator.")
+                return True
+
+        test_file = os.path.join(test_path, "test.txt")
+        try:
+            with open(test_file, 'w') as f:
+                f.write("test")
+        except PermissionError:
+            QMessageBox.critical(inst.ui, "Error", "You do not have the necessary permissions to uninstall from this directory. Please run the application as an administrator.")
+            return True
+        try:
+            os.remove(test_file)
+            os.rmdir(test_path)
+        except:
+            pass
 
     def check_reg(self):
         try:
@@ -309,10 +334,12 @@ class Main():
         except Exception as e:
             QMessageBox.critical(inst.ui, "Error", f"Failed to create shortcut: {e}")
 
-    # Uninstall function
     def uninstall(self):
         uninstallReg = self.update_reg_result()
         dirpath = Path(self.instValue)
+        if self.check_admin(dirpath):
+            shutil.rmtree(dirpath, ignore_errors=True)
+            return
 
         if uninstallReg[0] is not None:
             desktopShortcut = os.path.join(os.environ['USERPROFILE'], 'Desktop', f'{self.emulator}.lnk')
@@ -345,5 +372,11 @@ class Main():
 
 if __name__ == "__main__":
     main = Main()
-    main.initialize_app()
+    if inst.config.get_setting('launch_as_admin'):
+        if not pyuac.isUserAdmin():
+            pyuac.runAsAdmin()
+        else:
+            main.initialize_app()
+    else:
+        main.initialize_app()
 

@@ -6,30 +6,37 @@ class InstallPage(QWidget):
     def __init__(self):
         super().__init__()
         self.installPage = QWidget()
-        ## Layout and gorup
+
         installLayout = QVBoxLayout()
         checkboxLayout = QVBoxLayout()
-        checkboxGroup = QGroupBox("Do you want to create shortcuts?") # Checkboxes
-        checkboxGroup.setLayout(checkboxLayout) # Set the layout of Checkboxes
-        pathSelectorLayout = QHBoxLayout() # Browse widget layout
-        self.installPage.setLayout(installLayout) # Set the installpage layout
-        ## Widgets
+        checkboxGroup = QGroupBox("Do you want to create shortcuts?")
+        checkboxGroup.setLayout(checkboxLayout)
+        pathSelectorLayout = QHBoxLayout()
+        self.installPage.setLayout(installLayout)
+
         InstalOpt = QLabel('<b>Installation Options')
         InstalOpt.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.installationSourceComboBox = QComboBox() # Dropdown menu
-        self.desktopShortcutCheckbox = QCheckBox("Create a desktop shortcut") # Checkboxes
+        self.installationSourceComboBox = QComboBox()
+        self.desktopShortcutCheckbox = QCheckBox("Create a desktop shortcut")
         self.startMenuShortcutCheckbox = QCheckBox("Create a start menu shortcut")
-        self.installationPathLineEdit = QLineEdit()  # Browse for installation path widget
+        self.installationPathLineEdit = QLineEdit()
         self.browseButton = QPushButton("Browse")
         self.browseButton.clicked.connect(inst.main.InstallPath)
-        self.install_emu_button = QPushButton('Install') # Install button        ## Add widgets / layouts
+
+        bottomLayout = QHBoxLayout()
+        bottomLayout.addStretch()
+        self.install_emu_button = QPushButton('Install')
+        self.install_emu_button.setFixedWidth(120)
+        bottomLayout.addWidget(self.install_emu_button)
+
         installLayout.addLayout(inst.header.header())
-        installLayout.addWidget(InstalOpt) ### Instalation Option Label
-        installLayout.addWidget(self.installationSourceComboBox) ## Install Sorce Widget
-        pathSelectorLayout.addWidget(self.installationPathLineEdit) ## Browse Widget
+        installLayout.addWidget(InstalOpt)
+        installLayout.addWidget(self.installationSourceComboBox)
+        pathSelectorLayout.addWidget(self.installationPathLineEdit)
         pathSelectorLayout.addWidget(self.browseButton)
         installLayout.addLayout(pathSelectorLayout)
-        checkboxLayout.addWidget(self.desktopShortcutCheckbox) # Checkboxes
+        checkboxLayout.addWidget(self.desktopShortcutCheckbox)
         checkboxLayout.addWidget(self.startMenuShortcutCheckbox)
         installLayout.addWidget(checkboxGroup)
-        installLayout.addWidget(self.install_emu_button)
+        installLayout.addStretch()
+        installLayout.addLayout(bottomLayout)

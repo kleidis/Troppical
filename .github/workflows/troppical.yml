@@ -67,16 +67,22 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: troppical-windows
-          path: ./artifacts
+          path: artifacts
+
+      - name: List files
+        run: ls -R artifacts/
 
       - name: Get version
         id: version
         run: |
-          VERSION=$(cat ./artifacts/version.txt)
+          VERSION=$(cat artifacts/version.txt)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create Release
@@ -96,7 +102,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BUILD }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/main.exe
+          asset_path: artifacts/main.exe
           asset_name: troppical.exe
           asset_content_type: application/octet-stream
-

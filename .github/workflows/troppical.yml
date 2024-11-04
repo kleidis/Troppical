@@ -36,7 +36,8 @@ jobs:
             ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --cache-dir=~/.pip-cache -r requirements.txt
 
       - name: Set version
         shell: bash

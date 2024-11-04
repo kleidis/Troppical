@@ -1,5 +1,4 @@
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QPushButton,
-                           QHBoxLayout, QSizePolicy, QSpacerItem)
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from init_instances import inst

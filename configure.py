@@ -1,8 +1,5 @@
-from pathlib import Path
 import configparser
 import os
-from PyQt6.QtWidgets import QMessageBox
-from PyQt6.QtCore import QTimer
 from init_instances import inst
 from win32api import MessageBeep
 from win32con import MB_OK

@@ -284,7 +284,7 @@
     "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/ba1ad43409d104d44fca424d6d5b7f7927da44d2/network/assets/rpcs3.png",
     "emulator_desc": "An open-source PlayStation 3 emulator/debugger",
     "emulator_owner": "RPCS3",
-    "emulator_repo": "rpcs3",
+    "emulator_repo": "rpcs3-binaries-win",
     "emulator_artifact_name": "",
     "emulator_platform": "pc",
     "emulator_package": "",

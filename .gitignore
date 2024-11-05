@@ -9,7 +9,6 @@ installer_logo_base64.py
 citra_util.spec
 /__pycache__
 /dist
-troppical.spec
 .old
 *.spec
 /network/__pycache__

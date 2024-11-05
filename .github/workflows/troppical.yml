@@ -39,19 +39,10 @@ jobs:
         run: |
           pip install --cache-dir=~/.pip-cache -r requirements.txt
 
-      - name: Set version
-        shell: bash
-        run: |
-          echo "VERSION=$(date +'%y.%m%d')" >> $GITHUB_ENV
-          echo "$(date +'%y.%m%d')" > version.txt
-
       - name: Build
         shell: bash
         run: |
-          pyinstaller --clean --onefile --icon=icons/assets/troppical.ico \
-          --add-data "icons/assets/troppical.ico;." \
-          --add-data "version.txt;." \
-          --windowed main.py
+          pyinstaller Troppical.spec
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

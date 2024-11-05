@@ -71,6 +71,7 @@ class Main():
         return True # To avoid the function from switching index even on non-select item
 
     def InstallPath(self):
+        currentPath = os.path.normpath(inst.install.installationPathLineEdit.text())
         selectedDirectory = QFileDialog.getExistingDirectory(inst.install, "Select Installation Directory", currentPath)
 
         if selectedDirectory:

@@ -269,14 +269,14 @@
     "emulator_name": "RMG",
     "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/placeholder.png",
     "emulator_desc": "Nintendo 64 emulator",
-    "emulator_owner": "rmg-dev",
+    "emulator_owner": "Rosalie241",
     "emulator_repo": "RMG",
     "emulator_artifact_name": "",
     "emulator_platform": "multi",
     "emulator_package": "",
     "emulator_system": "N64",
-    "exe_path": "rmg.exe",
-    "has_in_app_updater": false,
+    "exe_path": "RMG.exe",
+    "has_in_app_updater": true,
     "is_from_github": true
   },
   {
@@ -305,7 +305,7 @@
     "emulator_system": "PSP",
     "exe_path": "ppsspp.exe",
     "has_in_app_updater": true,
-    "is_from_github": true
+    "is_from_github": false
   },
   {
     "emulator_name": "Dolphin",
@@ -331,7 +331,7 @@
     "emulator_platform": "multi",
     "emulator_package": "",
     "emulator_system": "PS1",
-    "exe_path": "duckstation.exe",
+    "exe_path": "duckstation-qt-x64-ReleaseLTCG.exe",
     "has_in_app_updater": true,
     "is_from_github": true
   },

@@ -6,14 +6,14 @@ from PyQt6.QtCore import QObject, QThread, pyqtSignal
 from PyQt6.QtGui import QFont
 from init_instances import inst
 from utils.mica import apply_mica
+import version
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.sharedThread = None  # Thread used for secondary function purposes
-        self.current_version = inst.online.get_latest_git_tag()
 
-        self.setWindowTitle(f'Troppical - {self.current_version}')  # Window name. TODO: Add version
+        self.setWindowTitle(f'Troppical - {version.version}')  # Window name. TODO: Add version
         self.setCentralWidget(QWidget(self))
         self.layout = QStackedLayout(self.centralWidget())  # Set the layout on the central widget
         self.setMaximumSize(1000, 720)  # Set the maximum window size to 1280x720
@@ -21,15 +21,11 @@ class MainWindow(QMainWindow):
         icon = inst.online.fetch_and_process_main_icon()
         self.setWindowIcon(icon)
 
-        if inst.online.get_latest_git_tag() > self.current_version:
-            QMessageBox.information(None, "Update Available", "A new version of Troppical is available. Would you like to update now?")
-        else:
-            QMessageBox.information(None, "No Updates Available", "Troppical is up to date.")
-
-
         self.segoe_ui = QFont("Segoe UI", 10)
         self.setFont(self.segoe_ui)
         self.load_stylesheet()
+        if getattr(sys, 'frozen', False):
+            inst.updater.check_for_update()
         self.widget_2_layout()
         self.connect_buttons()
         self.init_settings()

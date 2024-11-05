@@ -50,29 +50,20 @@ class Online():
                 QMessageBox.critical(None, "Error", f"Failed to fetch logo for {item['emulator_name']}: {response.status_code}")
         return self.logos
 
-    def get_latest_git_tag(self):
-        current_tag = "Local Build"
+    def get_git_tag(self):
         home_url = "https://api.github.com/repos/kleidis/Troppical/releases/latest"
-        if getattr(sys, 'frozen', False):
-            try:
-                with open(os.path.join(os.path.dirname(sys.executable), 'version.txt'), 'r') as f:
-                    version = f.read().strip()
-                    if len(version) == 7 and version[2] == '.' and version.replace('.','').isdigit():
-                        current_tag = version
-            except:
-                pass
-
         try:
             response = requests.get(home_url)
             if response.status_code == 200:
                 latest_tag = response.json()["tag_name"]
-                if current_tag != "Local Build" and latest_tag > current_tag:
-                    return latest_tag
+                assets = response.json()['assets']
+                return latest_tag, assets
             else:
                 print(f"Failed to get latest GitHub release tag: {response.status_code}")
+                return None
         except Exception as e:
             print(f"Failed to get latest GitHub release tag: {e}")
-        return current_tag
+            return None
 
     def filter_emulator_data(self):
         if self.emulatorDatabase is not None:

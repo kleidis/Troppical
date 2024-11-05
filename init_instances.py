@@ -13,7 +13,8 @@ class inst:
     _bar = None #progress_bar.py
     _finish = None #finish_page.py
     _settings = None #settings_page.py
-    _config = None
+    _config = None #configure.py
+    _updater = None #updater.py
 
     @property
     def main(self):
@@ -110,6 +111,13 @@ class inst:
             from configure import Configure
             self._config = Configure()
         return self._config
+
+    @property
+    def updater(self):
+        if self._updater is None:
+            from network.updater import Updater
+            self._updater = Updater()
+        return self._updater
 
 inst = inst()
 

@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QGroupBox, QComboBox, QCheckBox, QLineEdit
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 from init_instances import inst
 
 class InstallPage(QWidget):
@@ -13,6 +14,25 @@ class InstallPage(QWidget):
         checkboxGroup.setLayout(checkboxLayout)
         pathSelectorLayout = QHBoxLayout()
         self.installPage.setLayout(installLayout)
+
+        headerLayout = QHBoxLayout()
+        headerLayout.setSpacing(16)
+
+        self.backButton = QPushButton("Back")
+        self.backButton.setFixedSize(80, 28)
+        self.backButton.setFont(QFont("Segoe UI", 11))
+        self.backButton.clicked.connect(lambda: inst.ui.qt_index_switcher(1))
+        headerLayout.addWidget(self.backButton)
+
+        titleLayout = QVBoxLayout()
+        titleLayout.setSpacing(4)
+
+        titleLabel = QLabel("<font size='10'>Troppical</font>")
+        titleLabel.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        titleLayout.addWidget(titleLabel)
+
+        headerLayout.addLayout(titleLayout)
+        headerLayout.addStretch()
 
         InstalOpt = QLabel('<b>Installation Options')
         InstalOpt.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -29,7 +49,7 @@ class InstallPage(QWidget):
         self.install_emu_button.setFixedWidth(120)
         bottomLayout.addWidget(self.install_emu_button)
 
-        installLayout.addLayout(inst.header.header())
+        installLayout.addLayout(headerLayout)
         installLayout.addWidget(InstalOpt)
         installLayout.addWidget(self.installationSourceComboBox)
         pathSelectorLayout.addWidget(self.installationPathLineEdit)

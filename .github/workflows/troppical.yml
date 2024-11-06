@@ -49,8 +49,7 @@ jobs:
         with:
           name: troppical-windows
           path: |
-            ${{ github.workspace }}/dist/main.exe
-            ${{ github.workspace }}/version.txt
+            ${{ github.workspace }}/dist/Troppical.exe
 
   create-release:
     needs: [Windows-build]
@@ -94,6 +93,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BUILD }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/dist/main.exe
-          asset_name: troppical.exe
+          asset_path: artifacts/dist/Troppical.exe
+          asset_name: Troppical.exe
           asset_content_type: application/octet-stream

@@ -1,3 +1,4 @@
+import subprocess
 from PyQt6.QtWidgets import QApplication, QMessageBox, QFileDialog, QInputDialog
 from PyQt6.QtCore import QThread
 import os
@@ -11,6 +12,7 @@ import winreg
 from pathlib import Path
 import pyuac
 from init_instances import inst
+from utils.dep_check import check_7zip_installed, get_7zip_path
 
 class Main():
     def __init__(self):
@@ -83,24 +85,44 @@ class Main():
         self.releases = inst.online.fetch_releases()
 
         inst.install.installationSourceComboBox.clear()
-
-        for release in self.releases:
-            inst.install.installationSourceComboBox.addItem(release['tag_name'])
+        try:
+            for release in self.releases:
+                inst.install.installationSourceComboBox.addItem(release['tag_name'])
+        except Exception as e:
+            QMessageBox.critical(inst.ui, "Error", f"Failed to fetch releases: {str(e)}")
+            inst.ui.qt_index_switcher(1)
 
     # Updater function
     def emulator_updater(self):
-        updateReg = self.update_reg_result()
-        installedEmulator = updateReg[1]
+        reg = self.update_reg_result()
+        installedEmulator = reg[1]
         latestRelease = inst.online.fetch_releases(latest=True)
         latestTag = latestRelease['tag_name']
 
         # Check for specific emulators that use a rolling-release
-        if self.emulator in ['Vita3K', 'NooDS']: # TODOL Add this type to json database
+        if self.emulator in ['Vita3K', 'NooDS', 'Duckstation']: # TODOL Add this type to json database
             reply = QMessageBox.question(inst.ui, "Rolling-Release Emulator Detected", f"{self.emulator} uses rolling-releases instead of numbered releases. This means that the latest version may not be the one you have installed (We cannot detect the version). Would you like to proceed with the download anyway?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 self.installMode = "Update"
                 inst.ui.qt_index_switcher(4)
                 self.Prepare_Download()
+                return
+            else:
+                pass
+
+        if inst.online.emulatorDatabase[self.emulator]['has_in_app_updater']:
+            reply = QMessageBox.warning(
+                inst.ui,
+                "In-App Updater Detected",
+                f"{self.emulator} has its own way of updating. Would you like to open the emulator and manually update it, or download the latest version from here?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                try:
+                    exe_path = os.path.join(reg[0], inst.online.emulatorDatabase[self.emulator]['exe_path'])
+                    subprocess.Popen([exe_path])
+                except Exception as e:
+                    QMessageBox.critical(inst.ui, "Error", f"Failed to open emulator: {e}")
                 return
             else:
                 pass
@@ -124,35 +146,35 @@ class Main():
 
         if self.installMode == "Install":
             self.installationPath = inst.install.installationPathLineEdit.text()
-            windowsAssets = inst.online.fetch_github_release(self.selection)
+            self.windowsAssets = inst.online.fetch_github_release(self.selection)
         elif self.installMode == "Update":
             self.installationPath = regResult[0]
-            windowsAssets = inst.online.fetch_github_release("latest")
+            self.windowsAssets = inst.online.fetch_github_release("latest")
 
-        if not windowsAssets:
+        if not self.windowsAssets:
             QMessageBox.critical(inst.ui, "Error", f"No suitable Windows download found for {self.emulator}. Please try another release.")
             inst.ui.qt_index_switcher(3)
             return
 
-        if len(windowsAssets) > 1:
-            options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(windowsAssets)])
+        if len(self.windowsAssets) > 1:
+            options = "\n".join([f"{idx + 1}: {asset['name']}" for idx, asset in enumerate(self.windowsAssets)])
             choice, ok = QInputDialog.getItem(
                 inst.ui,
                 "Select Version",
                 "Multiple Windows versions found. Please select one:\n" + options,
-                [asset['name'] for asset in windowsAssets],
+                [asset['name'] for asset in self.windowsAssets],
                 # Make the selection non-editable
                 0,
                 False
             )
             if ok:
-                selectedAsset = next(asset for asset in windowsAssets if asset['name'] == choice)
+                selectedAsset = next(asset for asset in self.windowsAssets if asset['name'] == choice)
             else:
                 QMessageBox.critical(inst.ui, "Error", "Please select an asset to download")
                 inst.ui.qt_index_switcher(3)
                 return
         else:
-            selectedAsset = windowsAssets[0]
+            selectedAsset = self.windowsAssets[0]
 
         self.selectedAssetName = selectedAsset['name']
         self.targetDownload = selectedAsset['browser_download_url']
@@ -180,25 +202,58 @@ class Main():
         self.downloadWorker = None
 
     def extract_and_install(self, tempFile, extractTo):
-        zipFilePath = f"{tempFile}.zip"
+        seven_zip = get_7zip_path()
+        if not seven_zip and self.selectedAssetName.endswith('.7z'):
+            if not check_7zip_installed():
+                return
+            seven_zip = '7z'
+
+        if self.selectedAssetName.endswith('.7z'):
+            archiveFile = f"{tempFile}.7z"
+            is_7zip = True
+        else:
+            archiveFile = f"{tempFile}.zip"
+            is_7zip = False
+
         try:
-            os.rename(tempFile, zipFilePath)
+            os.rename(tempFile, archiveFile)
             self.tempExtractFolder = tempfile.mkdtemp()
 
             try:
-                with ZipFile(zipFilePath, 'r') as emuZip:
-                    emuZip.extractall(self.tempExtractFolder)
+                if is_7zip:
+                    result = subprocess.run([seven_zip, 'x', archiveFile, f'-o{self.tempExtractFolder}', '-y'],
+                                         capture_output=True, text=True)
+                    if result.returncode != 0:
+                        raise Exception(f"7zip extraction failed: {result.stderr}")
+                else:
+                    with ZipFile(archiveFile, 'r') as emuZip:
+                        emuZip.extractall(self.tempExtractFolder)
 
-                    for nestedZip in [f for f in emuZip.namelist() if f.endswith('.zip')]:
-                        nestedPath = os.path.join(self.tempExtractFolder, nestedZip)
-                        with ZipFile(nestedPath, 'r') as nested:
-                            nested.extractall(self.tempExtractFolder)
-                        os.remove(nestedPath)
+                # Handle nested archives
+                for root, _, files in os.walk(self.tempExtractFolder):
+                    for file in files:
+                        if file.endswith(('.zip', '.7z')):
+                            nested_path = os.path.join(root, file)
+                            try:
+                                if file.endswith('.7z'):
+                                    result = subprocess.run([seven_zip, 'x', nested_path, f'-o{root}', '-y'],
+                                                         capture_output=True, text=True)
+                                    if result.returncode != 0:
+                                        raise Exception(f"7zip extraction failed: {result.stderr}")
+                                else:
+                                    with ZipFile(nested_path, 'r') as nested:
+                                        nested.extractall(root)
+                                os.remove(nested_path)
+                            except Exception as e:
+                                QMessageBox.warning(inst.ui, "Nested Archive Warning",
+                                                 f"Failed to extract nested archive {file}: {str(e)}")
+                                continue
+
             except Exception as e:
                 QMessageBox.critical(inst.ui, "Extraction Error", f"Failed to extract files: {str(e)}")
                 return
             finally:
-                os.remove(zipFilePath)
+                os.remove(archiveFile)
             self.move_files(self.installationPath)
         except Exception as e:
             QMessageBox.critical(inst.ui, "File Error", f"Failed to process downloaded file: {str(e)}")

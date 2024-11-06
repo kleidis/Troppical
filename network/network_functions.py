@@ -86,7 +86,9 @@ class Online():
                 'owner': item['emulator_owner'],
                 'repo': item['emulator_repo'],
                 'exe_path': item['exe_path'],
-                'icon': fetch_icon(item['emulator_logo'])
+                'icon': fetch_icon(item['emulator_logo']),
+                'is_from_github': item['is_from_github'],
+                'has_in_app_updater': item['has_in_app_updater']
             }
             for item in self.troppicalDatabase
         }
@@ -129,12 +131,10 @@ class Online():
             return None
 
     def _filter_windows_assets(self, release):
-        # TODO: Improve this function
         return [
             asset for asset in release['assets']
-            if ('_win' in asset['name'].lower() or 'win' in asset['name'].lower())
-            and asset['name'].endswith('.zip')
-            and not asset['name'].endswith('.7z')
+            if any(keyword in asset['name'].lower() for keyword in ['win', 'windows'])
+            and (asset['name'].endswith('.zip') or asset['name'].endswith('.7z'))
         ]
 
 # Worker thread used for downlaoding emulators

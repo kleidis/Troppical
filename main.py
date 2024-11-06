@@ -59,9 +59,9 @@ class Main():
                 self.releasesUrl = f"https://api.github.com/repos/{owner}/{repo}/releases"
 
         installedEmulator = "Not Installed" if installReg is None else installReg[1]
-        default_path = os.path.normpath(inst.config.get_setting('default_install_path'))
+        defaultPath = os.path.normpath(inst.config.get_setting('default_install_path'))
         inst.install.installationPathLineEdit.setText(
-            os.path.join(default_path, self.emulator)
+            os.path.join(defaultPath, self.emulator)
         )
         inst.bar.labeldown.setText(f"Downloading: {self.emulator}")
         inst.bar.labelext.setText(f"Extracting: {self.emulator}")
@@ -119,8 +119,8 @@ class Main():
             )
             if reply == QMessageBox.StandardButton.Yes:
                 try:
-                    exe_path = os.path.join(reg[0], inst.online.emulatorDatabase[self.emulator]['exe_path'])
-                    subprocess.Popen([exe_path])
+                    exePath = os.path.join(reg[0], inst.online.emulatorDatabase[self.emulator]['exe_path'])
+                    subprocess.Popen([exePath])
                 except Exception as e:
                     QMessageBox.critical(inst.ui, "Error", f"Failed to open emulator: {e}")
                 return
@@ -202,26 +202,26 @@ class Main():
         self.downloadWorker = None
 
     def extract_and_install(self, tempFile, extractTo):
-        seven_zip = get_7zip_path()
-        if not seven_zip and self.selectedAssetName.endswith('.7z'):
+        sevenZip = get_7zip_path()
+        if not sevenZip and self.selectedAssetName.endswith('.7z'):
             if not check_7zip_installed():
                 return
-            seven_zip = '7z'
+            sevenZip = '7z'
 
         if self.selectedAssetName.endswith('.7z'):
             archiveFile = f"{tempFile}.7z"
-            is_7zip = True
+            is7zip = True
         else:
             archiveFile = f"{tempFile}.zip"
-            is_7zip = False
+            is7zip = False
 
         try:
             os.rename(tempFile, archiveFile)
             self.tempExtractFolder = tempfile.mkdtemp()
 
             try:
-                if is_7zip:
-                    result = subprocess.run([seven_zip, 'x', archiveFile, f'-o{self.tempExtractFolder}', '-y'],
+                if is7zip:
+                    result = subprocess.run([sevenZip, 'x', archiveFile, f'-o{self.tempExtractFolder}', '-y'],
                                          capture_output=True, text=True)
                     if result.returncode != 0:
                         raise Exception(f"7zip extraction failed: {result.stderr}")
@@ -233,17 +233,17 @@ class Main():
                 for root, _, files in os.walk(self.tempExtractFolder):
                     for file in files:
                         if file.endswith(('.zip', '.7z')):
-                            nested_path = os.path.join(root, file)
+                            nestedPath = os.path.join(root, file)
                             try:
                                 if file.endswith('.7z'):
-                                    result = subprocess.run([seven_zip, 'x', nested_path, f'-o{root}', '-y'],
+                                    result = subprocess.run([sevenZip, 'x', nestedPath, f'-o{root}', '-y'],
                                                          capture_output=True, text=True)
                                     if result.returncode != 0:
                                         raise Exception(f"7zip extraction failed: {result.stderr}")
                                 else:
-                                    with ZipFile(nested_path, 'r') as nested:
+                                    with ZipFile(nestedPath, 'r') as nested:
                                         nested.extractall(root)
-                                os.remove(nested_path)
+                                os.remove(nestedPath)
                             except Exception as e:
                                 QMessageBox.warning(inst.ui, "Nested Archive Warning",
                                                  f"Failed to extract nested archive {file}: {str(e)}")
@@ -323,24 +323,24 @@ class Main():
         inst.ui.qt_index_switcher(5)
 
     def check_admin(self, path):
-        test_path = os.path.join(path, "test_admin")
-        if not os.path.exists(test_path):
+        testPath = os.path.join(path, "test_admin")
+        if not os.path.exists(testPath):
             try:
-                os.makedirs(test_path)
+                os.makedirs(testPath)
             except PermissionError:
                 QMessageBox.critical(inst.ui, "Error", "You do not have the necessary permissions to uninstall from this directory. Please run the application as an administrator.")
                 return True
 
-        test_file = os.path.join(test_path, "test.txt")
+        testFile = os.path.join(testPath, "test.txt")
         try:
-            with open(test_file, 'w') as f:
+            with open(testFile, 'w') as f:
                 f.write("test")
         except PermissionError:
             QMessageBox.critical(inst.ui, "Error", "You do not have the necessary permissions to uninstall from this directory. Please run the application as an administrator.")
             return True
         try:
-            os.remove(test_file)
-            os.rmdir(test_path)
+            os.remove(testFile)
+            os.rmdir(testPath)
         except:
             pass
 

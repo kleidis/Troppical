@@ -6,26 +6,26 @@ from win32con import MB_OK
 
 class Configure:
     def __init__(self):
-        self.config_dir = os.path.join(os.getenv('APPDATA'), 'Troppical')
-        self.config_file = os.path.join(self.config_dir, 'config.ini')
-        self.default_config = {
+        self.configDir = os.path.join(os.getenv('APPDATA'), 'Troppical')
+        self.configFile = os.path.join(self.configDir, 'config.ini')
+        self.defaultConfig = {
             'Settings': {
                 'launch_as_admin': 'false',
                 'default_install_path': os.path.join(os.environ['LOCALAPPDATA'])
             }
         }
         self.config = configparser.ConfigParser()
-        self.current_config = self.load_config()
+        self.currentConfig = self.load_config()
 
     def load_config(self):
         try:
-            if not os.path.exists(self.config_dir):
-                os.makedirs(self.config_dir)
+            if not os.path.exists(self.configDir):
+                os.makedirs(self.configDir)
 
-            if os.path.exists(self.config_file):
-                self.config.read(self.config_file)
+            if os.path.exists(self.configFile):
+                self.config.read(self.configFile)
             else:
-                for section, values in self.default_config.items():
+                for section, values in self.defaultConfig.items():
                     if not self.config.has_section(section):
                         self.config.add_section(section)
                     for key, value in values.items():
@@ -39,7 +39,7 @@ class Configure:
 
     def create_default_config(self):
         self.config = configparser.ConfigParser()
-        for section, values in self.default_config.items():
+        for section, values in self.defaultConfig.items():
             self.config.add_section(section)
             for key, value in values.items():
                 self.config.set(section, key, str(value))
@@ -47,7 +47,7 @@ class Configure:
 
     def save_config(self):
         try:
-            with open(self.config_file, 'w') as f:
+            with open(self.configFile, 'w') as f:
                 self.config.write(f)
         except Exception as e:
             print(f"Error saving config: {e}")
@@ -60,7 +60,7 @@ class Configure:
                 return value.lower() == 'true'
             return value
         except:
-            return self.default_config
+            return self.defaultConfig
 
     def set_setting(self, key, value, section='Settings'):
         self.config.set(section, key, str(value))

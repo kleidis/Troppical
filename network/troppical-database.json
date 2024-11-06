@@ -308,20 +308,6 @@
     "is_from_github": false
   },
   {
-    "emulator_name": "Dolphin",
-    "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/ba1ad43409d104d44fca424d6d5b7f7927da44d2/network/assets/dolphin.png",
-    "emulator_desc": "A GameCube and Wii emulator",
-    "emulator_owner": "dolphin-emu",
-    "emulator_repo": "dolphin",
-    "emulator_artifact_name": "",
-    "emulator_platform": "multi",
-    "emulator_package": "",
-    "emulator_system": "GameCube/Wii",
-    "exe_path": "dolphin.exe",
-    "has_in_app_updater": false,
-    "is_from_github": false
-  },
-  {
     "emulator_name": "Duckstation",
     "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/ba1ad43409d104d44fca424d6d5b7f7927da44d2/network/assets/duckstation.png",
     "emulator_desc": "A PlayStation 1 emulator",
@@ -345,7 +331,7 @@
     "emulator_platform": "pc",
     "emulator_package": "",
     "emulator_system": "PS2",
-    "exe_path": "pcsx2.exe",
+    "exe_path": "pcsx2-qt.exe",
     "has_in_app_updater": true,
     "is_from_github": true
   },

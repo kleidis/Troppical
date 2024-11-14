@@ -102,7 +102,8 @@ class Online():
         if response.status_code == 200:
             return response.json()
         else:
-            raise Exception(f"Failed to fetch releases: {response.status_code}")
+            QMessageBox.critical(None, "Error", f"Your Emulator's host repository is not supported for automatic updates.")
+            return
 
     def fetch_github_release(self, callTag=None):
         try:

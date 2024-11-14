@@ -56,7 +56,24 @@ class Main():
             if selectedEmulator:
                 owner = selectedEmulator['owner']
                 repo = selectedEmulator['repo']
-                self.releasesUrl = f"https://api.github.com/repos/{owner}/{repo}/releases"
+
+                non_github_hosts = {
+                    "Citron": {
+                        "host_type": "gitea",
+                        "api_url": "https://git.citron-emu.org/api/v1/repos/{owner}/{repo}/releases"
+                    },
+                }
+
+                def set_releases_url(owner, repo):
+                    if selectedEmulator['name'] in non_github_hosts:
+                        host_info = non_github_hosts[selectedEmulator['name']]
+                        releasesUrl = host_info['api_url'].format(owner=owner, repo=repo)
+                    else:
+                        # Default to GitHub if not in the dictionary
+                        releasesUrl = f"https://api.github.com/repos/{owner}/{repo}/releases"
+
+                    return releasesUrl
+                self.releasesUrl = set_releases_url(owner, repo)
 
         installedEmulator = "Not Installed" if installReg is None else installReg[1]
         defaultPath = os.path.normpath(inst.config.get_setting('default_install_path'))
@@ -97,6 +114,8 @@ class Main():
         reg = self.update_reg_result()
         installedEmulator = reg[1]
         latestRelease = inst.online.fetch_releases(latest=True)
+        if not latestRelease:
+            return
         latestTag = latestRelease['tag_name']
 
         # Check for specific emulators that use a rolling-release

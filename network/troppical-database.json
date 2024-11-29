@@ -4,7 +4,7 @@
     "emulator_logo": "https://raw.githubusercontent.com/kleidis/Troppical/7e62e65739b0a5f58564845992c1a6c999e0f5b7/network/assets/lime3ds.png",
     "emulator_desc": "A Nintendo 3DS emulator based on Citra",
     "emulator_owner": "Lime3DS",
-    "emulator_repo": "Lime3DS",
+    "emulator_repo": "lime3ds-archive",
     "emulator_artifact_name": "null.apk",
     "emulator_platform": "multi",
     "emulator_package": "io.github.lime3ds.android",

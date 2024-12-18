@@ -323,6 +323,8 @@ class Main():
 
     def installation_complete(self):
         self.create_reg() # Create the registry values
+        if self.installMode == "Install":
+            inst.config.handle_emulator_lst(self.emulator)
 
         installPath = self.update_reg_result()[0]
         inst.bar.extractionProgressBar.setValue(100)
@@ -423,6 +425,12 @@ class Main():
             if reply == QMessageBox.StandardButton.No:
                 return
             else:
+                try:
+                    inst.config.handle_emulator_lst(self.emulator, uninstall=True)
+                except Exception as e:
+                    QMessageBox.critical(inst.ui, "Error", f"Failed to uninstall: {str(e)}")
+                    return
+                return
                 for shortcut in [desktopShortcut, startMenuShortcut]:
                     if os.path.exists(shortcut):
                         os.remove(shortcut)

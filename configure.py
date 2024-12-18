@@ -1,4 +1,5 @@
 import configparser
+import datetime
 import os
 from init_instances import inst
 from win32api import MessageBeep
@@ -8,10 +9,16 @@ class Configure:
     def __init__(self):
         self.configDir = os.path.join(os.getenv('APPDATA'), 'Troppical')
         self.configFile = os.path.join(self.configDir, 'config.ini')
+        self.emulatorLsitFile = os.path.join(self.configDir, 'emulator.ini')
         self.defaultConfig = {
             'Settings': {
                 'launch_as_admin': 'false',
                 'default_install_path': os.path.join(os.environ['LOCALAPPDATA'])
+            }
+        }
+        self.emulatorList = {
+            '': {
+                '': ''
             }
         }
         self.config = configparser.ConfigParser()
@@ -45,12 +52,14 @@ class Configure:
                 self.config.set(section, key, str(value))
         return self.config
 
-    def save_config(self):
-        try:
+    def save_config(self, emulator=False):
+        if emulator==True:
+            with open(self.emulatorLsitFile, 'w') as f:
+                self.config.write(f)
+                return
+        else:
             with open(self.configFile, 'w') as f:
                 self.config.write(f)
-        except Exception as e:
-            print(f"Error saving config: {e}")
 
     def get_setting(self, key, section='Settings'):
         try:
@@ -84,3 +93,21 @@ class Configure:
         inst.ui.qt_index_switcher(0)
 
         MessageBeep(MB_OK)
+
+        # Emulator list
+
+    def handle_emulator_lst(self, emulator, uninstall=False):
+        self.config = configparser.ConfigParser()
+        self.config.read(self.emulatorLsitFile)
+
+        for section, values in self.emulatorList.items():
+            if uninstall==False:
+                if not self.config.has_section(emulator):
+                    print (f"Adding section {section}")
+                    self.config.add_section(emulator)
+                for key, value in values.items():
+                        print (f"Adding key {key} with stirng {str(emulator)}")
+                        self.config.set(emulator, "Installed", str(emulator))
+            else:
+                self.config.remove_section(emulator)
+        self.save_config(emulator=True)

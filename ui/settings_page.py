@@ -1,8 +1,18 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QLabel, QPushButton, QHBoxLayout, QLineEdit, QFileDialog
+from PyQt6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QCheckBox,
+    QLabel,
+    QPushButton,
+    QHBoxLayout,
+    QLineEdit,
+    QFileDialog,
+)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from init_instances import inst
 import os
+
 
 class SettingsPage(QWidget):
     def __init__(self):
@@ -14,22 +24,25 @@ class SettingsPage(QWidget):
 
         self.add_header()
 
-        self.add_settings_section("General", [
-            {
-                "type": "checkbox",
-                "id": "launchAsAdminCheckbox",
-                "title": "Launch as administrator",
-                "description": "Run Troppical with elevated privileges"
-            },
-            {
-                "type": "path",
-                "id": "defaultInstallPath",
-                "title": "Default installation path",
-                "description": "Base directory for emulator installations",
-                "default": os.path.join(os.environ['LOCALAPPDATA'])
-            }
-            # You can add more settings here as dictonaries
-        ])
+        self.add_settings_section(
+            "General",
+            [
+                {
+                    "type": "checkbox",
+                    "id": "launchAsAdminCheckbox",
+                    "title": "Launch as administrator",
+                    "description": "Run Troppical with elevated privileges",
+                },
+                {
+                    "type": "path",
+                    "id": "defaultInstallPath",
+                    "title": "Default installation path",
+                    "description": "Base directory for emulator installations",
+                    "default": os.path.join(os.environ["LOCALAPPDATA"]),
+                },
+                # You can add more settings here as dictonaries
+            ],
+        )
 
         self.settingsLayout.addStretch()
         self.add_apply_button()
@@ -112,12 +125,11 @@ class SettingsPage(QWidget):
         self.settingsLayout.addLayout(pathLayout)
         self.settingsLayout.addWidget(description)
         self.settingsLayout.addSpacing(16)
+
     def browse_path(self, pathInput):
         currentPath = pathInput.text()
         selectedDirectory = QFileDialog.getExistingDirectory(
-            self,
-            "Select Directory",
-            currentPath
+            self, "Select Directory", currentPath
         )
         if selectedDirectory:
             if not inst.main.check_admin(selectedDirectory):

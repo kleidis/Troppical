@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayo
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
+
 # Welcome page
 class WelcomePage(QWidget):
     def __init__(self):
@@ -20,12 +21,11 @@ class WelcomePage(QWidget):
 
         self.manageButton = self.create_nav_button(
             "Manage",
-            "Install a new emulator or Update / Uninstall your installed emulators"
+            "Install a new emulator or Update / Uninstall your installed emulators",
         )
         # Configure navigation area
         self.configureButton = self.create_nav_button(
-            "Configure",
-            "Create and modify emulator settings (Coming Soon!)"
+            "Configure", "Create and modify emulator settings (Coming Soon!)"
         )
         self.configureButton.setEnabled(False)
 
@@ -51,7 +51,9 @@ class WelcomePage(QWidget):
 
         # Add text with description
         titleLabel = QLabel(text)
-        titleLabel.setFont(QFont("Segoe UI", 13))  # Less bold, using font weight instead
+        titleLabel.setFont(
+            QFont("Segoe UI", 13)
+        )  # Less bold, using font weight instead
         titleLabel.setStyleSheet("color: #FFFFFF;")
         titleLabel.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
@@ -68,7 +70,8 @@ class WelcomePage(QWidget):
         # Style the button
         button.setFixedHeight(140)
         button.setToolTip(tooltip)
-        button.setStyleSheet("""
+        button.setStyleSheet(
+            """
             QPushButton {
                 background-color: rgba(255, 255, 255, 0.06);
                 border: none;
@@ -90,7 +93,8 @@ class WelcomePage(QWidget):
             QPushButton:disabled * {
                 color: rgba(255, 255, 255, 0.3);
             }
-        """)
+        """
+        )
 
         return button
 

@@ -1,7 +1,9 @@
 from PyQt6.QtWidgets import QVBoxLayout, QLabel
 from PyQt6.QtCore import Qt
 from init_instances import inst
-class Header():
+
+
+class Header:
     def header(self):
         # Header Layout
         self.headerLayout = QVBoxLayout()

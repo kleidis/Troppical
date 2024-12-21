@@ -4,14 +4,15 @@ from init_instances import inst
 from win32api import MessageBeep
 from win32con import MB_OK
 
+
 class Configure:
     def __init__(self):
-        self.configDir = os.path.join(os.getenv('APPDATA'), 'Troppical')
-        self.configFile = os.path.join(self.configDir, 'config.ini')
+        self.configDir = os.path.join(os.getenv("APPDATA"), "Troppical")
+        self.configFile = os.path.join(self.configDir, "config.ini")
         self.defaultConfig = {
-            'Settings': {
-                'launch_as_admin': 'false',
-                'default_install_path': os.path.join(os.environ['LOCALAPPDATA'])
+            "Settings": {
+                "launch_as_admin": "false",
+                "default_install_path": os.path.join(os.environ["LOCALAPPDATA"]),
             }
         }
         self.config = configparser.ConfigParser()
@@ -47,38 +48,39 @@ class Configure:
 
     def save_config(self):
         try:
-            with open(self.configFile, 'w') as f:
+            with open(self.configFile, "w") as f:
                 self.config.write(f)
         except Exception as e:
             print(f"Error saving config: {e}")
 
-    def get_setting(self, key, section='Settings'):
+    def get_setting(self, key, section="Settings"):
         try:
             value = self.config.get(section, key)
-            # Convert string 'true'/'false' to boolean if needed
-            if value.lower() in ('true', 'false'):
-                return value.lower() == 'true'
+            if value.lower() in ("true", "false"):
+                return value.lower() == "true"
             return value
         except:
             return self.defaultConfig
 
-    def set_setting(self, key, value, section='Settings'):
+    def set_setting(self, key, value, section="Settings"):
         self.config.set(section, key, str(value))
         self.save_config()
 
     def apply_settings(self):
         inst.settings.launchAsAdminCheckbox.setChecked(
-            self.get_setting('launch_as_admin')
+            self.get_setting("launch_as_admin")
         )
         inst.settings.defaultInstallPath.setText(
-            self.get_setting('default_install_path')
+            self.get_setting("default_install_path")
         )
 
     def handle_settings_button_apply(self):
-        self.set_setting('launch_as_admin',
-                        inst.settings.launchAsAdminCheckbox.isChecked())
-        self.set_setting('default_install_path',
-                        inst.settings.defaultInstallPath.text())
+        self.set_setting(
+            "launch_as_admin", inst.settings.launchAsAdminCheckbox.isChecked()
+        )
+        self.set_setting(
+            "default_install_path", inst.settings.defaultInstallPath.text()
+        )
 
         self.apply_settings()
         inst.ui.qt_index_switcher(0)

@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from init_instances import inst
 
+
 class ActPage(QWidget):
     def __init__(self):
         super().__init__()
@@ -42,18 +43,15 @@ class ActPage(QWidget):
         actLayout.addSpacing(24)
 
         self.installButton = self.create_nav_button(
-            "Install",
-            "Install the selected emulator"
+            "Install", "Install the selected emulator"
         )
 
         self.updateButton = self.create_nav_button(
-            "Check for Updates",
-            "Check and install available updates for your emulator"
+            "Check for Updates", "Check and install available updates for your emulator"
         )
 
         self.uninstallButton = self.create_nav_button(
-            "Uninstall",
-            "Remove the installed emulator from your system"
+            "Uninstall", "Remove the installed emulator from your system"
         )
 
         actLayout.addWidget(self.installButton)
@@ -86,7 +84,8 @@ class ActPage(QWidget):
 
         button.setFixedHeight(140)
         button.setToolTip(tooltip)
-        button.setStyleSheet("""
+        button.setStyleSheet(
+            """
             QPushButton {
                 background-color: rgba(255, 255, 255, 0.06);
                 border: none;
@@ -108,6 +107,7 @@ class ActPage(QWidget):
             QPushButton:disabled * {
                 color: rgba(255, 255, 255, 0.3);
             }
-        """)
+        """
+        )
 
         return button

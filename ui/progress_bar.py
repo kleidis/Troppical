@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QProgressBar, QLabel
 from init_instances import inst
 
- # Progress bar page
+
+# Progress bar page
 class ProgressBarPage(QWidget):
     def __init__(self):
         super().__init__()

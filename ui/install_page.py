@@ -1,7 +1,18 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QGroupBox, QComboBox, QCheckBox, QLineEdit
+from PyQt6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QHBoxLayout,
+    QGroupBox,
+    QComboBox,
+    QCheckBox,
+    QLineEdit,
+)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from init_instances import inst
+
 
 class InstallPage(QWidget):
     def __init__(self):
@@ -34,18 +45,18 @@ class InstallPage(QWidget):
         headerLayout.addLayout(titleLayout)
         headerLayout.addStretch()
 
-        InstalOpt = QLabel('<b>Installation Options')
+        InstalOpt = QLabel("<b>Installation Options")
         InstalOpt.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.installationSourceComboBox = QComboBox()
         self.desktopShortcutCheckbox = QCheckBox("Create a desktop shortcut")
         self.startMenuShortcutCheckbox = QCheckBox("Create a start menu shortcut")
         self.installationPathLineEdit = QLineEdit()
         self.browseButton = QPushButton("Browse")
-        self.browseButton.clicked.connect(inst.main.InstallPath)
+        self.browseButton.clicked.connect(inst.main.Install_path)
 
         bottomLayout = QHBoxLayout()
         bottomLayout.addStretch()
-        self.install_emu_button = QPushButton('Install')
+        self.install_emu_button = QPushButton("Install")
         self.install_emu_button.setFixedWidth(120)
         bottomLayout.addWidget(self.install_emu_button)
 

@@ -7,15 +7,19 @@ from PyQt6.QtCore import QThread
 from version import version
 from init_instances import inst
 
+
 class Updater:
     def check_for_update(self):
         currentVersion = version
         update = inst.online.get_git_tag()[0]
 
         if update > currentVersion:
-            reply = QMessageBox.question(None, "Update Available",
+            reply = QMessageBox.question(
+                None,
+                "Update Available",
                 f"Version {update} is available. Current version is {currentVersion}. Would you like to update?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
 
             if reply == QMessageBox.StandardButton.Yes:
                 return self.download_update()
@@ -26,13 +30,17 @@ class Updater:
         try:
 
             assets = inst.online.get_git_tag()[1]
-            exeAsset = next((asset for asset in assets if asset['name'] == 'troppical.exe'), None)
+            exeAsset = next(
+                (asset for asset in assets if asset["name"] == "troppical.exe"), None
+            )
 
             if not exeAsset:
-                QMessageBox.critical(None, "Error", "No executable found in latest release")
+                QMessageBox.critical(
+                    None, "Error", "No executable found in latest release"
+                )
                 return False
 
-            tempExe = os.path.join(tempfile.gettempdir(), 'troppical.exe.new')
+            tempExe = os.path.join(tempfile.gettempdir(), "troppical.exe.new")
 
             progress = QProgressDialog("Downloading update...", "Cancel", 0, 100)
             progress.setWindowTitle("Updating Troppical")
@@ -41,7 +49,7 @@ class Updater:
 
             self.thread = QThread()
             self.worker = inst.download
-            self.worker.set_task(exeAsset['browser_download_url'], tempExe)
+            self.worker.set_task(exeAsset["browser_download_url"], tempExe)
             self.worker.moveToThread(self.thread)
             self.thread.started.connect(self.worker.run)
             self.worker.progress.connect(progress.setValue)
@@ -66,11 +74,11 @@ class Updater:
     def finish_update(self):
         try:
             currentExe = sys.executable
-            tempExe = os.path.join(tempfile.gettempdir(), 'troppical.exe.new')
+            tempExe = os.path.join(tempfile.gettempdir(), "troppical.exe.new")
             if not os.path.exists(tempExe):
                 return
 
-            batchContent = f'''@echo off
+            batchContent = f"""@echo off
 :wait
 tasklist /FI "IMAGENAME eq {os.path.basename(currentExe)}" 2>NUL | find /I /N "{os.path.basename(currentExe)}" >NUL
 if "%ERRORLEVEL%"=="0" (
@@ -79,14 +87,17 @@ if "%ERRORLEVEL%"=="0" (
 )
 move /Y "{tempExe}" "{currentExe}" >nul
 del "%~f0"
-'''
-            batchFile = os.path.join(tempfile.gettempdir(), 'troppical_update.bat')
-            with open(batchFile, 'w') as f:
+"""
+            batchFile = os.path.join(tempfile.gettempdir(), "troppical_update.bat")
+            with open(batchFile, "w") as f:
                 f.write(batchContent)
 
-            QMessageBox.information(None, "Update Ready",
+            QMessageBox.information(
+                None,
+                "Update Ready",
                 "Update has been downloaded. The application will close now.\nPlease restart Troppical after the update is complete.",
-                QMessageBox.StandardButton.Ok)
+                QMessageBox.StandardButton.Ok,
+            )
 
             os.startfile(batchFile)
             sys.exit(0)

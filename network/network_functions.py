@@ -8,18 +8,23 @@ from PyQt6.QtCore import QByteArray, Qt
 from init_instances import inst
 import sys
 
-class Online():
+
+class Online:
     databaseUrl = "https://raw.githubusercontent.com/kleidis/Troppical/refs/heads/master/network/troppical-database.json"
 
     def __init__(self):
-        self.troppicalDatabase = self.fetch_data() # Fetch the data from troppical_dataabse JSON
+        self.troppicalDatabase = (
+            self.fetch_data()
+        )  # Fetch the data from troppical_dataabse JSON
         self.emulatorDatabase = None  # Cache for filtered emulator data
 
     def fetch_data(self):
         response = requests.get(self.databaseUrl)
         if response.status_code == 200:
             allData = response.json()
-            self.troppicalDatabase = [item for item in allData if item.get('emulator_platform') != 'android']
+            self.troppicalDatabase = [
+                item for item in allData if item.get("emulator_platform") != "android"
+            ]
             return self.troppicalDatabase
         else:
             raise Exception(f"Failed to fetch data: {response.status_code}")
@@ -32,22 +37,32 @@ class Online():
         if response.status_code == 200:
             imageBytes = response.content
             qimage = QImage.fromData(QByteArray(imageBytes))
-            pixmap = QPixmap.fromImage(qimage).scaled(180, 180, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            pixmap = QPixmap.fromImage(qimage).scaled(
+                180,
+                180,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
             return QIcon(pixmap)
         else:
-            QMessageBox.critical(None, "Error", f"Failed to fetch icon: {response.status_code}")
+            QMessageBox.critical(
+                None, "Error", f"Failed to fetch icon: {response.status_code}"
+            )
             return QIcon()
-
 
     def fetch_logos(self):
         self.logos = {}
         for item in self.troppicalDatabase:
-            logoUrl = item['emulator_logo']
+            logoUrl = item["emulator_logo"]
             response = requests.get(logoUrl)
             if response.status_code == 200:
-                self.logos[item['emulator_name']] = response.content
+                self.logos[item["emulator_name"]] = response.content
             else:
-                QMessageBox.critical(None, "Error", f"Failed to fetch logo for {item['emulator_name']}: {response.status_code}")
+                QMessageBox.critical(
+                    None,
+                    "Error",
+                    f"Failed to fetch logo for {item['emulator_name']}: {response.status_code}",
+                )
         return self.logos
 
     def get_git_tag(self):
@@ -56,10 +71,12 @@ class Online():
             response = requests.get(home_url)
             if response.status_code == 200:
                 latest_tag = response.json()["tag_name"]
-                assets = response.json()['assets']
+                assets = response.json()["assets"]
                 return latest_tag, assets
             else:
-                print(f"Failed to get latest GitHub release tag: {response.status_code}")
+                print(
+                    f"Failed to get latest GitHub release tag: {response.status_code}"
+                )
                 return None
         except Exception as e:
             print(f"Failed to get latest GitHub release tag: {e}")
@@ -74,21 +91,26 @@ class Online():
             if response.status_code == 200:
                 imageBytes = response.content
                 qimage = QImage.fromData(QByteArray(imageBytes))
-                pixmap = QPixmap.fromImage(qimage).scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                pixmap = QPixmap.fromImage(qimage).scaled(
+                    32,
+                    32,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
                 return QIcon(pixmap)
             return QIcon()  # Default icon if fetching fails
 
         self.emulatorDatabase = {
-            item['emulator_name']: {
-                'name': item['emulator_name'],
-                'system': item['emulator_system'],
-                'description': item['emulator_desc'],
-                'owner': item['emulator_owner'],
-                'repo': item['emulator_repo'],
-                'exe_path': item['exe_path'],
-                'icon': fetch_icon(item['emulator_logo']),
-                'is_from_github': item['is_from_github'],
-                'has_in_app_updater': item['has_in_app_updater']
+            item["emulator_name"]: {
+                "name": item["emulator_name"],
+                "system": item["emulator_system"],
+                "description": item["emulator_desc"],
+                "owner": item["emulator_owner"],
+                "repo": item["emulator_repo"],
+                "exe_path": item["exe_path"],
+                "icon": fetch_icon(item["emulator_logo"]),
+                "is_from_github": item["is_from_github"],
+                "has_in_app_updater": item["has_in_app_updater"],
             }
             for item in self.troppicalDatabase
         }
@@ -102,7 +124,11 @@ class Online():
         if response.status_code == 200:
             return response.json()
         else:
-            QMessageBox.critical(None, "Error", f"Your Emulator's host repository is not supported for automatic updates.")
+            QMessageBox.critical(
+                None,
+                "Error",
+                f"Your Emulator's host repository is not supported for automatic updates.",
+            )
             return
 
     def fetch_github_release(self, callTag=None):
@@ -121,22 +147,26 @@ class Online():
                     if callTag:
                         # Find specific release by tag
                         for release in releases:
-                            if release['tag_name'] == callTag:
+                            if release["tag_name"] == callTag:
                                 return self._filter_windows_assets(release)
                         return None
                     return releases
 
             raise Exception(f"Failed to fetch release: {response.status_code}")
         except Exception as e:
-            QMessageBox.critical(None, "Error", f"Failed to fetch release information: {str(e)}")
+            QMessageBox.critical(
+                None, "Error", f"Failed to fetch release information: {str(e)}"
+            )
             return None
 
     def _filter_windows_assets(self, release):
         return [
-            asset for asset in release['assets']
-            if any(keyword in asset['name'].lower() for keyword in ['win', 'windows'])
-            and (asset['name'].endswith('.zip') or asset['name'].endswith('.7z'))
+            asset
+            for asset in release["assets"]
+            if any(keyword in asset["name"].lower() for keyword in ["win", "windows"])
+            and (asset["name"].endswith(".zip") or asset["name"].endswith(".7z"))
         ]
+
 
 # Worker thread used for downlaoding emulators
 class DownloadWorker(QObject):
@@ -155,13 +185,13 @@ class DownloadWorker(QObject):
     def run(self):
         try:
             response = requests.get(self.url, stream=True)
-            totalSize = int(response.headers.get('content-length', 0))
+            totalSize = int(response.headers.get("content-length", 0))
             if totalSize == 0:
                 print("The content-length of the response is zero.")
                 return
 
             downloadedSize = 0
-            with open(self.dest, 'wb') as file:
+            with open(self.dest, "wb") as file:
                 for data in response.iter_content(1024):
                     downloadedSize += len(data)
                     file.write(data)
@@ -171,4 +201,3 @@ class DownloadWorker(QObject):
         except Exception as e:
             QMessageBox.critical(None, "Error", "Error during download.")
             self.finished.emit()
-

@@ -8,23 +8,24 @@ from init_instances import inst
 from utils.mica import apply_mica
 import version
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.sharedThread = None  # Thread used for secondary function purposes
 
-        self.setWindowTitle(f'Troppical - {version.version}')  # Window name. TODO: Add version
+        self.setWindowTitle(f"Troppical - {version.version}")
         self.setCentralWidget(QWidget(self))
-        self.layout = QStackedLayout(self.centralWidget())  # Set the layout on the central widget
-        self.setMaximumSize(1000, 720)  # Set the maximum window size to 1280x720
-        self.setMinimumSize(1000, 720)  # Set the minimum window size to 800x600
+        self.layout = QStackedLayout(self.centralWidget())
+        self.setMaximumSize(1000, 720)
+        self.setMinimumSize(1000, 720)
         icon = inst.online.fetch_and_process_main_icon()
         self.setWindowIcon(icon)
 
         self.segoe_ui = QFont("Segoe UI", 10)
         self.setFont(self.segoe_ui)
         self.load_stylesheet()
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             inst.updater.check_for_update()
         self.widget_2_layout()
         self.connect_buttons()
@@ -57,13 +58,13 @@ class MainWindow(QMainWindow):
     def qt_index_switcher(self, index):
         # Mapping of index to page attributes and instances
         pageMap = {
-            0: ('welcome_page', inst.wel, 'welcomePage'),
-            1: ('selection_page', inst.sel, 'emulatorSelectPage'),
-            2: ('act_page', inst.act, 'actPage'),
-            3: ('install_page', inst.install, 'installPage'),
-            4: ('progress_bar_page', inst.bar, 'progressBarPage'),
-            5: ('finish_page', inst.finish, 'finishPage'),
-            6: ('settings_page', inst.settings, 'settingsPage')
+            0: ("welcome_page", inst.wel, "welcomePage"),
+            1: ("selection_page", inst.sel, "emulatorSelectPage"),
+            2: ("act_page", inst.act, "actPage"),
+            3: ("install_page", inst.install, "installPage"),
+            4: ("progress_bar_page", inst.bar, "progressBarPage"),
+            5: ("finish_page", inst.finish, "finishPage"),
+            6: ("settings_page", inst.settings, "settingsPage"),
         }
 
         if index in pageMap:
@@ -83,18 +84,17 @@ class MainWindow(QMainWindow):
             inst.config.load_config()
 
             settings_map = {
-                'launch_as_admin': inst.settings.launchAsAdminCheckbox,
-                'default_install_path': inst.settings.defaultInstallPath
+                "launch_as_admin": inst.settings.launchAsAdminCheckbox,
+                "default_install_path": inst.settings.defaultInstallPath,
             }
 
             for setting_key, ui_element in settings_map.items():
-                if hasattr(ui_element, 'setChecked'):  # For checkboxes
+                if hasattr(ui_element, "setChecked"):  # For checkboxes
                     ui_element.setChecked(inst.config.get_setting(setting_key))
-                elif hasattr(ui_element, 'setText'):  # For text inputs
+                elif hasattr(ui_element, "setText"):  # For text inputs
                     ui_element.setText(inst.config.get_setting(setting_key))
         except Exception as e:
             print(f"Error initializing settings: {e}")
-
 
     def qt_button_click(self):
         button = self.sender()
@@ -122,45 +122,55 @@ class MainWindow(QMainWindow):
             action()
 
     def handle_manage(self):
-        if not hasattr(self, 'emulatorDatabaseInitialized') or not self.emulatorDatabaseInitialized:
+        if (
+            not hasattr(self, "emulatorDatabaseInitialized")
+            or not self.emulatorDatabaseInitialized
+        ):
             self.initialize_emulator_database()
             self.emulatorDatabaseInitialized = True
         inst.ui.qt_index_switcher(1)
+
     def handle_select(self):
         if inst.main.set_emulator():
             inst.ui.qt_index_switcher(2)
+
     def handle_install(self):
         inst.main.installMode = "Install"
         inst.ui.qt_index_switcher(3)
-        inst.main.Add_releases_to_combobox()
+        inst.main.add_releases_to_combobox()
+
     def handle_uninstall(self):
         inst.main.installMode = "Uninstall"  # Unused for now
         inst.main.uninstall()
+
     def handle_install_emu(self):
         inst.ui.qt_index_switcher(4)
-        inst.main.Prepare_Download()
+        inst.main.prepare_Download()
+
     def handle_finish(self):
         button = self.sender()
         if button == inst.finish.installAnotherButton:
             self.layout.setCurrentIndex(0)
             inst.bar.downloadProgressBar.setValue(0)
             inst.bar.extractionProgressBar.setValue(0)
-            setattr(inst.main, 'installMode', None)
-            setattr(inst.main, 'selection', None)
+            setattr(inst.main, "installMode", None)
+            setattr(inst.main, "selection", None)
             inst.install.desktopShortcutCheckbox.setChecked(False)
             inst.install.startMenuShortcutCheckbox.setChecked(False)
         elif button == inst.finish.finishButton:
             self.close()
+
     def handle_back(self):
         currentIndex = self.layout.currentIndex()
         if currentIndex > 0:
             self.layout.setCurrentIndex(currentIndex - 1)
+
     def handle_settings(self):
         inst.ui.qt_index_switcher(6)
 
     def initialize_emulator_database(self):
         # Check if the message box is already shown
-        if hasattr(self, 'initializingMsg') and self.initializingMsg.isVisible():
+        if hasattr(self, "initializingMsg") and self.initializingMsg.isVisible():
             return
 
         # Show initializing message
@@ -171,7 +181,9 @@ class MainWindow(QMainWindow):
         self.initializingMsg.show()
 
         # Start the secondary thread with the task and callback
-        self.start_secondary_thread(inst.online.filter_emulator_data, lambda: inst.sel.populate_emulator_tree())
+        self.start_secondary_thread(
+            inst.online.filter_emulator_data, lambda: inst.sel.populate_emulator_tree()
+        )
 
     def start_secondary_thread(self, task, callback, *args, **kwargs):
         if self.sharedThread is not None:
@@ -199,6 +211,7 @@ class MainWindow(QMainWindow):
             inst.act.updateButton.setEnabled(True)
             inst.act.uninstallButton.setEnabled(True)
 
+
 class Worker(QObject):
     finished = pyqtSignal(dict)
 
@@ -217,4 +230,3 @@ class Worker(QObject):
         if self.task is not None:
             result = self.task(*self.args, **self.kwargs)
             self.finished.emit(result)
-

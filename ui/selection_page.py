@@ -1,7 +1,17 @@
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QPushButton, QHBoxLayout, QLineEdit, QLabel)
+from PyQt6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QPushButton,
+    QHBoxLayout,
+    QLineEdit,
+    QLabel,
+)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from init_instances import inst
+
 
 # Emulator Select Page
 class SelectionPage(QWidget):
@@ -30,7 +40,9 @@ class SelectionPage(QWidget):
 
         self.emulatorTreeWidget = QTreeWidget()
         self.emulatorTreeWidget.setHeaderHidden(True)
-        self.emulatorTreeWidget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.emulatorTreeWidget.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOn
+        )
         emulatorSelectLayout.addWidget(self.emulatorTreeWidget)
 
         bottomLayout = QHBoxLayout()
@@ -68,9 +80,9 @@ class SelectionPage(QWidget):
     def populate_emulator_tree(self):
         # Iterate over each emulator item and add it to the tree
         for emulatorName, data in inst.online.emulatorDatabase.items():
-            emulatorSystem = data['system']
-            emulatorDesc = data['description']
-            icon = data['icon']
+            emulatorSystem = data["system"]
+            emulatorDesc = data["description"]
+            icon = data["icon"]
 
             # Check if the emulator system already has a tree item, if not create one
             systemItem = None

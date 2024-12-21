@@ -1,5 +1,6 @@
 # Credit to QtWin11 project
 
+
 class Style:
     dark_stylesheet = """
         QWidget {
@@ -382,4 +383,3 @@ class Style:
             background: none;
         }
         """
-
